@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>
+        {{ artist }}
+    </h2>
+    {% if songs %}
+        <ul>
+            {% for song in songs %}
+                <li>
+                    <a href="/song/{{ song.pk }}/">{{ song.path }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            You've got no songs for this artist. Sorry.
+        </p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,4 @@
+Flask
+SQLAlchemy
+Flask-SQLAlchemy
+Flask-Admin
