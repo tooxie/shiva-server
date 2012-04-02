@@ -52,8 +52,12 @@ def get_song(pk):
     tags = session.query(TagContent).join(SongTag).\
                       filter(SongTag.song==song)
     title = tags.join(session.query(ID3Tag).join(TagGroup).\
-                 filter(TagGroup.name=='title'))
-    return (song, title.one().string_data, tags)
+                 filter(TagGroup.name=='title')).first()
+    try:
+        title = title.string_data
+    except AttributeError:
+        title = ''
+    return (song, title, tags)
 
 def get_song_url(song):
     """
