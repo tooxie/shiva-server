@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
     <h2>
-        {{ song_title }}
+        {% if song_title %}
+            {{ song_title }}
+        {% endif %}
     </h2>
     <p>
         <audio src="{{ song.get_url() }}" controls></audio>
@@ -11,7 +13,7 @@
             {% for tag in tags %}
                 <li>
                     {% if tag.is_binary %}
-                        <img src="{{ tag.get_contents() }}">
+                        <img src="{{ url_for('pic', tag_pk=tag.pk) }}">
                     {% else %}
                         {{ tag.get_contents() }}
                     {% endif %}
