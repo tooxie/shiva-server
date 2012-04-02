@@ -5,7 +5,7 @@ from os import path
 
 DEBUG = True
 
-PROJECT_ROOT = path.dirname(path.abspath(__file__))
+PROJECT_ROOT = path.dirname(path.abspath(__file__))[:-len('/settings')]
 SQLALCHEMY_DATABASE_URI = 'sqlite:///%s/stream.db' % PROJECT_ROOT
 ACCEPTED_FORMATS = (
     'mp3',
