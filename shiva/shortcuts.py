@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from shiva.models import *
+from shiva import settings
 
+from flask import url_for
 from sqlalchemy.sql.expression import ClauseElement, alias
 from sqlalchemy import distinct
 
@@ -40,3 +42,37 @@ def get_songs_for_artist(artist):
         artist = session.query(TagContent).filter_by(pk=artist).one()
     return session.query(Song).join(SongTag).join(TagContent).\
                    filter(SongTag.content==artist)
+
+def get_song(pk):
+    """
+    """
+
+    session = get_session()
+    song = session.query(Song).filter_by(pk=pk).one()
+    tags = session.query(TagContent).join(SongTag).\
+                      filter(SongTag.song==song)
+    title = tags.join(session.query(ID3Tag).join(TagGroup).\
+                 filter(TagGroup.name=='title'))
+    return (song, title.one().string_data, tags)
+
+def get_song_url(song):
+    """
+    """
+
+    for mobject in getattr(settings, 'MEDIA_DIRS', []):
+        url = mobject.get_song_url(song)
+        if url:
+            return url
+
+    # It really should never hit this line. But you know...
+    return url_for('stream', song_pk=song.pk)
+
+def allowed_to_stream(song):
+    """
+    """
+
+    for mobject in getattr(settings, 'MEDIA_DIRS', []):
+        if mobject.allowed_to_stream(song):
+            return True
+
+    return False

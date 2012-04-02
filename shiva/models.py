@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from shiva.settings import SQLALCHEMY_DATABASE_URI
+from shiva import settings
 
+from flask import url_for
 from sqlalchemy import (Boolean, Column, ForeignKey, Integer, LargeBinary,
                         Sequence, String,)
 from sqlalchemy import create_engine
@@ -8,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, backref
 import os
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI, echo=True)
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URI, echo=True)
 Session = sessionmaker(bind=engine)
 
 # ATTENTION: Next line is the worst hack to bypass this exception:
@@ -48,6 +49,11 @@ class Song(Base):
     size = Column(Integer)
 
     hash = relationship('Hash', backref=backref('songs', order_by=pk))
+
+    def get_url(self):
+        from shiva.shortcuts import get_song_url
+
+        return get_song_url(self)
 
     def __repr__(self):
         return "<Song('%s')>" % self.path

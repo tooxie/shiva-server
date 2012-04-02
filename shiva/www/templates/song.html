@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h2>
+        {{ song_title }}
+    </h2>
+    <p>
+        <audio src="{{ song.get_url() }}" controls></audio>
+    </p>
+    {% if tags %}
+        <ul>
+            {% for tag in tags %}
+                <li>
+                    {% if tag.is_binary %}
+                        <img src="{{ tag.get_contents() }}">
+                    {% else %}
+                        {{ tag.get_contents() }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

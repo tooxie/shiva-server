@@ -2,11 +2,11 @@
 # K-Pg
 from shiva import models
 from shiva.shortcuts import get_or_create
+from shiva import settings
 
 from hashlib import md5
 import id3reader
 import os
-import sys
 import unicodedata
 
 def _safestr(s):
@@ -65,14 +65,20 @@ def is_song(file_path):
     """Tries to guess whether the file is a valid song or not.
     """
 
-    if not os.path.isdir(file_path) and file_path.endswith('.mp3'):
-        id3data = None
-        try:
-            id3data = id3reader.Reader(file_path)
-        except Exception, e:
-            return False
-        if id3data:
-            return True
+    if os.path.isdir(file_path):
+        return False
+    if '.' not in file_path:
+        return False
+    ext = file_path[file_path.rfind('.') + 1:]
+    if ext not in getattr(settings, 'ACCEPTED_FORMATS', []):
+        return False
+    id3data = None
+    try:
+        id3data = id3reader.Reader(file_path)
+    except Exception, e:
+        return False
+    if id3data:
+        return True
     return False
 
 def walk(dir_name):
@@ -94,11 +100,11 @@ def walk(dir_name):
     return True
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        session = models.get_session()
-        for song in session.query(models.Song).all():
-            if not os.path.exists(song.path):
-                print('File %s does not exist.' % song.path)
-    elif len(sys.argv) > 1:
-        for path in sys.argv[1:]:
-            walk(path)
+    media_dirs = getattr(settings, 'MEDIA_DIRS', [])
+    if len(media_dirs) == 0:
+        print("Remember to set the MEDIA_DIRS setting, otherwise I don't " +
+              'know where to look for.')
+
+    for mobject in media_dirs:
+        for mdir in mobject.get_dirs():
+            walk(mdir)
