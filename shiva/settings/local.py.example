@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from shiva.media import MediaDir
+
 SECRET_KEY = ''  # Set this to something secret.
 MEDIA_DIRS = (
     # Examples
