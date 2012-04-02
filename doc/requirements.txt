@@ -2,3 +2,5 @@ Flask
 SQLAlchemy
 Flask-SQLAlchemy
 Flask-Admin
+mutagen
+PyMedia

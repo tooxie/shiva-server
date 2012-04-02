@@ -1,9 +1,9 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
--- CREATE TABLE taggroups (
--- 	name VARCHAR(128) NOT NULL,
--- 	PRIMARY KEY (name)
--- );
+CREATE TABLE taggroups (
+	name VARCHAR(128) NOT NULL,
+	PRIMARY KEY (name)
+);
 INSERT INTO "taggroups" VALUES('album');
 INSERT INTO "taggroups" VALUES('performer');
 INSERT INTO "taggroups" VALUES('title');
@@ -22,13 +22,13 @@ COMMIT;
 
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
--- CREATE TABLE tags (
--- 	pk INTEGER NOT NULL,
--- 	name VARCHAR(128),
--- 	group_pk VARCHAR,
--- 	PRIMARY KEY (pk),
--- 	FOREIGN KEY(group_pk) REFERENCES taggroups (name)
--- );
+CREATE TABLE tags (
+	pk INTEGER NOT NULL,
+	name VARCHAR(128),
+	group_pk VARCHAR,
+	PRIMARY KEY (pk),
+	FOREIGN KEY(group_pk) REFERENCES taggroups (name)
+);
 INSERT INTO "tags" VALUES(1,'TIT2','title');
 INSERT INTO "tags" VALUES(2,'COMM','comment');
 INSERT INTO "tags" VALUES(3,'TDRC','date');
