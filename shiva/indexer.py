@@ -10,8 +10,7 @@ import os
 import unicodedata
 
 def _safestr(s):
-    """Get a good string for printing, that won't throw exceptions, no matter
-    what's in it.
+    """Translate any string into a safe unicode string.
     """
 
     if type(s) == str:
