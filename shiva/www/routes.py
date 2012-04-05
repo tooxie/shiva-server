@@ -2,10 +2,14 @@
 from shiva.www import app
 from shiva.www import views
 
-app.add_url_rule('/', 'home', views.index)
-app.add_url_rule('/artist/<int:pk>/', 'artist', views.artist)
-app.add_url_rule('/song/<int:pk>/', 'song', views.song)
-app.add_url_rule('/pic/<int:tag_pk>/', 'pic', views.pic)
-app.add_url_rule('/stream/<int:song_pk>/', 'stream', views.stream)
-app.add_url_rule('/about/', 'about', views.about)
-app.add_url_rule('/contact/', 'contact', views.contact)
+url = app.add_url_rule
+
+url('/', 'home', views.index)
+url('/artist/<int:pk>/', 'artist', views.artist)
+url('/song/<int:pk>/', 'song', views.song)
+url('/pic/<int:tag_pk>/', 'pic', views.pic)
+url('/stream/<int:song_pk>/', 'stream', views.stream)
+url('/download/', 'download', views.download, methods=['GET', 'POST'])
+url('/download/<int:song_pk>/', 'download', views.download)
+url('/about/', 'about', views.about)
+url('/contact/', 'contact', views.contact)
