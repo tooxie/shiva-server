@@ -42,6 +42,9 @@ def stream(song_pk):
 
     return response
 
+def download(song_pk=None):
+    raise NotImplementedError
+
 def pic(tag_pk):
     """
     """

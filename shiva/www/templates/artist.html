@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+
 {% block content %}
     <h2>
         {{ artist }}
@@ -11,6 +12,16 @@
                 </li>
             {% endfor %}
         </ul>
+        <p>
+            <form method="GET" action="{{ url_for('download') }}">
+                <button>Download</button>
+            </form>
+            or
+            <form method="GET" action="{{ url_for('download') }}">
+                <button>Listen</button>
+            </form>
+            to this songs.
+        </p>
     {% else %}
         <p>
             You've got no songs for this artist. Sorry.
