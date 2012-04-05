@@ -3,9 +3,10 @@ from shiva.media import MediaDir
 
 SECRET_KEY = ''  # Set this to something secret.
 MEDIA_DIRS = (
-    # Examples
+    # Examples.
     # MediaDir(root='/srv/http', dirs=('/music',), url='http://127.0.0.1/'),
     # MediaDir('/home/fatmike/music/shiva'),
+    # If in doubt, read the source.
 )
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.
