@@ -2,5 +2,6 @@ Flask
 SQLAlchemy
 Flask-SQLAlchemy
 Flask-Admin
-mutagen
-PyMedia
+Flask-OAuth
+Flask-OpenID
+Flask-WTF
