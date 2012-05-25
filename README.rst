@@ -36,8 +36,8 @@ Usage
 
 * Rename shiva/www/settings/local.py.example to local.py.
 * Edit it and configure the directories to scan for music.
-* Run the walker:
-  $ python walker.py
+* Run the indexer:
+  $ python indexer.py
 * Run the server:
   $ python shiva/www/runserver.py
 * Go to http://127.0.0.1:5000/ or http://127.0.0.1:5000/admin/
