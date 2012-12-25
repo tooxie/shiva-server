@@ -1,0 +1,4 @@
+Flask==0.9
+Flask-Restful==0.1.2
+Flask-SQLAlchemy==0.16
+eyed3
