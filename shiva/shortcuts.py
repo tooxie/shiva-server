@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from shiva.models import *
+from shiva import models
 from shiva import settings
 
 from flask import url_for
 from sqlalchemy.sql.expression import ClauseElement, alias
 from sqlalchemy import distinct
 
-def get_or_create(session, model, defaults={}, **kwargs):
+def get_or_create(model, session, defaults={}, **kwargs):
     """Django's get_or_create implementation for SQLAlchemy.
     """
 
@@ -19,6 +19,7 @@ def get_or_create(session, model, defaults={}, **kwargs):
         instance = model(**params)
         session.add(instance)
         created = True
+        session.commit()
 
     return (instance, created)
 
@@ -27,10 +28,10 @@ def get_artists():
     """
 
     session = get_session()
-    tags = session.query(ID3Tag).join(TagGroup).\
-                   filter(TagGroup.name=='performer')
-    return session.query(distinct(TagContent.string_data), TagContent.pk).\
-            join(SongTag).join(tags)
+    tags = session.query(models.ID3Tag).join(models.TagGroup).\
+                   filter(models.TagGroup.name=='performer')
+    return session.query(distinct(models.TagContent.string_data), \
+            models.TagContent.pk).join(models.SongTag).join(tags)
 
 def get_songs_for_artist(artist):
     """Get a list of Song objects for a given artist. The function expects a
@@ -39,20 +40,20 @@ def get_songs_for_artist(artist):
 
     session = get_session()
     if type(artist) == int:
-        artist = session.query(TagContent).filter_by(pk=artist).one()
-    return session.query(Song).join(SongTag).join(TagContent).\
-                   filter(SongTag.content==artist)
+        artist = session.query(models.TagContent).filter_by(pk=artist).one()
+    return session.query(models.Song).join(models.SongTag).join(models.TagContent).\
+                   filter(models.SongTag.content==artist)
 
 def get_song(pk):
     """
     """
 
     session = get_session()
-    song = session.query(Song).filter_by(pk=pk).one()
-    tags = session.query(TagContent).join(SongTag).\
-                      filter(SongTag.song==song)
-    title = tags.join(session.query(ID3Tag).join(TagGroup).\
-                 filter(TagGroup.name=='title')).first()
+    song = session.query(models.Song).filter_by(pk=pk).one()
+    tags = session.query(models.TagContent).join(models.SongTag).\
+                      filter(models.SongTag.song==song)
+    title = tags.join(session.query(models.ID3Tag).join(models.TagGroup).\
+                 filter(models.TagGroup.name=='title')).first()
     try:
         title = title.string_data
     except AttributeError:

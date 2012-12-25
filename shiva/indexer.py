@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # K-Pg
-from shiva import models
+from shiva import api
 from shiva.shortcuts import get_or_create
 from shiva import settings
 
@@ -31,37 +31,38 @@ def file_size(file_path):
 
     return os.stat(file_path).st_size
 
-def save_song(file_path):
-    """Takes a path to a song, hashes it, reads its metadata and stores
+def save_track(file_path):
+    """Takes a path to a track, hashes it, reads its metadata and stores
     everything in the database.
     """
 
+    session = api.db.session
     full_path = _safestr(os.path.abspath(file_path))
-    id3data = id3reader.Reader(file_path)
-    session = models.get_session()
 
-    if session.query(models.Song).filter_by(path=full_path).count():
+    if session.query(api.Track).filter_by(path=full_path).count():
         return True
 
-    song_hash, c = get_or_create(session, models.Hash,
-                                        digest=compute_hash(file_path))
-    song, c = get_or_create(session, models.Song, path=full_path,
-                                   hash=song_hash, size=file_size(file_path))
-    for frame in id3data.allFrames:
-        tag, c = get_or_create(session, models.ID3Tag, name=frame.id)
-        if hasattr(frame, 'value'):
-            value = frame.value if type(frame.value) != list else ''
-            params = {'string_data': _safestr(value), 'is_binary': False}
-        else:
-            params = {'binary_data': frame.rawData, 'is_binary': True}
-        data, c = get_or_create(session, models.TagContent, **params)
-        session.add(data)
-        song_tag = models.SongTag(song=song, tag=tag, content=data)
-        session.add(song_tag)
+    track, created = get_or_create(api.Track, session=session,
+                                  path=full_path)
+
+    id3r = track.get_id3_reader().tag
+    artist, created = get_or_create(api.Artist, session=session,
+                                    name=id3r.artist)
+    album, created = get_or_create(api.Album, session=session, name=id3r.album,
+                                   year=id3r.release_date)
+
+    album.artist = artist
+    session.add(album)
+
+    track.album = album
+    session.add(track)
+
     session.commit()
 
-def is_song(file_path):
-    """Tries to guess whether the file is a valid song or not.
+    return True
+
+def is_track(file_path):
+    """Tries to guess whether the file is a valid track or not.
     """
 
     if os.path.isdir(file_path):
@@ -81,7 +82,7 @@ def is_song(file_path):
     return False
 
 def walk(dir_name):
-    """Recursively walks through a directory looking for songs.
+    """Recursively walks through a directory looking for tracks.
     """
 
     if os.path.isdir(dir_name):
@@ -90,11 +91,11 @@ def walk(dir_name):
             if os.path.isdir(path):
                 walk(path)
             else:
-                if is_song(path):
-                    save_song(path)
+                if is_track(path):
+                    save_track(path)
     else:
-        if is_song(dir_name):
-            save_song(dir_name)
+        if is_track(dir_name):
+            save_track(dir_name)
 
     return True
 
