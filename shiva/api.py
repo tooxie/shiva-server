@@ -209,7 +209,7 @@ class ArtistResource(Resource):
         return self.get_one(artist_id)
 
     def get_all(self):
-        artists = Artist.query.limit(100)
+        artists = Artist.query.all()
 
         for artist in artists:
             yield marshal(artist, self.resource_fields)
@@ -247,7 +247,7 @@ class AlbumResource(Resource):
         return self.get_one(album_id)
 
     def get_all(self):
-        albums = Album.query.limit(100)
+        albums = Album.query.all()
 
         for album in albums:
             yield marshal(album, self.resource_fields)
@@ -291,7 +291,7 @@ class TracksResource(Resource):
 
     def get_all(self):
         # TODO: Pagination
-        tracks = Track.query.limit(100)
+        tracks = Track.query.all()
 
         for track in tracks:
             yield marshal(track, self.resource_fields)
