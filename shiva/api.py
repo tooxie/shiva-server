@@ -60,7 +60,7 @@ class Track(db.Model):
     __tablename__ = 'tracks'
 
     pk = db.Column(db.Integer, primary_key=True)
-    _path = db.Column(db.String(128), unique=True, nullable=False)
+    path = db.Column(db.Unicode(256), unique=True, nullable=False)
     md5_hash = db.Column(db.String(128), unique=True, nullable=False)
     title = db.Column(db.String(128))
     bitrate = db.Column(db.Integer)
@@ -78,28 +78,31 @@ class Track(db.Model):
         if isinstance(path, file):
             _path = path.name
 
-        self.path = _path
+        self.set_path(_path)
         self._id3r = None
 
-    @property
-    def path(self):
-        return self._path
+    def get_path(self):
+        if self.path:
+            return self.path.encode('utf-8')
 
-    @path.setter
-    def path(self, path):
-        if path != self._path:
-            if os.path.exists(path):
-                self._path = path
+        return None
+
+    def set_path(self, path):
+        if path != self.get_path():
+            self.path = path
+            if os.path.exists(self.get_path()):
                 self.file_size = self.compute_size()
-                self.md5_hash = self.compute_hash()
                 self.bitrate = self.get_bitrate()
                 self.length = self.get_length()
                 self.title = self.get_title()
 
+                # Leave this for last, get_title() may change file's contents.
+                self.md5_hash = self.compute_hash()
+
     def get_file(self):
         """Returns the file as a python file object.
         """
-        return open(self._path, 'r')
+        return open(self.get_path(), 'r')
 
     def compute_hash(self):
         """Computes the MD5 digest for this file.
@@ -111,14 +114,14 @@ class Track(db.Model):
     def compute_size(self):
         """Computes the size of a file in filesystem.
         """
-        return os.stat(self._path).st_size
+        return os.stat(self.get_path()).st_size
 
     def get_id3_reader(self):
         """Returns an object with the ID3 info reader.
         """
         if not getattr(self, '_id3r', None):
             # TODO: Encapsulate this inside a class
-            self._id3r = eyed3.load(self._path)
+            self._id3r = eyed3.load(self.get_path())
 
         return self._id3r
 
@@ -137,7 +140,16 @@ class Track(db.Model):
     def get_title(self):
         """
         """
-        return self.get_id3_reader().tag.title
+        id3r = self.get_id3_reader()
+
+        if not id3r.tag:
+            id3r.tag = eyed3.id3.Tag()
+
+        if not id3r.tag.title:
+            id3r.tag.title = raw_input('Song title: ').decode('utf-8')
+            id3r.tag.save(id3r.path)
+
+        return id3r.tag.title
 
     def __repr__(self):
         return "<Track('%s')>" % self.md5_hash
@@ -270,10 +282,10 @@ class TracksResource(Resource):
     resource_fields = {
         'id': FieldMap('pk', lambda x: int(x)),
         'uri': InstanceURI('track'),
-        # 'path': fields.String,
-        'stream_uri': StreamURI,
+        'path': fields.String,  # TODO: Reconsider
+        # 'stream_uri': StreamURI,
         'download_uri': DownloadURI,
-        # 'hash': FieldMap('md5_hash', lambda x: str(x)),
+        'hash': FieldMap('md5_hash', lambda x: str(x)),  # TODO: Reconsider
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,
