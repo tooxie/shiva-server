@@ -176,9 +176,18 @@ class DownloadURI(fields.String):
         return '/download/%i' % obj.pk
 
 
-class ForeignKeyField(fields.Nested):
+class ForeignKeyField(fields.Raw):
+    def __init__(self, foreign_obj, nested):
+        self.foreign_obj = foreign_obj
+        self.nested = nested
+
+        super(ForeignKeyField, self).__init__()
+
     def output(self, key, obj):
-        return marshal(getattr(obj, key), self.nested)
+        _id = getattr(obj, '%s_pk' % key)
+        obj = db.session.query(self.foreign_obj).get(_id)
+
+        return marshal(obj, self.nested)
 
 
 class ArtistField(fields.Nested):
@@ -204,25 +213,12 @@ class NestedLazy(fields.Nested):
             items.append(marshal(item, self.nested))
 
         return items
+
 # }}}
 
 
 # Resources {{{
-class ShivaResource(Resource):
-    def __init__(self, *args, **kwargs):
-        self.includes = []
-        if request.args:
-            self.includes = [arg.strip() \
-                             for arg in request.args.get('include').split(',')]
-
-            for include in self.includes:
-                extra_field = 'extra_field_%s' % include
-                self.resource_fields.update(getattr(self, extra_field, {}))
-
-        super(ShivaResource, self).__init__(*args, **kwargs)
-
-
-class ArtistResource(ShivaResource):
+class ArtistResource(Resource):
     """
     """
 
@@ -231,9 +227,6 @@ class ArtistResource(ShivaResource):
         'id': FieldMap('pk', lambda x: int(x)),
         'name': fields.String,
         'uri': InstanceURI('artist'),
-    }
-    extra_field_album = {
-        'album': NestedLazy('AlbumResource', 'resource_fields'),
     }
 
     def get(self, artist_id=None):
@@ -258,7 +251,7 @@ class ArtistResource(ShivaResource):
         return artist
 
 
-class AlbumResource(ShivaResource):
+class AlbumResource(Resource):
     """
     """
 
@@ -268,9 +261,10 @@ class AlbumResource(ShivaResource):
         'name': fields.String,
         'year': fields.Integer,
         'uri': InstanceURI('album'),
-    }
-    extra_field_tracks = {
-        'tracks': NestedLazy('TracksResource', 'resource_fields'),
+        'artist': ForeignKeyField(Artist, {
+            'id': FieldMap('pk', lambda x: int(x)),
+            'uri': InstanceURI('artist'),
+        }),
     }
 
     def get(self, album_id=None):
@@ -295,7 +289,7 @@ class AlbumResource(ShivaResource):
         return album
 
 
-class TracksResource(ShivaResource):
+class TracksResource(Resource):
     """
     """
 
@@ -310,12 +304,10 @@ class TracksResource(ShivaResource):
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,
-    }
-    extra_field_album = {
-        'album': ForeignKeyField(AlbumResource.resource_fields),
-    }
-    extra_field_artist = {
-        'artist': ArtistField(ArtistResource.resource_fields),
+        'album': ForeignKeyField(Album, {
+            'id': FieldMap('pk', lambda x: int(x)),
+            'uri': InstanceURI('album'),
+        }),
     }
 
     def get(self, track_id=None):
