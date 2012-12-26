@@ -4,40 +4,15 @@ from shiva import api
 from shiva.shortcuts import get_or_create
 from shiva import settings
 
-from hashlib import md5
-import id3reader
 import os
-import unicodedata
-
-def _safestr(s):
-    """Translate any string into a safe unicode string.
-    """
-
-    if type(s) == str:
-        return unicodedata.normalize('NFC', unicode(s, encoding='latin1',
-                                                    errors='ignore'))
-
-    return s
-
-def compute_hash(file_path):
-    """Computes the hash for a file.
-    """
-
-    return md5(open(file_path, 'r').read()).hexdigest()
-
-def file_size(file_path):
-    """Returns the size of a file.
-    """
-
-    return os.stat(file_path).st_size
+import eyed3
 
 def save_track(file_path):
     """Takes a path to a track, hashes it, reads its metadata and stores
     everything in the database.
     """
-
     session = api.db.session
-    full_path = _safestr(os.path.abspath(file_path))
+    full_path = file_path.decode('utf-8')
 
     if session.query(api.Track).filter_by(path=full_path).count():
         return True
@@ -67,18 +42,18 @@ def is_track(file_path):
 
     if os.path.isdir(file_path):
         return False
+
     if '.' not in file_path:
         return False
+
     ext = file_path[file_path.rfind('.') + 1:]
     if ext not in getattr(settings, 'ACCEPTED_FORMATS', []):
         return False
-    id3data = None
-    try:
-        id3data = id3reader.Reader(file_path)
-    except Exception, e:
-        return False
-    if id3data:
+
+    id3data = eyed3.load(file_path)
+    if getattr(id3data, 'path', False):
         return True
+
     return False
 
 def walk(dir_name):

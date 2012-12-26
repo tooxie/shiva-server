@@ -8,7 +8,6 @@ from flask import Flask
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask import request
 
 NUM_RE = re.compile('\d')
 
@@ -188,32 +187,6 @@ class ForeignKeyField(fields.Raw):
         obj = db.session.query(self.foreign_obj).get(_id)
 
         return marshal(obj, self.nested)
-
-
-class ArtistField(fields.Nested):
-    def output(self, key, obj):
-        return marshal(obj.album.artist, self.nested)
-
-
-class NestedLazy(fields.Nested):
-    def __init__(self, cls_name, fields_attr, **kwargs):
-        self.cls_name = cls_name
-        self.fields_attr = fields_attr
-
-        super(fields.Nested, self).__init__(**kwargs)
-
-    def output(self, key, obj):
-        if not getattr(self, 'nested', None):
-            # TODO: Ver como hace el ForeignKey de django.
-            self.nested = getattr(globals()[self.cls_name], self.fields_attr)
-
-        items = []
-        nested_item = list(getattr(obj, key))
-        for item in nested_item:
-            items.append(marshal(item, self.nested))
-
-        return items
-
 # }}}
 
 
