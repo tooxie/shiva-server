@@ -328,6 +328,4 @@ api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
 # }}}
 
 if __name__ == '__main__':
-    if not os.path.exists(DB_PATH):
-        db.create_all()
-    app.run('0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
