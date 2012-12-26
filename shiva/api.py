@@ -3,7 +3,6 @@ import os
 from hashlib import md5
 import re
 
-import eyed3
 from flask import Flask
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
@@ -120,8 +119,13 @@ class Track(db.Model):
         """Returns an object with the ID3 info reader.
         """
         if not getattr(self, '_id3r', None):
+            import eyed3  # FIXME: Replace ASAP
             # TODO: Encapsulate this inside a class
             self._id3r = eyed3.load(self.get_path())
+
+        if not self._id3r.tag:
+            self._id3r.tag = eyed3.id3.Tag()
+            self._id3r.tag.save(self._id3r.path)
 
         return self._id3r
 
@@ -142,12 +146,9 @@ class Track(db.Model):
         """
         id3r = self.get_id3_reader()
 
-        if not id3r.tag:
-            id3r.tag = eyed3.id3.Tag()
-
         if not id3r.tag.title:
             id3r.tag.title = raw_input('Song title: ').decode('utf-8')
-            id3r.tag.save(id3r.path)
+            id3r.tag.save()
 
         return id3r.tag.title
 
