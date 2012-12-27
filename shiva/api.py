@@ -263,6 +263,21 @@ class ArtistResource(Resource):
 
         return artist
 
+    def post(self, artist_id=None):
+        if artist_id:
+            return JSONResponse(405)
+
+        # artist = new Artist(name=request.form.get('name'))
+        # artist.save()
+
+        return JSONResponse(201, headers=[('Location', '/artist/1337')])
+
+    def put(self, artist_id=None):
+        if not artist_id:
+            return JSONResponse(405)
+
+        return {}
+
     def delete(self, artist_id=None):
         if not artist_id:
             return JSONResponse(405)
