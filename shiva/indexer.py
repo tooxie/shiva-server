@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # K-Pg
-from shiva import api
-from shiva import settings
-
 import os
-import eyed3
 import pickle
+
+import eyed3
+
+from shiva import api, settings
 
 def g(name, value=None):
     gname = '.indexerrc'
@@ -18,9 +18,8 @@ def g(name, value=None):
 
     if value:
         my_globals.update({name: value})
-        gfile = open(gname, 'w')
-        gfile.write(pickle.dumps(my_globals))
-        gfile.close()
+        with open(gname, 'w') as gfile:
+            gfile.write(pickle.dumps(my_globals))
     else:
         if name in my_globals:
             return my_globals[name]
