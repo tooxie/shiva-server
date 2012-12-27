@@ -65,6 +65,7 @@ class Track(db.Model):
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
     length = db.Column(db.Integer)
+    number = db.Column(db.Integer)
 
     album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'))
 
@@ -93,6 +94,7 @@ class Track(db.Model):
                 self.file_size = self.compute_size()
                 self.bitrate = self.get_bitrate()
                 self.length = self.get_length()
+                self.number = self.get_number()
                 self.title = self.get_title()
 
                 # Leave this for last, get_title() may change file's contents.
@@ -140,6 +142,11 @@ class Track(db.Model):
         """Computes the length of the track in seconds.
         """
         return self.get_id3_reader().info.time_secs
+
+    def get_number(self):
+        """
+        """
+        return self.get_id3_reader().tag.track_num[0]
 
     def get_title(self):
         """
@@ -294,6 +301,7 @@ class TracksResource(Resource):
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('album'),
         }),
+        'number': fields.Integer,
     }
 
     def get(self, track_id=None):
