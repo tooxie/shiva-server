@@ -154,7 +154,7 @@ class Track(db.Model):
         id3r = self.get_id3_reader()
 
         if not id3r.tag.title:
-            id3r.tag.title = raw_input('Song title: ').decode('utf-8')
+            id3r.tag.title = raw_input('Song title: ').decode('utf-8').strip()
             id3r.tag.save()
 
         return id3r.tag.title

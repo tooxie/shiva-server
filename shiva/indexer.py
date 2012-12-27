@@ -49,12 +49,12 @@ def save_track(file_path):
     if not id3r.tag.artist:
         _prev = g('PREV_ARTIST')
         if _prev:
-            use_prev = raw_input('Use %s? [y/N] ' % _prev)
+            use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
 
         if use_prev == 'y':
             _artist = _prev
         else:
-            _artist = unicode(raw_input('Artist name: '))
+            _artist = unicode(raw_input('Artist name: ').strip())
 
         g('PREV_ARTIST', _artist)
         id3r.tag.artist = _artist
@@ -72,12 +72,12 @@ def save_track(file_path):
     if not id3r.tag.album:
         _prev = g('PREV_ALBUM')
         if _prev:
-            use_prev = raw_input('Use %s? [y/N] ' % _prev)
+            use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
 
         if use_prev == 'y':
             _album = _prev
         else:
-            _album = unicode(raw_input('Album name: '))
+            _album = unicode(raw_input('Album name: ').strip())
 
         g('PREV_ALBUM', _album)
         id3r.tag.album = _album
