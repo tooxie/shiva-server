@@ -3,7 +3,7 @@ import os
 from hashlib import md5
 import re
 
-from flask import Flask, Response
+from flask import Flask, Response, request
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -267,7 +267,11 @@ class AlbumResource(Resource):
         return self.get_one(album_id)
 
     def get_all(self):
-        albums = Album.query.all()
+        artist_pk = request.args.get('artist')
+        if artist_pk:
+            albums = Album.query.filter_by(artist_pk=artist_pk)
+        else:
+            albums = Album.query.all()
 
         for album in albums:
             yield marshal(album, self.resource_fields)
@@ -310,9 +314,17 @@ class TracksResource(Resource):
 
         return self.get_one(track_id)
 
+    # TODO: Pagination
     def get_all(self):
-        # TODO: Pagination
-        tracks = Track.query.all()
+        album_pk = request.args.get('album')
+        artist_pk = request.args.get('artist')
+        if album_pk:
+            tracks = Track.query.filter_by(album_pk=album_pk)
+        elif artist_pk:
+            qs_album = Album.query.filter_by(artist_pk=artist_pk)
+            tracks = Track.query.join(qs_album)
+        else:
+            tracks = Track.query.all()
 
         for track in tracks:
             yield marshal(track, self.resource_fields)
