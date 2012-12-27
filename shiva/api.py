@@ -251,9 +251,7 @@ class ArtistResource(Resource):
         return self.get_one(artist_id)
 
     def get_all(self):
-        artists = Artist.query.all()
-
-        for artist in artists:
+        for artist in Artist.query.all():
             yield marshal(artist, self.resource_fields)
 
     @marshal_with(resource_fields)
@@ -298,18 +296,19 @@ class AlbumResource(Resource):
 
     def get(self, album_id=None):
         if not album_id:
-            return list(self.get_all())
+            return list(self.get_many())
 
         return self.get_one(album_id)
 
-    def get_all(self):
+    def get_many(self):
         artist_pk = request.args.get('artist')
         if artist_pk:
+            artist_pk = None if artist_pk == 'null' else artist_pk
             albums = Album.query.filter_by(artist_pk=artist_pk)
         else:
-            albums = Album.query.all()
+            albums = Album.query
 
-        for album in albums:
+        for album in albums.order_by('artist_pk', 'year', 'name', 'pk'):
             yield marshal(album, self.resource_fields)
 
     @marshal_with(resource_fields)
@@ -360,23 +359,24 @@ class TracksResource(Resource):
 
     def get(self, track_id=None):
         if not track_id:
-            return list(self.get_all())
+            return list(self.get_many())
 
         return self.get_one(track_id)
 
     # TODO: Pagination
-    def get_all(self):
+    def get_many(self):
         album_pk = request.args.get('album')
         artist_pk = request.args.get('artist')
         if album_pk:
+            album_pk = None if album_pk == 'null' else album_pk
             tracks = Track.query.filter_by(album_pk=album_pk)
         elif artist_pk:
             qs_album = Album.query.filter_by(artist_pk=artist_pk)
             tracks = Track.query.join(qs_album)
         else:
-            tracks = Track.query.all()
+            tracks = Track.query
 
-        for track in tracks:
+        for track in tracks.order_by('album_pk', 'number', 'pk'):
             yield marshal(track, self.resource_fields)
 
     @marshal_with(resource_fields)
@@ -409,6 +409,7 @@ api.add_resource(AlbumResource, '/albums', '/album/<int:album_id>',
 api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
                  endpoint='track')
 # }}}
+
 
 # Routes {{{
 @app.route('/track/<int:track_id>/download.<ext>')
