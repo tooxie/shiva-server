@@ -12,6 +12,10 @@ Shiva.Collection = Backbone.Collection.extend({
     }
 });
 
+buzz.sound.prototype.destroy = function() {
+    this.set('src', '');
+}
+
 Shiva.Audio = function(audio_url) {
     return {
         server_url: 'http://localhost:5001/api',
