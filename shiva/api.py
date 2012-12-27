@@ -210,6 +210,9 @@ class ForeignKeyField(fields.Raw):
 
     def output(self, key, obj):
         _id = getattr(obj, '%s_pk' % key)
+        if not _id:
+            return None
+
         obj = db.session.query(self.foreign_obj).get(_id)
 
         return marshal(obj, self.nested)
@@ -217,6 +220,18 @@ class ForeignKeyField(fields.Raw):
 
 
 # Resources {{{
+class JSONResponse(Response):
+    def __init__(self, status=200, **kwargs):
+        params = {
+            'headers': kwargs.get('headers', []),
+            'mimetype': 'application/json',
+            'response': '',
+            'status': status,
+        }
+
+        super(JSONResponse, self).__init__(**params)
+
+
 class ArtistResource(Resource):
     """
     """
@@ -246,9 +261,22 @@ class ArtistResource(Resource):
         artist = Artist.query.get(artist_id)
 
         if not artist:
-            abort(404)
+            return JSONResponse(404)
 
         return artist
+
+    def delete(self, artist_id=None):
+        if not artist_id:
+            return JSONResponse(405)
+
+        artist = Artist.query.get(artist_id)
+        if not artist:
+            return JSONResponse(404)
+
+        db.session.delete(artist)
+        db.session.commit()
+
+        return {}
 
 
 class AlbumResource(Resource):
@@ -292,6 +320,19 @@ class AlbumResource(Resource):
             abort(404)
 
         return album
+
+    def delete(self, album_id=None):
+        if not album_id:
+            return JSONResponse(405)
+
+        album = Album.query.get(album_id)
+        if not album:
+            return JSONResponse(404)
+
+        db.session.delete(album)
+        db.session.commit()
+
+        return {}
 
 
 class TracksResource(Resource):
@@ -346,6 +387,19 @@ class TracksResource(Resource):
             abort(404)
 
         return track
+
+    def delete(self, track_id=None):
+        if not track_id:
+            return JSONResponse(405)
+
+        track = Track.query.get(track_id)
+        if not track:
+            return JSONResponse(404)
+
+        db.session.delete(track)
+        db.session.commit()
+
+        return {}
 
 
 api.add_resource(ArtistResource, '/artists', '/artist/<int:artist_id>',
