@@ -185,14 +185,18 @@ class InstanceURI(fields.String):
         return '/%s/%i' % (self.base_uri, obj.pk)
 
 
-class StreamURI(fields.String):
+class StreamURI(InstanceURI):
     def output(self, key, obj):
-        return '/stream/%i' % obj.pk
+        uri = super(StreamURI, self).output(key, obj)
+
+        return '%s/stream' % uri
 
 
-class DownloadURI(fields.String):
+class DownloadURI(InstanceURI):
     def output(self, key, obj):
-        return '/track/%i/download' % obj.pk
+        uri = super(DownloadURI, self).output(key, obj)
+
+        return '%s/download' % uri
 
 
 class ForeignKeyField(fields.Raw):
@@ -220,6 +224,7 @@ class ArtistResource(Resource):
         'id': FieldMap('pk', lambda x: int(x)),
         'name': fields.String,
         'uri': InstanceURI('artist'),
+        'download': DownloadURI('artist'),
     }
 
     def get(self, artist_id=None):
@@ -258,6 +263,7 @@ class AlbumResource(Resource):
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('artist'),
         }),
+        'download': DownloadURI('album'),
     }
 
     def get(self, album_id=None):
@@ -296,7 +302,7 @@ class TracksResource(Resource):
         'uri': InstanceURI('track'),
         'path': fields.String,  # TODO: Reconsider
         # 'stream_uri': StreamURI,
-        'download_uri': DownloadURI,
+        'download_uri': DownloadURI('tracks'),
         'hash': FieldMap('md5_hash', lambda x: str(x)),  # TODO: Reconsider
         'bitrate': fields.Integer,
         'length': fields.Integer,
@@ -306,6 +312,7 @@ class TracksResource(Resource):
             'uri': InstanceURI('album'),
         }),
         'number': fields.Integer,
+        'download': DownloadURI('track'),
     }
 
     def get(self, track_id=None):
