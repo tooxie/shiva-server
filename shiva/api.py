@@ -28,6 +28,7 @@ class Artist(db.Model):
 
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
+    image = db.Column(db.String(256))
 
     albums = db.relationship('Album', backref='artist', lazy='dynamic')
 
@@ -44,6 +45,7 @@ class Album(db.Model):
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), unique=True)
     year = db.Column(db.Integer)
+    cover = db.Column(db.String(256))
 
     tracks = db.relationship('Track', backref='album', lazy='dynamic')
     artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
