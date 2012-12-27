@@ -3,7 +3,7 @@ import os
 from hashlib import md5
 import re
 
-from flask import Flask
+from flask import Flask, Response
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -185,7 +185,7 @@ class StreamURI(fields.String):
 
 class DownloadURI(fields.String):
     def output(self, key, obj):
-        return '/download/%i' % obj.pk
+        return '/track/%i/download' % obj.pk
 
 
 class ForeignKeyField(fields.Raw):
@@ -325,6 +325,24 @@ api.add_resource(AlbumResource, '/albums', '/album/<int:album_id>',
                  endpoint='album')
 api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
                  endpoint='track')
+# }}}
+
+# Routes {{{
+@app.route('/track/<int:track_id>/download.<ext>')
+def download(track_id, ext):
+    """
+    """
+    if ext != 'mp3':
+        raise NotImplementedError
+
+    track = db.session.query(Track).get(track_id)
+    track_file = open(track.get_path(), 'r')
+    filename_header = (
+        'Content-Disposition', 'attachment; filename="%s.mp3"' % track.title
+    )
+
+    return Response(response=track_file.read(), mimetype='audio/mpeg',
+            headers=[filename_header])
 # }}}
 
 if __name__ == '__main__':
