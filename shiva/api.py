@@ -7,8 +7,10 @@ from flask import Flask, Response, request
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
 from flask.ext.sqlalchemy import SQLAlchemy
+import translitcodec
 
 NUM_RE = re.compile('\d')
+PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
 # Setup {{{
 app = Flask(__name__)
@@ -16,6 +18,19 @@ DB_PATH = 'shiva.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % DB_PATH
 db = SQLAlchemy(app)
 api = Api(app)
+# }}}
+
+
+# Utils {{{
+def slugify(text):
+    """Generates an ASCII-only slug."""
+    result = []
+    for word in PUNCT_RE.split(text.lower()):
+        word = word.encode('translit/long')
+        if word:
+            result.append(word)
+
+    return unicode(u'-'.join(result))
 # }}}
 
 
@@ -27,10 +42,18 @@ class Artist(db.Model):
     __tablename__ = 'artists'
 
     pk = db.Column(db.Integer, primary_key=True)
+    # TODO: Update the files' ID3 tags when changing this info.
     name = db.Column(db.String(128), nullable=False)
     image = db.Column(db.String(256))
+    slug = db.Column(db.String(), nullable=False)
 
     albums = db.relationship('Album', backref='artist', lazy='dynamic')
+
+    def __setattr__(self, attr, value):
+        if attr == 'name':
+            super(Artist, self).__setattr__('slug', slugify(value))
+
+        super(Artist, self).__setattr__(attr, value)
 
     def __repr__(self):
         return '<Artist (%s)>' % self.name
@@ -46,9 +69,16 @@ class Album(db.Model):
     name = db.Column(db.String(128), unique=True)
     year = db.Column(db.Integer)
     cover = db.Column(db.String(256))
+    slug = db.Column(db.String(), nullable=False)
 
     tracks = db.relationship('Track', backref='album', lazy='dynamic')
     artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
+
+    def __setattr__(self, attr, value):
+        if attr == 'name':
+            super(Album, self).__setattr__('slug', slugify(value))
+
+        super(Album, self).__setattr__(attr, value)
 
     def __repr__(self):
         return '<Album (%s)>' % self.name
@@ -68,6 +98,7 @@ class Track(db.Model):
     file_size = db.Column(db.Integer)
     length = db.Column(db.Integer)
     number = db.Column(db.Integer)
+    slug = db.Column(db.String(), nullable=False)
 
     album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'))
 
@@ -82,6 +113,12 @@ class Track(db.Model):
 
         self.set_path(_path)
         self._id3r = None
+
+    def __setattr__(self, attr, value):
+        if attr == 'title':
+            super(Track, self).__setattr__('slug', slugify(value))
+
+        super(Track, self).__setattr__(attr, value)
 
     def get_path(self):
         if self.path:
@@ -242,6 +279,8 @@ class ArtistResource(Resource):
         'name': fields.String,
         'uri': InstanceURI('artist'),
         'download': DownloadURI('artist'),
+        'image': fields.String,
+        'slug': fields.String,
     }
 
     def get(self, artist_id=None):
@@ -300,6 +339,7 @@ class AlbumResource(Resource):
     resource_fields = {
         'id': FieldMap('pk', lambda x: int(x)),
         'name': fields.String,
+        'slug': fields.String,
         'year': fields.Integer,
         'uri': InstanceURI('album'),
         'artist': ForeignKeyField(Artist, {
@@ -364,6 +404,7 @@ class TracksResource(Resource):
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,
+        'slug': fields.String,
         'album': ForeignKeyField(Album, {
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('album'),

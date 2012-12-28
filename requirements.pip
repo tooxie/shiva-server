@@ -3,3 +3,5 @@ Flask-Restful==0.1.2
 Flask-SQLAlchemy==0.16
 eyed3==0.7.1
 requests==1.0.4
+translitcodec==0.3
+pyLast==0.5.11
