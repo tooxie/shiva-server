@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-from hashlib import md5
 import re
 
 from flask import Flask, Response, request
@@ -98,7 +97,6 @@ class Track(db.Model):
 
     pk = db.Column(db.Integer, primary_key=True)
     path = db.Column(db.Unicode(256), unique=True, nullable=False)
-    md5_hash = db.Column(db.String(128), unique=True, nullable=False)
     title = db.Column(db.String(128))
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
@@ -142,20 +140,10 @@ class Track(db.Model):
                 self.number = self.get_number()
                 self.title = self.get_title()
 
-                # Leave this for last, get_title() may change file's contents.
-                self.md5_hash = self.compute_hash()
-
     def get_file(self):
         """Returns the file as a python file object.
         """
         return open(self.get_path(), 'r')
-
-    def compute_hash(self):
-        """Computes the MD5 digest for this file.
-        """
-        track_file = self.get_file()
-
-        return md5(track_file.read()).hexdigest()
 
     def compute_size(self):
         """Computes the size of a file in filesystem.
@@ -205,7 +193,7 @@ class Track(db.Model):
         return id3r.tag.title
 
     def __repr__(self):
-        return "<Track('%s')>" % self.md5_hash
+        return "<Track('%s')>" % self.title
 # }}}
 
 
@@ -434,7 +422,6 @@ class TracksResource(Resource):
         'path': fields.String,  # TODO: Reconsider
         # 'stream_uri': StreamURI,
         'download_uri': DownloadURI('track'),
-        'hash': FieldMap('md5_hash', lambda x: str(x)),  # TODO: Reconsider
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,

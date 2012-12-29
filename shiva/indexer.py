@@ -149,17 +149,15 @@ class Indexer(object):
                     changed = True
 
             if changed:
-                track_obj.md5_hash = track_obj.compute_hash()
                 api.db.session.add(track_obj)
                 api.db.session.commit()
 
     def save_track(self):
-        """Takes a path to a track, hashes it, reads its metadata and stores
-        everything in the database.
+        """Takes a path to a track, reads its metadata and stores everything in
+        the database.
         """
         session = api.db.session
         full_path = self.file_path.decode('utf-8')
-        contents_changed = False
 
         print(self.file_path)
 
@@ -183,7 +181,6 @@ class Indexer(object):
 
             self.PREV_ARTIST = _artist
             id3r.artist = _artist
-            contents_changed = True
 
         use_prev = None
         if not id3r.album:
@@ -198,7 +195,6 @@ class Indexer(object):
 
             self.PREV_ALBUM = _album
             id3r.album = _album
-            contents_changed = True
 
         artist = self.get_artist(id3r.artist)
 
@@ -217,8 +213,6 @@ class Indexer(object):
         session.add(album)
 
         track.album = album
-        if contents_changed:
-            track.md5_hash = track.compute_hash()
         session.add(track)
 
         session.commit()
