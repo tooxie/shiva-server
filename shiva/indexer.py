@@ -2,154 +2,280 @@
 # K-Pg
 import os
 import pickle
+from datetime import datetime
 
 import eyed3
+import pylast
 
 from shiva import api, settings
 
-def g(name, value=None):
-    gname = '.indexerrc'
-    if not os.path.exists(gname):
-        with open(gname, 'w') as gfile:
-            gfile.write(pickle.dumps({}))
+def get_lastfm_api_key():
+    return file('lastfm.key', 'r').read().strip()
 
-    with open(gname, 'r') as gfile:
-        my_globals = pickle.loads(gfile.read())
 
-    if value:
-        my_globals.update({name: value})
-        with open(gname, 'w') as gfile:
-            gfile.write(pickle.dumps(my_globals))
-    else:
-        if name in my_globals:
-            return my_globals[name]
+class ID3Manager(object):
+    def __init__(self, mp3_path):
+        self.mp3_path = mp3_path
+        self.reader = eyed3.load(mp3_path)
 
-def save_track(file_path):
-    """Takes a path to a track, hashes it, reads its metadata and stores
-    everything in the database.
-    """
-    session = api.db.session
-    full_path = file_path.decode('utf-8')
-    contents_changed = False
+        if not self.reader.tag:
+            self.reader.tag = eyed3.id3.Tag()
+            self.reader.tag.save(mp3_path)
 
-    print(file_path)
+    def __getattribute__(self, attr):
+        _super = super(ID3Manager, self)
+        try:
+            _getter = _super.__getattribute__('get_%s' % attr)
+        except AttributeError:
+            _getter = None
+        if _getter:
+            return _getter()
 
-    if session.query(api.Track).filter_by(path=full_path).count():
+        return super(ID3Manager, self).__getattribute__(attr)
+
+    def __setattr__(self, attr, value):
+        value = value.strip() if isinstance(value, (str, unicode)) else value
+        _setter = getattr(self, 'set_%s' % attr, None)
+        if _setter:
+            _setter(value)
+
+        super(ID3Manager, self).__setattr__(attr, value)
+
+    def is_valid(self):
+        if not self.reader.path:
+            return False
+
         return True
 
-    track = api.Track(full_path)
-    session.add(track)
+    def get_path(self):
+        return self.mp3_path
 
-    id3r = track.get_id3_reader()
-    if not id3r.tag:
-        id3r.tag = eyed3.id3.Tag()
+    def same_path(self, path):
+        return path == self.mp3_path
 
-    use_prev = None
-    if not id3r.tag.artist:
-        _prev = g('PREV_ARTIST')
-        if _prev:
-            use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
+    def get_artist(self):
+        return self.reader.tag.artist.strip()
 
-        if use_prev == 'y':
-            _artist = _prev
-        else:
-            _artist = unicode(raw_input('Artist name: ').strip())
+    def set_artist(self, name):
+        self.reader.tag.artist = name
+        self.reader.tag.save()
 
-        g('PREV_ARTIST', _artist)
-        id3r.tag.artist = _artist
-        id3r.tag.save(id3r.path)
-        contents_changed = True
+    def get_album(self):
+        return self.reader.tag.album.strip()
 
-    qs_artist = session.query(api.Artist).filter_by(name=id3r.tag.artist)
-    if qs_artist.count():
-        artist = qs_artist.first()
-    else:
-        artist = api.Artist(name=id3r.tag.artist)
-        session.add(artist)
+    def set_album(self, name):
+        self.reader.tag.album = name
+        self.reader.tag.save()
 
-    use_prev = None
-    if not id3r.tag.album:
-        _prev = g('PREV_ALBUM')
-        if _prev:
-            use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
+    def get_release_year(self):
+        rdate = self.reader.tag.release_date
+        return rdate.year if rdate else None
 
-        if use_prev == 'y':
-            _album = _prev
-        else:
-            _album = unicode(raw_input('Album name: ').strip())
+    def set_release_year(self, year):
+        self.release_date.year = year
+        self.reader.tag.save()
 
-        g('PREV_ALBUM', _album)
-        id3r.tag.album = _album
-        id3r.tag.save(id3r.path)
-        contents_changed = True
 
-    album_year = id3r.tag.release_date.year if id3r.tag.release_date else None
-    qs_album = session.query(api.Album).filter_by(name=id3r.tag.album)
-    if qs_album.count():
-        album = qs_album.first()
-    else:
-        album = api.Album(name=id3r.tag.album, year=album_year)
+class Indexer(object):
+    def __init__(self, settings=None):
+        self.settings = settings
+        self.media_dirs = getattr(self.settings, 'MEDIA_DIRS', [])
+        self.id3r = None
+        self.PREV_ARTIST = None
+        self.PREV_ALBUM = None
+        self.lastfm = pylast.LastFMNetwork(api_key=get_lastfm_api_key())
+
+        if len(self.media_dirs) == 0:
+            print('Remember to set the MEDIA_DIRS setting, otherwise I ' +
+                  'don\'t know where to look for.')
+
+    def get_artist(self, name):
+        artist = api.db.session.query(api.Artist).filter_by(name=name).first()
+        if not artist:
+            cover = self.lastfm.get_artist(name).get_cover_image()
+            artist = api.Artist(name=name, image=cover)
+            api.db.session.add(artist)
+            api.db.session.commit()
+
+        return artist
+
+    def get_release_year(self, lastfm_album):
+        _date = lastfm_album.get_release_date()
+        if not _date:
+            return None
+
+        return datetime.strptime(_date, '%d %b %Y, %H:%M').year
+
+    def check_diff(self, track_obj):
+        changed = False
+        id3r = self.get_id3_reader()
+        if id3r.tag.artist != track_obj.album.artist.name:
+            print('%s != %s' % (id3r.tag.artist, track_obj.album.artist.name))
+            if not id3r.tag.artist:
+                id3r.tag.artist = track_obj.album.artist.name
+                id3r.tag.save()
+                changed = True
+
+            elif not track_obj.album.artist.name:
+                track_obj.album.artist.name = id3r.tag.artist
+                api.db.session.add(track_obj.album.artist)
+                changed = True
+
+            else:
+                print(id3r.path)
+                print(track_obj.path)
+                print('Chose one:')
+                print('1) %s' % id3r.tag.artist)
+                print('2) %s' % track_obj.album.artist.name)
+                print('w) Other')
+                print('i) Ignore')
+                option = unicode(raw_input('Chose 1, 2, w or q: '))
+                if option == '1':
+                    print('You chose %s' % id3r.tag.artist)
+                    track_obj.album.artist = self.get_artist(id3r.tag.artist)
+                    api.db.session.add(track_obj.album)
+                    changed = True
+                elif option == '2':
+                    print('You chose %s' % track_obj.album.artist.name)
+                    id3r.tag.artist = track_obj.album.artist.name
+                    id3r.tag.save()
+                    changed = True
+                elif option == 'w':
+                    _artist = self.get_artist(raw_input('Artist name: '))
+                    id3r.tag.artist = _artist.name
+                    id3r.tag.save()
+                    track_obj.album.artist = _artist
+                    api.db.session.add(track_obj.album)
+                    changed = True
+
+            if changed:
+                track_obj.md5_hash = track_obj.compute_hash()
+                api.db.session.add(track_obj)
+                api.db.session.commit()
+
+    def save_track(self):
+        """Takes a path to a track, hashes it, reads its metadata and stores
+        everything in the database.
+        """
+        session = api.db.session
+        full_path = self.file_path.decode('utf-8')
+        contents_changed = False
+
+        print(self.file_path)
+
+        if session.query(api.Track).filter_by(path=full_path).count():
+            return True
+
+        track = api.Track(full_path)
+        session.add(track)
+
+        use_prev = None
+        id3r = self.get_id3_reader()
+        if not id3r.artist:
+            _prev = self.PREV_ARTIST
+            if _prev:
+                use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
+
+            if use_prev == 'y':
+                _artist = _prev
+            else:
+                _artist = unicode(raw_input('Artist name: ').strip())
+
+            self.PREV_ARTIST = _artist
+            id3r.artist = _artist
+            contents_changed = True
+
+        use_prev = None
+        if not id3r.album:
+            _prev = self.PREV_ALBUM
+            if _prev:
+                use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
+
+            if use_prev == 'y':
+                _album = _prev
+            else:
+                _album = unicode(raw_input('Album name: ').strip())
+
+            self.PREV_ALBUM = _album
+            id3r.album = _album
+            contents_changed = True
+
+        artist = self.get_artist(id3r.artist)
+
+        album = api.Album.query.filter_by(name=id3r.album).first()
+        # album = qs_album.intersect(artist.albums).first()
+        if not album:
+            album = api.Album(name=id3r.album, year=id3r.release_year)
+            _album = self.lastfm.get_album(self.lastfm.get_artist(artist.name),
+                                           album.name)
+            album.cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
+            album.year = self.get_release_year(_album)
+
+        if artist not in album.artists:
+            album.artists.append(artist)
+
         session.add(album)
 
-    album.artist = artist
-    session.add(album)
+        track.album = album
+        if contents_changed:
+            track.md5_hash = track.compute_hash()
+        session.add(track)
 
-    track.album = album
-    if contents_changed:
-        track.md5_hash = track.compute_hash()
-    session.add(track)
+        session.commit()
 
-    session.commit()
-
-    return True
-
-def is_track(file_path):
-    """Tries to guess whether the file is a valid track or not.
-    """
-
-    if os.path.isdir(file_path):
-        return False
-
-    if '.' not in file_path:
-        return False
-
-    ext = file_path[file_path.rfind('.') + 1:]
-    if ext not in getattr(settings, 'ACCEPTED_FORMATS', []):
-        return False
-
-    id3data = eyed3.load(file_path)
-    if getattr(id3data, 'path', False):
         return True
 
-    return False
+    def get_id3_reader(self):
+        if not self.id3r:
+            self.id3r = ID3Manager(self.file_path)
 
-def walk(dir_name):
-    """Recursively walks through a directory looking for tracks.
-    """
+        if not self.id3r.same_path(self.file_path):
+            self.id3r = ID3Manager(self.file_path)
 
-    if os.path.isdir(dir_name):
-        for name in os.listdir(dir_name):
-            path = os.path.join(dir_name, name)
-            if os.path.isdir(path):
-                walk(path)
-            else:
-                if is_track(path):
-                    save_track(path)
-    else:
-        if is_track(dir_name):
-            save_track(dir_name)
+        return self.id3r
 
-    return True
+    def is_track(self):
+        """Tries to guess whether the file is a valid track or not.
+        """
+        if os.path.isdir(self.file_path):
+            return False
+
+        if '.' not in self.file_path:
+            return False
+
+        ext = self.file_path[self.file_path.rfind('.') + 1:]
+        if ext not in getattr(self.settings, 'ACCEPTED_FORMATS', []):
+            return False
+
+        if not self.get_id3_reader().is_valid():
+            return False
+
+        return True
+
+    def walk(self, dir_name):
+        """Recursively walks through a directory looking for tracks.
+        """
+
+        if os.path.isdir(dir_name):
+            for name in os.listdir(dir_name):
+                self.file_path = os.path.join(dir_name, name)
+                if os.path.isdir(self.file_path):
+                    self.walk(self.file_path)
+                else:
+                    if self.is_track():
+                        self.save_track()
+        else:
+            self.file_path = dir_name
+            if self.is_track():
+                self.save_track()
+
+        return True
+
+    def run(self):
+        for mobject in self.media_dirs:
+            for mdir in mobject.get_dirs():
+                self.walk(mdir)
 
 if __name__ == '__main__':
-    media_dirs = getattr(settings, 'MEDIA_DIRS', [])
-    if len(media_dirs) == 0:
-        print("Remember to set the MEDIA_DIRS setting, otherwise I don't " +
-              'know where to look for.')
-
-    for mobject in media_dirs:
-        for mdir in mobject.get_dirs():
-            walk(mdir)
-
-    if os.path.exists('.indexerrc'):
-        os.unlink('.indexerrc')
+    lola = Indexer(settings)
+    lola.run()
