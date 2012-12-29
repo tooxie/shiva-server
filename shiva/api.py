@@ -47,8 +47,6 @@ class Artist(db.Model):
     image = db.Column(db.String(256))
     slug = db.Column(db.String(), nullable=False)
 
-    albums = db.relationship('Album', backref='artist', lazy='dynamic')
-
     def __setattr__(self, attr, value):
         if attr == 'name':
             super(Artist, self).__setattr__('slug', slugify(value))
@@ -57,6 +55,12 @@ class Artist(db.Model):
 
     def __repr__(self):
         return '<Artist (%s)>' % self.name
+
+
+artists = db.Table('albumartists',
+    db.Column('artist_pk', db.Integer, db.ForeignKey('artists.pk')),
+    db.Column('album_pk', db.Integer, db.ForeignKey('albums.pk'))
+)
 
 
 class Album(db.Model):
@@ -72,7 +76,9 @@ class Album(db.Model):
     slug = db.Column(db.String(), nullable=False)
 
     tracks = db.relationship('Track', backref='album', lazy='dynamic')
-    artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
+
+    artists = db.relationship('Artist', secondary=artists,
+                              backref=db.backref('albums', lazy='dynamic'))
 
     def __setattr__(self, attr, value):
         if attr == 'name':
@@ -238,6 +244,21 @@ class DownloadURI(InstanceURI):
         return '%s/download' % uri
 
 
+class ManyToManyField(fields.Raw):
+    def __init__(self, foreign_obj, nested):
+        self.foreign_obj = foreign_obj
+        self.nested = nested
+
+        super(ManyToManyField, self).__init__()
+
+    def output(self, key, obj):
+        items = list()
+        for item in getattr(obj, key):
+            items.append(marshal(item, self.nested))
+
+        return items
+
+
 class ForeignKeyField(fields.Raw):
     def __init__(self, foreign_obj, nested):
         self.foreign_obj = foreign_obj
@@ -293,14 +314,13 @@ class ArtistResource(Resource):
         for artist in Artist.query.all():
             yield marshal(artist, self.resource_fields)
 
-    @marshal_with(resource_fields)
     def get_one(self, artist_id):
         artist = Artist.query.get(artist_id)
 
         if not artist:
             return JSONResponse(404)
 
-        return artist
+        return marshal(artist, resource_fields)
 
     def post(self, artist_id=None):
         if artist_id:
@@ -342,7 +362,7 @@ class AlbumResource(Resource):
         'slug': fields.String,
         'year': fields.Integer,
         'uri': InstanceURI('album'),
-        'artist': ForeignKeyField(Artist, {
+        'artists': ManyToManyField(Artist, {
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('artist'),
         }),
@@ -358,12 +378,12 @@ class AlbumResource(Resource):
     def get_many(self):
         artist_pk = request.args.get('artist')
         if artist_pk:
-            artist_pk = None if artist_pk == 'null' else artist_pk
-            albums = Album.query.filter_by(artist_pk=artist_pk)
+            # artist_pk = None if artist_pk == 'null' else artist_pk
+            albums = Artist.query.get(artist_pk).albums
         else:
             albums = Album.query
 
-        for album in albums.order_by('artist_pk', 'year', 'name', 'pk'):
+        for album in albums.order_by('year', 'name', 'pk'):
             yield marshal(album, self.resource_fields)
 
     @marshal_with(resource_fields)
