@@ -274,6 +274,16 @@ class ForeignKeyField(fields.Raw):
         obj = db.session.query(self.foreign_obj).get(_id)
 
         return marshal(obj, self.nested)
+
+
+class AlbumCover(fields.Raw):
+    def output(self, key, obj):
+        output = super(AlbumCover, self).output(key, obj)
+        if not output:
+            output = ('http://wortraub.com/wp-content/uploads/2012/07/'
+                     'Vinyl_Close_Up.jpg')
+
+        return output
 # }}}
 
 
@@ -367,6 +377,7 @@ class AlbumResource(Resource):
             'uri': InstanceURI('artist'),
         }),
         'download': DownloadURI('album'),
+        'cover': AlbumCover,
     }
 
     def get(self, album_id=None):
