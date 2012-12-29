@@ -41,7 +41,7 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Store your Last.fm API key it in *shiva/lastfm.key*:
+* Store your Last.fm API key in *shiva/lastfm.key*:
 
 ::
 
