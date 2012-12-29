@@ -280,6 +280,10 @@ Filtering
 The track listing accepts 1 of 2 possible parameters to filter down the list
 only to those tracks corresponding to a given `album` or `artist`.
 
+
+By artist
+~~~~~~~~~
+
 Example request/response:
 
 ::
@@ -317,6 +321,46 @@ Example request/response:
             bitrate: 186,
             id: 505,
             uri: "/track/505"
+        }
+    ]
+
+
+By album
+~~~~~~~~
+
+::
+
+    GET /tracks?album=17
+    [
+        {
+            album: {
+                id: 17,
+                uri: "/album/17"
+            },
+            length: 132,
+            number: 1,
+            title: "Shapes",
+            path: "/srv/music/flip-keep_rockin/flip-01-shapes.mp3",
+            slug: "shapes",
+            download_uri: "/track/263/download",
+            bitrate: 192,
+            id: 263,
+            uri: "/track/263"
+        },
+        {
+            album: {
+                id: 17,
+                uri: "/album/17"
+            },
+            length: 118,
+            number: 2,
+            title: "Stucked to The Ground",
+            path: "/srv/music/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
+            slug: "stucked-to-the-ground",
+            download_uri: "/track/267/download",
+            bitrate: 192,
+            id: 267,
+            uri: "/track/267"
         }
     ]
 
