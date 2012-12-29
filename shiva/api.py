@@ -309,7 +309,7 @@ class ArtistResource(Resource):
         'id': FieldMap('pk', lambda x: int(x)),
         'name': fields.String,
         'uri': InstanceURI('artist'),
-        'download': DownloadURI('artist'),
+        'download_uri': DownloadURI('artist'),
         'image': fields.String,
         'slug': fields.String,
     }
@@ -376,7 +376,7 @@ class AlbumResource(Resource):
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('artist'),
         }),
-        'download': DownloadURI('album'),
+        'download_uri': DownloadURI('album'),
         'cover': AlbumCover,
     }
 
@@ -430,7 +430,7 @@ class TracksResource(Resource):
         'uri': InstanceURI('track'),
         'path': fields.String,  # TODO: Reconsider
         # 'stream_uri': StreamURI,
-        'download_uri': DownloadURI('tracks'),
+        'download_uri': DownloadURI('track'),
         'hash': FieldMap('md5_hash', lambda x: str(x)),  # TODO: Reconsider
         'bitrate': fields.Integer,
         'length': fields.Integer,
@@ -441,7 +441,6 @@ class TracksResource(Resource):
             'uri': InstanceURI('album'),
         }),
         'number': fields.Integer,
-        'download': DownloadURI('track'),
     }
 
     def get(self, track_id=None):
