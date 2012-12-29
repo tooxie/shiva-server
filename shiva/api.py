@@ -330,7 +330,7 @@ class ArtistResource(Resource):
         if not artist:
             return JSONResponse(404)
 
-        return marshal(artist, resource_fields)
+        return marshal(artist, self.resource_fields)
 
     def post(self, artist_id=None):
         if artist_id:
