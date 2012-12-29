@@ -376,17 +376,14 @@ class AlbumResource(Resource):
 
     def get_many(self):
         artist_pk = request.args.get('artist')
-        albums = []
         if artist_pk:
-            artist = Artist.query.get(artist_pk)
-            if artist:
-                albums = artist.albums
+            albums = Album.query.join(Album.artists).filter(
+                Artist.pk == artist_pk)
         else:
             albums = Album.query
 
-        if albums:
-            for album in albums.order_by('year', 'name', 'pk'):
-                yield marshal(album, self.resource_fields)
+        for album in albums.order_by(Album.year, Album.name, Album.pk):
+            yield marshal(album, self.resource_fields)
 
     @marshal_with(resource_fields)
     def get_one(self, album_id):
