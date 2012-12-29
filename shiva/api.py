@@ -321,7 +321,7 @@ class ArtistResource(Resource):
         return self.get_one(artist_id)
 
     def get_all(self):
-        for artist in Artist.query.all():
+        for artist in Artist.query.order_by('name'):
             yield marshal(artist, self.resource_fields)
 
     def get_one(self, artist_id):
