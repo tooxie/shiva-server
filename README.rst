@@ -91,11 +91,12 @@ Resources
 You have the following resources available:
 
 * /artists
-* /artist/<int:id>
+* /artist/<int:artist_id>
 * /albums
-* /album/<int:id>
+* /album/<int:album_id>
 * /tracks
-* /track/<int:id>
+* /track/<int:track_id>
+* /lyrics/<int:track_id>
 
 
 ----------------
@@ -303,6 +304,45 @@ Example request/response:
             uri: "/track/505"
         }
     ]
+
+
+---------------
+Lyrics Resource
+---------------
+
+Example request/response:
+
+::
+
+    GET /lyrics/268
+    {
+        track: {
+            id: 268,
+            uri: "/track/268"
+        },
+        uri: "http://lyrics.wikia.com/Flip:Wrong_Side",
+        lyrics: "Along our way We've got to choose 'tween what's wrong or right Basically our l[...]",
+        artist: {
+            id: 8,
+            uri: "/artist/8"
+        }
+    }
+
+
+Have in mind
+------------
+
+* Due to legal issues lyric-providers are not allowed to send the complete
+  text, but just a small snippet considered "Fair Use".
+* Insted, they are forced to send traffic to their website in order
+  to track users.
+
+  + For more info read http://api.wikia.com/wiki/LyricWiki_API#FAQs
+
+* For that same reason this software does not store lyrics, but fetches them
+  every time. This is inefficient, I know.
+* Also, the LyricWiki API is, so to say, quite sensitive and may not find the
+  lyrics you request unless the artist is in the correct case.
 
 
 Assumptions

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import urllib2
 
 from flask import Flask, Response, request
 from flask.ext.restful import (abort, Api, fields, marshal, marshal_with,
                                Resource)
 from flask.ext.sqlalchemy import SQLAlchemy
 import translitcodec
+import requests
 
 NUM_RE = re.compile('\d')
 PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
@@ -309,7 +311,7 @@ class ArtistResource(Resource):
         return self.get_one(artist_id)
 
     def get_all(self):
-        for artist in Artist.query.order_by('name'):
+        for artist in Artist.query.order_by(Artist.name):
             yield marshal(artist, self.resource_fields)
 
     def get_one(self, artist_id):
@@ -475,12 +477,44 @@ class TracksResource(Resource):
         return {}
 
 
+class LyricsResource(Resource):
+    """
+    """
+
+    def get(self, track_id):
+        track = Track.query.get(track_id)
+        lyricswiki = ('http://lyrics.wikia.com/api.php?'
+                      'artist=%s&song=%s&fmt=realjson')
+        for artist in track.album.artists:
+            print(lyricswiki % (urllib2.quote(artist.name),
+                                urllib2.quote(track.title.upper())))
+            r = requests.get(lyricswiki % (urllib2.quote(artist.name),
+                                           urllib2.quote(track.title.upper())))
+            lyrics = r.json().get('lyrics')
+            if lyrics != "Not found":
+                return {
+                    'lyrics': lyrics,
+                    'uri': r.json().get('url'),
+                    'artist': {
+                        'id': artist.pk,
+                        'uri': '/artist/%i' % artist.pk,
+                    },
+                    'track': {
+                        'id': track.pk,
+                        'uri': '/track/%i' % track.pk,
+                    },
+                }
+
+        return JSONResponse(404)
+
+
 api.add_resource(ArtistResource, '/artists', '/artist/<int:artist_id>',
                  endpoint='artist')
 api.add_resource(AlbumResource, '/albums', '/album/<int:album_id>',
                  endpoint='album')
 api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
                  endpoint='track')
+api.add_resource(LyricsResource, '/lyrics/<int:track_id>', endpoint='lyrics')
 # }}}
 
 
