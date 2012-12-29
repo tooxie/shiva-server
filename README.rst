@@ -103,7 +103,8 @@ Artists Resource
 ----------------
 
 
-Example request:
+Example request/response:
+
 ::
 
     GET /artist/3
@@ -132,24 +133,29 @@ Fields
 Albums Resource
 ---------------
 
-Example request:
+Example request/response:
+
 ::
 
-    GET /album/12
+    GET /album/9
     {
         artists: [
             {
-                id: 7,
-                uri: "/artist/7"
+                id: 2,
+                uri: "/artist/2"
+            },
+            {
+                id: 5,
+                uri: "/artist/5"
             }
         ],
-        name: "Anesthesia",
-        year: 2008,
-        download_uri: "/album/12/download",
-        uri: "/album/12",
-        cover: "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
-        id: 12,
-        slug: "anesthesia"
+        download_uri: "/album/9/download",
+        name: "NOFX & Rancid - BYO Split Series (Vol. III)",
+        year: 0,
+        uri: "/album/9",
+        cover: "http://userserve-ak.last.fm/serve/300x300/72986694.jpg",
+        id: 9,
+        slug: "nofx-rancid-byo-split-series-vol-iii"
     }
 
 
@@ -172,25 +178,41 @@ Filtering
 The album list accepts an `artist` parameter in which case will filter the list
 of albums only to those corresponding to that artist.
 
-Example request:
+Example request/response:
+
 ::
 
-    GET /albums/?artist=15
+    GET /albums/?artist=7
     [
         {
             artists: [
                 {
-                    id: 15,
-                    uri: "/artist/15"
+                    id: 7,
+                    uri: "/artist/7"
                 }
             ],
-            download_uri: "/album/35/download",
-            name: "Sofa So Good",
-            year: 0,
-            uri: "/album/35",
-            cover: "http://userserve-ak.last.fm/serve/300x300/8728519.jpg",
-            id: 35,
-            slug: "sofa-so-good"
+            download_uri: "/album/12/download",
+            name: "Anesthesia",
+            year: 2008,
+            uri: "/album/12",
+            cover: "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
+            id: 12,
+            slug: "anesthesia"
+        },
+        {
+            artists: [
+                {
+                    id: 7,
+                    uri: "/artist/7"
+                }
+            ],
+            download_uri: "/album/27/download",
+            name: "Kum Kum",
+            year: 2008,
+            uri: "/album/27",
+            cover: "http://userserve-ak.last.fm/serve/300x300/62372889.jpg",
+            id: 27,
+            slug: "kum-kum"
         }
     ]
 
@@ -199,7 +221,8 @@ Example request:
 Track Resource
 --------------
 
-Example request:
+Example request/response:
+
 ::
 
     GET /track/484
@@ -241,7 +264,8 @@ Filtering
 The track listing accepts 1 of 2 possible parameters to filter down the list
 only to those tracks corresponding to a given `album` or `artist`.
 
-Example request:
+Example request/response:
+
 ::
 
     GET /tracks?artist=35
@@ -288,9 +312,14 @@ For the sake of simplicity many assumptions were made that will eventually be
 worked on and improved/removed.
 
 * Only music files.
-  * Actually, only mp3 files.
+
+  + Actually, only mp3 files.
+
 * No users.
-  * Therefore, no customization.
+
+  + Therefore, no customization.
+  + And no privacy.
+
 * No uploading of files.
 * No update of ID3 info when DB info changes.
 
@@ -299,9 +328,13 @@ Wish list
 =========
 
 * Indexes your music and videos.
+
+  + Which formats? Ogg? Wav?
+
 * Lets you batch-edit your ID3 tags.
 * You can listen to your songs.
 * You can download your songs by one or in batch.
+* Users.
 * Share your music with your friends.
 * Share your music with other servers.
 * Listen to your friend's music.
