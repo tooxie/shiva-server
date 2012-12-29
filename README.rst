@@ -5,6 +5,15 @@ Shiva
 Dinosaurs will slowly die.
 
 
+Prerequisites
+=============
+
+You are going to need a Last.fm API key. You can get one at
+http://www.last.fm/api/account/create
+
+This is used to fetch the artists' images.
+
+
 Installation
 ============
 
@@ -31,6 +40,12 @@ Installation
 * Edit it and configure the directories to scan for music.
 
   + See `Scanning directories`_ for more info.
+
+* Store your Last.fm API key it in *shiva/lastfm.key*:
+
+::
+
+    $ echo "YourLastFMAPIKey" > shiva/lastfm.key
 
 * Add shiva to the PYTHONPATH:
 
