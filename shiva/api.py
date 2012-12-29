@@ -444,12 +444,12 @@ class TracksResource(Resource):
             album_pk = None if album_pk == 'null' else album_pk
             tracks = Track.query.filter_by(album_pk=album_pk)
         elif artist_pk:
-            qs_album = Album.query.filter_by(artist_pk=artist_pk)
-            tracks = Track.query.join(qs_album)
+            tracks = Track.query.join(Album.query.join(Album.artists).filter(
+                    Artist.pk == artist_pk))
         else:
             tracks = Track.query
 
-        for track in tracks.order_by('album_pk', 'number', 'pk'):
+        for track in tracks.order_by(Track.album_pk, Track.number, Track.pk):
             yield marshal(track, self.resource_fields)
 
     @marshal_with(resource_fields)
