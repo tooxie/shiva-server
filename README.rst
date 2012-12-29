@@ -367,17 +367,16 @@ worked on and improved/removed.
 Wish list
 =========
 
-* Indexes your music and videos.
+* Index your music and videos.
 
   + Which formats? Ogg? Wav?
 
-* Lets you batch-edit your ID3 tags.
-* You can listen to your songs.
-* You can download your songs by one or in batch.
+* Batch-edit ID3 tags.
+* Download your songs in batch.
 * Users.
 * Share your music with your friends.
-* Share your music with other servers.
-* Listen to your friend's music.
+* Share your music with your friends' servers.
+* Listen to your friends' music.
 * They can also upload their music.
 * Stream audio and video. (Radio mode)
 * Set up a radio and collaboratively pick the music.
