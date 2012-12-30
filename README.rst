@@ -5,6 +5,14 @@ Shiva
 Dinosaurs will slowly die.
 
 
+What is Shiva?
+==============
+
+* An API to your music.
+* A music player.
+* A music collection organizer.
+
+
 Prerequisites
 =============
 
@@ -137,12 +145,13 @@ Example request/response:
 Fields
 ------
 
-* download_uri
-* id
-* image
-* name
-* slug
-* uri
+* download_uri: The URI to download this artist's tracks. (NOT IMPLEMENTED)
+* id: The object's ID.
+* image: Link to a photo. (Provided by last.fm)
+* name: Artist's name.
+* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+  of the artist's name.
+* uri: The URI of this resource's instance.
 
 
 ---------------
@@ -178,14 +187,15 @@ Example request/response:
 Fields
 ------
 
-* artists
-* cover
-* download_uri
-* id
-* name
-* slug
-* uri
-* year
+* artists: A list of the artists involved in that record.
+* cover: A link to an image of the album's cover. (Provided by last.fm)
+* download_uri: The URI to download this album. (NOT IMPLEMENTED)
+* id: The object's ID.
+* name: The album's name.
+* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+  of the album's name.
+* uri: The URI of this resource's instance.
+* year: The release year of the album.
 
 
 Filtering
@@ -262,16 +272,20 @@ Example request/response:
 Fields
 ------
 
-* album
-* bitrate
-* download_uri
-* id
-* length
-* number
-* path
-* slug
-* title
-* uri
+* album: The album to which this track belongs.
+* bitrate: In MP3s this value is directly proportional to the
+  `sound quality <https://en.wikipedia.org/wiki/Bit_rate#MP3>`__.
+* download_uri: The URI to download this track.
+* id: The object's ID.
+* length: The length in seconds of the track.
+* number: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`__
+  of this track with respect to this album.
+* path: The path of the file in the server's filesystem. (Is this actually
+  useful for anything?)
+* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+  of the track's title.
+* title: The title of the track.
+* uri: The URI of this resource's instance.
 
 
 Filtering
@@ -388,13 +402,13 @@ Example request/response:
     }
 
 
-Have in mind
+Keep in mind
 ------------
 
 * Due to legal issues lyric-providers are not allowed to send the complete
   text, but just a small snippet considered "Fair Use".
-* Insted, they are forced to send traffic to their website in order
-  to track users.
+* Instead, they are forced to send traffic to their website in order to track
+  users.
 
   + For more info read http://api.wikia.com/wiki/LyricWiki_API#FAQs
 
@@ -417,7 +431,9 @@ worked on and improved/removed.
 * No users.
 
   + Therefore, no customization.
-  + And no privacy.
+  + And no privacy (You can still use
+    `htpasswd <https://httpd.apache.org/docs/2.2/programs/htpasswd.html>`__,
+    thou.)
 
 * No uploading of files.
 * No update of ID3 info when DB info changes.
@@ -433,13 +449,16 @@ Wish list
 * Batch-edit ID3 tags.
 * Download your songs in batch.
 * Users.
+
+  + Favourite artists.
+  + Playlists.
+
 * Share your music with your friends.
 * Share your music with your friends' servers.
 * Listen to your friends' music.
 * They can also upload their music.
 * Stream audio and video. (Radio mode)
 * Set up a radio and collaboratively pick the music.
-* Browse your collection by artist/album.
 * Your music, your rules.
 
 
