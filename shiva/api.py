@@ -232,11 +232,6 @@ class Track(db.Model):
                 self.number = self.get_id3_reader().track_number
                 self.title = self.get_id3_reader().title
 
-    def get_file(self):
-        """Returns the file as a python file object.
-        """
-        return open(self.get_path(), 'r')
-
     def get_id3_reader(self):
         """Returns an object with the ID3 info reader.
         """
@@ -469,8 +464,6 @@ class TracksResource(Resource):
     resource_fields = {
         'id': FieldMap('pk', lambda x: int(x)),
         'uri': InstanceURI('track'),
-        'path': fields.String,  # TODO: Reconsider
-        # 'stream_uri': StreamURI,
         'download_uri': DownloadURI('track'),
         'bitrate': fields.Integer,
         'length': fields.Integer,

@@ -108,10 +108,7 @@ class Indexer(object):
         return True
 
     def get_id3_reader(self):
-        if not self.id3r:
-            self.id3r = api.ID3Manager(self.file_path)
-
-        if not self.id3r.same_path(self.file_path):
+        if not self.id3r or not self.id3r.same_path(self.file_path):
             self.id3r = api.ID3Manager(self.file_path)
 
         return self.id3r
