@@ -4,76 +4,12 @@ import os
 import pickle
 from datetime import datetime
 
-import eyed3
 import pylast
 
 from shiva import api, settings
 
 def get_lastfm_api_key():
     return file('lastfm.key', 'r').read().strip()
-
-
-class ID3Manager(object):
-    def __init__(self, mp3_path):
-        self.mp3_path = mp3_path
-        self.reader = eyed3.load(mp3_path)
-
-        if not self.reader.tag:
-            self.reader.tag = eyed3.id3.Tag()
-            self.reader.tag.save(mp3_path)
-
-    def __getattribute__(self, attr):
-        _super = super(ID3Manager, self)
-        try:
-            _getter = _super.__getattribute__('get_%s' % attr)
-        except AttributeError:
-            _getter = None
-        if _getter:
-            return _getter()
-
-        return super(ID3Manager, self).__getattribute__(attr)
-
-    def __setattr__(self, attr, value):
-        value = value.strip() if isinstance(value, (str, unicode)) else value
-        _setter = getattr(self, 'set_%s' % attr, None)
-        if _setter:
-            _setter(value)
-
-        super(ID3Manager, self).__setattr__(attr, value)
-
-    def is_valid(self):
-        if not self.reader.path:
-            return False
-
-        return True
-
-    def get_path(self):
-        return self.mp3_path
-
-    def same_path(self, path):
-        return path == self.mp3_path
-
-    def get_artist(self):
-        return self.reader.tag.artist.strip()
-
-    def set_artist(self, name):
-        self.reader.tag.artist = name
-        self.reader.tag.save()
-
-    def get_album(self):
-        return self.reader.tag.album.strip()
-
-    def set_album(self, name):
-        self.reader.tag.album = name
-        self.reader.tag.save()
-
-    def get_release_year(self):
-        rdate = self.reader.tag.release_date
-        return rdate.year if rdate else None
-
-    def set_release_year(self, year):
-        self.release_date.year = year
-        self.reader.tag.save()
 
 
 class Indexer(object):
@@ -151,7 +87,6 @@ class Indexer(object):
         artist = self.get_artist(id3r.artist)
 
         album = api.Album.query.filter_by(name=id3r.album).first()
-        # album = qs_album.intersect(artist.albums).first()
         if not album:
             album = api.Album(name=id3r.album, year=id3r.release_year)
             _album = self.lastfm.get_album(self.lastfm.get_artist(artist.name),
@@ -174,10 +109,10 @@ class Indexer(object):
 
     def get_id3_reader(self):
         if not self.id3r:
-            self.id3r = ID3Manager(self.file_path)
+            self.id3r = api.ID3Manager(self.file_path)
 
         if not self.id3r.same_path(self.file_path):
-            self.id3r = ID3Manager(self.file_path)
+            self.id3r = api.ID3Manager(self.file_path)
 
         return self.id3r
 

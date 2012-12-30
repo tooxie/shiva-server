@@ -32,6 +32,93 @@ def slugify(text):
             result.append(word)
 
     return unicode(u'-'.join(result))
+
+
+class ID3Manager(object):
+    def __init__(self, mp3_path):
+        import eyed3  # FIXME: Replace ASAP
+
+        self.mp3_path = mp3_path
+        self.reader = eyed3.load(mp3_path)
+
+        if not self.reader.tag:
+            self.reader.tag = eyed3.id3.Tag()
+            self.reader.tag.save(mp3_path)
+
+    def __getattribute__(self, attr):
+        _super = super(ID3Manager, self)
+        try:
+            _getter = _super.__getattribute__('get_%s' % attr)
+        except AttributeError:
+            _getter = None
+        if _getter:
+            return _getter()
+
+        return super(ID3Manager, self).__getattribute__(attr)
+
+    def __setattr__(self, attr, value):
+        value = value.strip() if isinstance(value, (str, unicode)) else value
+        _setter = getattr(self, 'set_%s' % attr, None)
+        if _setter:
+            _setter(value)
+
+        super(ID3Manager, self).__setattr__(attr, value)
+
+    def is_valid(self):
+        if not self.reader.path:
+            return False
+
+        return True
+
+    def get_path(self):
+        return self.mp3_path
+
+    def same_path(self, path):
+        return path == self.mp3_path
+
+    def get_artist(self):
+        return self.reader.tag.artist.strip()
+
+    def set_artist(self, name):
+        self.reader.tag.artist = name
+        self.reader.tag.save()
+
+    def get_album(self):
+        return self.reader.tag.album.strip()
+
+    def set_album(self, name):
+        self.reader.tag.album = name
+        self.reader.tag.save()
+
+    def get_release_year(self):
+        rdate = self.reader.tag.release_date
+        return rdate.year if rdate else None
+
+    def set_release_year(self, year):
+        self.release_date.year = year
+        self.reader.tag.save()
+
+    def get_bitrate(self):
+        return self.reader.info.bit_rate[1]
+
+    def get_length(self):
+        return self.reader.info.time_secs
+
+    def get_track_number(self):
+        return self.reader.tag.track_num[0]
+
+    def get_title(self):
+        if not self.reader.tag.title:
+            _title = raw_input('Song title: ').decode('utf-8').strip()
+            self.reader.tag.title = _title
+            self.reader.tag.save()
+
+        return self.reader.tag.title
+
+    def get_size(self):
+        """Computes the size of the mp3 file in filesystem.
+        """
+        return os.stat(self.reader.path).st_size
 # }}}
 
 
@@ -139,63 +226,24 @@ class Track(db.Model):
         if path != self.get_path():
             self.path = path
             if os.path.exists(self.get_path()):
-                self.file_size = self.compute_size()
-                self.bitrate = self.get_bitrate()
-                self.length = self.get_length()
-                self.number = self.get_number()
-                self.title = self.get_title()
+                self.file_size = self.get_id3_reader().size
+                self.bitrate = self.get_id3_reader().bitrate
+                self.length = self.get_id3_reader().length
+                self.number = self.get_id3_reader().track_number
+                self.title = self.get_id3_reader().title
 
     def get_file(self):
         """Returns the file as a python file object.
         """
         return open(self.get_path(), 'r')
 
-    def compute_size(self):
-        """Computes the size of a file in filesystem.
-        """
-        return os.stat(self.get_path()).st_size
-
     def get_id3_reader(self):
         """Returns an object with the ID3 info reader.
         """
         if not getattr(self, '_id3r', None):
-            import eyed3  # FIXME: Replace ASAP
-            # TODO: Encapsulate this inside a class
-            self._id3r = eyed3.load(self.get_path())
-
-        if not self._id3r.tag:
-            self._id3r.tag = eyed3.id3.Tag()
-            self._id3r.tag.save(self._id3r.path)
+            self._id3r = ID3Manager(self.get_path())
 
         return self._id3r
-
-    def get_bitrate(self):
-        """Reads the bitrate information from the file.
-        """
-        bitrate = self.get_id3_reader().info.bit_rate_str
-
-        return ''.join(NUM_RE.findall(bitrate))
-
-    def get_length(self):
-        """Computes the length of the track in seconds.
-        """
-        return self.get_id3_reader().info.time_secs
-
-    def get_number(self):
-        """
-        """
-        return self.get_id3_reader().tag.track_num[0]
-
-    def get_title(self):
-        """
-        """
-        id3r = self.get_id3_reader()
-
-        if not id3r.tag.title:
-            id3r.tag.title = raw_input('Song title: ').decode('utf-8').strip()
-            id3r.tag.save()
-
-        return id3r.tag.title
 
     def __repr__(self):
         return "<Track('%s')>" % self.title
