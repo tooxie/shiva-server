@@ -48,6 +48,8 @@ class Artist(db.Model):
     image = db.Column(db.String(256))
     slug = db.Column(db.String(), nullable=False)
 
+    tracks = db.relationship('Track', backref='tracks', lazy='dynamic')
+
     def __setattr__(self, attr, value):
         if attr == 'name':
             super(Artist, self).__setattr__('slug', slugify(value))
@@ -107,6 +109,7 @@ class Track(db.Model):
     slug = db.Column(db.String(), nullable=False)
 
     album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'))
+    artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
 
     def __init__(self, path):
         if type(path) not in (unicode, str, file):

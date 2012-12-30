@@ -106,52 +106,6 @@ class Indexer(object):
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
-    def check_diff(self, track_obj):
-        changed = False
-        id3r = self.get_id3_reader()
-        if id3r.tag.artist != track_obj.album.artist.name:
-            print('%s != %s' % (id3r.tag.artist, track_obj.album.artist.name))
-            if not id3r.tag.artist:
-                id3r.tag.artist = track_obj.album.artist.name
-                id3r.tag.save()
-                changed = True
-
-            elif not track_obj.album.artist.name:
-                track_obj.album.artist.name = id3r.tag.artist
-                api.db.session.add(track_obj.album.artist)
-                changed = True
-
-            else:
-                print(id3r.path)
-                print(track_obj.path)
-                print('Chose one:')
-                print('1) %s' % id3r.tag.artist)
-                print('2) %s' % track_obj.album.artist.name)
-                print('w) Other')
-                print('i) Ignore')
-                option = unicode(raw_input('Chose 1, 2, w or q: '))
-                if option == '1':
-                    print('You chose %s' % id3r.tag.artist)
-                    track_obj.album.artist = self.get_artist(id3r.tag.artist)
-                    api.db.session.add(track_obj.album)
-                    changed = True
-                elif option == '2':
-                    print('You chose %s' % track_obj.album.artist.name)
-                    id3r.tag.artist = track_obj.album.artist.name
-                    id3r.tag.save()
-                    changed = True
-                elif option == 'w':
-                    _artist = self.get_artist(raw_input('Artist name: '))
-                    id3r.tag.artist = _artist.name
-                    id3r.tag.save()
-                    track_obj.album.artist = _artist
-                    api.db.session.add(track_obj.album)
-                    changed = True
-
-            if changed:
-                api.db.session.add(track_obj)
-                api.db.session.commit()
-
     def save_track(self):
         """Takes a path to a track, reads its metadata and stores everything in
         the database.
