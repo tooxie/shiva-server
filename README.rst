@@ -255,7 +255,6 @@ Example request/response:
     {
         number: 4,
         download_uri: "/track/484/download",
-        path: "/srv/music/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
         bitrate: 128,
         slug: "dinosaurs-will-die",
         album: {
@@ -280,8 +279,6 @@ Fields
 * length: The length in seconds of the track.
 * number: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`__
   of this track with respect to this album.
-* path: The path of the file in the server's filesystem. (Is this actually
-  useful for anything?)
 * slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
   of the track's title.
 * title: The title of the track.
@@ -302,39 +299,43 @@ Example request/response:
 
 ::
 
-    GET /tracks?artist=15
+    GET /tracks?artist=16
     [
         {
             album: {
-                id: 35,
-                uri: "/album/35"
+                id: 36,
+                uri: "/album/36"
             },
             length: 189,
+            artist: {
+                id: 16,
+                uri: "/artist/16"
+            },
             number: 1,
             title: "Pay Cheque (Heritage II)",
-            path: "/srv/music/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque
-            (Heritage II).mp3",
             slug: "pay-cheque-heritage-ii",
-            download_uri: "/track/497/download",
+            download_uri: "/track/523/download",
             bitrate: 196,
-            id: 497,
-            uri: "/track/497"
+            id: 523,
+            uri: "/track/523"
         },
         {
             album: {
-                id: 35,
-                uri: "/album/35"
+                id: 36,
+                uri: "/album/36"
             },
             length: 171,
+            artist: {
+                id: 16,
+                uri: "/artist/16"
+            },
             number: 2,
             title: "In Your Dreams",
-            path: "/srv/music/ftd-2003-sofa_so_good/02 For The Day - In Your
-            Dreams.mp3",
             slug: "in-your-dreams",
-            download_uri: "/track/505/download",
+            download_uri: "/track/531/download",
             bitrate: 186,
-            id: 505,
-            uri: "/track/505"
+            id: 531,
+            uri: "/track/531"
         }
     ]
 
@@ -354,7 +355,6 @@ By album
             length: 132,
             number: 1,
             title: "Shapes",
-            path: "/srv/music/flip-keep_rockin/flip-01-shapes.mp3",
             slug: "shapes",
             download_uri: "/track/263/download",
             bitrate: 192,
@@ -369,7 +369,6 @@ By album
             length: 118,
             number: 2,
             title: "Stucked to The Ground",
-            path: "/srv/music/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
             slug: "stucked-to-the-ground",
             download_uri: "/track/267/download",
             bitrate: 192,
@@ -424,7 +423,7 @@ Assumptions
 For the sake of simplicity many assumptions were made that will eventually be
 worked on and improved/removed.
 
-* Only music files.
+* Only music files. No videos.
 
   + Actually, only mp3 files.
 
