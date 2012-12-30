@@ -439,6 +439,13 @@ worked on and improved/removed.
 * No update of ID3 info when DB info changes.
 
 
+Known issues
+============
+
+* The ID3 reader doesn't always detect the bit rate correctly. Seems like a
+  common issue to many libraries, at least the ones I tried.
+
+
 Wish list
 =========
 
