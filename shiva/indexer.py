@@ -90,12 +90,11 @@ class Indexer(object):
                   'don\'t know where to look for.')
 
     def get_artist(self, name):
-        artist = api.db.session.query(api.Artist).filter_by(name=name).first()
+        artist = api.Artist.query.filter_by(name=name).first()
         if not artist:
             cover = self.lastfm.get_artist(name).get_cover_image()
             artist = api.Artist(name=name, image=cover)
             api.db.session.add(artist)
-            api.db.session.commit()
 
         return artist
 
@@ -115,11 +114,10 @@ class Indexer(object):
 
         print(self.file_path)
 
-        if session.query(api.Track).filter_by(path=full_path).count():
+        if api.Track.query.filter_by(path=full_path).count():
             return True
 
         track = api.Track(full_path)
-        session.add(track)
 
         use_prev = None
         id3r = self.get_id3_reader()
