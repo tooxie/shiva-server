@@ -167,6 +167,7 @@ class Indexer(object):
         session.add(album)
 
         track.album = album
+        track.artist = artist
         session.add(track)
 
         session.commit()

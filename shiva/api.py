@@ -428,6 +428,10 @@ class TracksResource(Resource):
         'length': fields.Integer,
         'title': fields.String,
         'slug': fields.String,
+        'artist': ForeignKeyField(Album, {
+            'id': FieldMap('pk', lambda x: int(x)),
+            'uri': InstanceURI('artist'),
+        }),
         'album': ForeignKeyField(Album, {
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('album'),
@@ -449,8 +453,7 @@ class TracksResource(Resource):
             album_pk = None if album_pk == 'null' else album_pk
             tracks = Track.query.filter_by(album_pk=album_pk)
         elif artist_pk:
-            tracks = Track.query.join(Album.query.join(Album.artists).filter(
-                    Artist.pk == artist_pk))
+            tracks = Track.query.filter(Artist.pk == artist_pk)
         else:
             tracks = Track.query
 
@@ -488,25 +491,22 @@ class LyricsResource(Resource):
         track = Track.query.get(track_id)
         lyricswiki = ('http://lyrics.wikia.com/api.php?'
                       'artist=%s&song=%s&fmt=realjson')
-        for artist in track.album.artists:
-            print(lyricswiki % (urllib2.quote(artist.name),
-                                urllib2.quote(track.title.upper())))
-            r = requests.get(lyricswiki % (urllib2.quote(artist.name),
-                                           urllib2.quote(track.title.upper())))
-            lyrics = r.json().get('lyrics')
-            if lyrics != "Not found":
-                return {
-                    'lyrics': lyrics,
-                    'uri': r.json().get('url'),
-                    'artist': {
-                        'id': artist.pk,
-                        'uri': '/artist/%i' % artist.pk,
-                    },
-                    'track': {
-                        'id': track.pk,
-                        'uri': '/track/%i' % track.pk,
-                    },
-                }
+        response = requests.get(lyricswiki % (urllib2.quote(track.artist.name),
+                                              urllib2.quote(track.title)))
+        lyrics = response.json().get('lyrics')
+        if lyrics != "Not found":
+            return {
+                'lyrics': lyrics,
+                'uri': response.json().get('url'),
+                'artist': {
+                    'id': artist.pk,
+                    'uri': '/artist/%i' % artist.pk,
+                },
+                'track': {
+                    'id': track.pk,
+                    'uri': '/track/%i' % track.pk,
+                },
+            }
 
         return JSONResponse(404)
 
