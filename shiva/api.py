@@ -48,7 +48,7 @@ class Artist(db.Model):
     image = db.Column(db.String(256))
     slug = db.Column(db.String(), nullable=False)
 
-    tracks = db.relationship('Track', backref='tracks', lazy='dynamic')
+    tracks = db.relationship('Track', backref='artist', lazy='dynamic')
 
     def __setattr__(self, attr, value):
         if attr == 'name':
@@ -453,7 +453,7 @@ class TracksResource(Resource):
             album_pk = None if album_pk == 'null' else album_pk
             tracks = Track.query.filter_by(album_pk=album_pk)
         elif artist_pk:
-            tracks = Track.query.filter(Artist.pk == artist_pk)
+            tracks = Track.query.filter(Track.artist_pk == artist_pk)
         else:
             tracks = Track.query
 
@@ -499,8 +499,8 @@ class LyricsResource(Resource):
                 'lyrics': lyrics,
                 'uri': response.json().get('url'),
                 'artist': {
-                    'id': artist.pk,
-                    'uri': '/artist/%i' % artist.pk,
+                    'id': track.artist.pk,
+                    'uri': '/artist/%i' % track.artist.pk,
                 },
                 'track': {
                     'id': track.pk,
