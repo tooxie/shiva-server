@@ -167,7 +167,7 @@ Example request/response:
         ],
         download_uri: "/album/9/download",
         name: "NOFX & Rancid - BYO Split Series (Vol. III)",
-        year: 0,
+        year: 2002,
         uri: "/album/9",
         cover: "http://userserve-ak.last.fm/serve/300x300/72986694.jpg",
         id: 9,
@@ -209,7 +209,7 @@ Example request/response:
             ],
             download_uri: "/album/12/download",
             name: "Anesthesia",
-            year: 2008,
+            year: 1995,
             uri: "/album/12",
             cover: "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
             id: 12,
@@ -224,7 +224,7 @@ Example request/response:
             ],
             download_uri: "/album/27/download",
             name: "Kum Kum",
-            year: 2008,
+            year: 1996,
             uri: "/album/27",
             cover: "http://userserve-ak.last.fm/serve/300x300/62372889.jpg",
             id: 27,
@@ -288,7 +288,7 @@ Example request/response:
 
 ::
 
-    GET /tracks?artist=35
+    GET /tracks?artist=15
     [
         {
             album: {
