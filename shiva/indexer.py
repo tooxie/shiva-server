@@ -85,11 +85,13 @@ class Indexer(object):
 
         album = api.Album.query.filter_by(name=id3r.album).first()
         if not album:
-            album = api.Album(name=id3r.album, year=id3r.release_year)
+            _year = self.get_release_year(_album)
+            if not _year and id3r.release_year:
+                _year = id3r.release_year
+            album = api.Album(name=id3r.album, year=_year)
             _album = self.lastfm.get_album(self.lastfm.get_artist(artist.name),
                                            album.name)
             album.cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
-            album.year = self.get_release_year(_album)
 
         if artist not in album.artists:
             album.artists.append(artist)
