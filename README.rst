@@ -111,6 +111,7 @@ You have the following resources available:
 
 * /artists
 * /artist/<int:artist_id>
+* /artist/<int:artist_id>/shows
 * /albums
 * /album/<int:album_id>
 * /tracks
@@ -148,6 +149,52 @@ Fields
 * slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
   of the artist's name.
 * uri: The URI of this resource's instance.
+
+
+--------------
+Shows Resource
+--------------
+
+Returns a structure provided by BandsInTown.com as is.
+
+Example request/response:
+
+::
+
+    GET /artist/1/shows
+    [
+        {
+            "artists": [
+                {
+                    "image_url": "http://www.bandsintown.com/Lagwagon/photo/medium.jpg",
+                    "name": "Lagwagon",
+                    "mbid": "c7788fba-e635-4d8b-a937-01a68ab154e3",
+                    "facebook_tour_dates_url": "http://bnds.in/HE8iWo",
+                    "thumb_url": "http://www.bandsintown.com/Lagwagon/photo/small.jpg"
+                }
+            ],
+            "formatted_datetime": "Friday, January 18, 2013 at 7:00pm",
+            "ticket_type": "Tickets",
+            "formatted_location": "Hollywood, CA",
+            "title": "Lagwagon @ Hollywood Palladium in Hollywood, CA",
+            "facebook_share_url": "<annoyingly long fb url>",
+            "ticket_status": "available",
+            "id": "5869403",
+            "description": null,
+            "venue": {
+                "city": "Hollywood",
+                "name": "Hollywood Palladium",
+                "latitude": "34.0981410",
+                "region": "CA",
+                "country": "United States",
+                "longitude": "-118.3242730"
+            },
+            "facebook_rsvp_url": "http://www.bandsintown.com/event/5869403/facebook_rsvp?app_id=MY_APP_ID&artist=Lagwagon&came_from=67",
+            "on_sale_datetime": "2012-11-02T10:00:00",
+            "datetime": "2013-01-18T19:00:00",
+            "ticket_url": "http://www.bandsintown.com/event/5869403/buy_tickets?app_id=MY_APP_ID&artist=Lagwagon"
+        }
+    ]
 
 
 ---------------

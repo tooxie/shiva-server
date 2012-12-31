@@ -327,11 +327,12 @@ class AlbumCover(fields.Raw):
 class JSONResponse(Response):
     def __init__(self, status=200, **kwargs):
         params = {
-            'headers': kwargs.get('headers', []),
+            'headers': [],
             'mimetype': 'application/json',
             'response': '',
             'status': status,
         }
+        params.update(kwargs)
 
         super(JSONResponse, self).__init__(**params)
 
@@ -558,10 +559,39 @@ class LyricsResource(Resource):
         return JSONResponse(404)
 
 
+class ShowsResource(Resource):
+    """
+    """
+
+    def get(self, artist_id):
+        bit_uri = ('http://api.bandsintown.com/artists/%(artist)s/events.json?'
+                   'api_version=2.0&app_id=MY_APP_ID&location=%(location)s')
+        artist = Artist.query.get(artist_id)
+
+        if not artist:
+            return JSONResponse(404)
+
+        print(bit_uri % {
+            'artist': urllib2.quote(artist.name),
+            'location': urllib2.quote('Berlin, Germany'),
+        })
+        response = requests.get(bit_uri % {
+            'artist': urllib2.quote(artist.name),
+            'location': urllib2.quote('Berlin, Germany'),
+        })
+
+        return JSONResponse(response=response.text,
+                            status=response.status_code)
+
+
 api.add_resource(ArtistResource, '/artists', '/artist/<int:artist_id>',
                  endpoint='artist')
+api.add_resource(ShowsResource, '/artist/<int:artist_id>/shows',
+                 endpoint='shows')
+
 api.add_resource(AlbumResource, '/albums', '/album/<int:album_id>',
                  endpoint='album')
+
 api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
                  endpoint='track')
 api.add_resource(LyricsResource, '/track/<int:track_id>/lyrics',
