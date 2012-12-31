@@ -307,7 +307,7 @@ class ForeignKeyField(fields.Raw):
         if not _id:
             return None
 
-        obj = db.session.query(self.foreign_obj).get(_id)
+        obj = self.foreign_obj.query.get(_id)
 
         return marshal(obj, self.nested)
 
@@ -531,9 +531,15 @@ class LyricsResource(Resource):
     def get(self, track_id):
         track = Track.query.get(track_id)
         lyricswiki = ('http://lyrics.wikia.com/api.php?'
-                      'artist=%s&song=%s&fmt=realjson')
-        response = requests.get(lyricswiki % (urllib2.quote(track.artist.name),
-                                              urllib2.quote(track.title)))
+                      'artist=%(artist)s&song=%(track)s&fmt=realjson')
+        print(lyricswiki % {
+            'artist': urllib2.quote(track.artist.name),
+            'track': urllib2.quote(track.title),
+        })
+        response = requests.get(lyricswiki % {
+            'artist': urllib2.quote(track.artist.name),
+            'track': urllib2.quote(track.title),
+        })
         lyrics = response.json().get('lyrics')
         if lyrics != "Not found":
             return {
@@ -558,7 +564,8 @@ api.add_resource(AlbumResource, '/albums', '/album/<int:album_id>',
                  endpoint='album')
 api.add_resource(TracksResource, '/tracks', '/track/<int:track_id>',
                  endpoint='track')
-api.add_resource(LyricsResource, '/lyrics/<int:track_id>', endpoint='lyrics')
+api.add_resource(LyricsResource, '/track/<int:track_id>/lyrics',
+                 endpoint='lyrics')
 # }}}
 
 
@@ -570,7 +577,7 @@ def download(track_id, ext):
     if ext != 'mp3':
         raise NotImplementedError
 
-    track = db.session.query(Track).get(track_id)
+    track = Track.query.get(track_id)
     track_file = open(track.get_path(), 'r')
     filename_header = (
         'Content-Disposition', 'attachment; filename="%s.mp3"' % track.title

@@ -115,7 +115,7 @@ You have the following resources available:
 * /album/<int:album_id>
 * /tracks
 * /track/<int:track_id>
-* /lyrics/<int:track_id>
+* /track/<int:track_id>/lyrics
 
 
 ----------------
@@ -382,7 +382,7 @@ Example request/response:
 
 ::
 
-    GET /lyrics/268
+    GET /track/268/lyrics
     {
         track: {
             id: 268,
