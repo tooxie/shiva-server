@@ -9,5 +9,6 @@ MEDIA_DIRS = (
     # If in doubt, read the source.
 )
 LASTFM_API_KEY = ''
+LOCATION = ''
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.

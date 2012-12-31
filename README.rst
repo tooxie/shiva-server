@@ -50,6 +50,7 @@ Installation
   + See `Scanning directories`_ for more info.
 
 * Set the LASTFM_API_KEY setting with the key you got from Last.fm.
+* Configure your LOCATION (`See available choices <http://www.postgresql.org/docs/8.1/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE>`__)
 * Add shiva to the PYTHONPATH:
 
 ::
