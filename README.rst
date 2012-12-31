@@ -486,6 +486,15 @@ Known issues
 
 * The ID3 reader doesn't always detect the bit rate correctly. Seems like a
   common issue to many libraries, at least the ones I tried.
+* The lyrics API may not find the lyrics unless the artist is in the correct
+  case.
+* Some weird encoded file names may break the indexer. Doesn't happen with
+  every non-ascii character, but you may encounter this error. Sorry for that,
+  unicode errors are hard to track. Example error:
+
+::
+
+    UnicodeDecodeError: 'utf8' codec can't decode byte 0xe1 in position 50: invalid continuation byte
 
 
 Wish list
@@ -508,7 +517,8 @@ Wish list
 * They can also upload their music.
 * Stream audio and video. (Radio mode)
 * Set up a radio and collaboratively pick the music.
-* Your music, your rules.
+* Better lyrics engine.
+* Tabs.
 
 
 Why Shiva?
