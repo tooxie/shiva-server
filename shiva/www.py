@@ -7,13 +7,16 @@ app.static_folder = 'static'
 
 @app.route('/')
 def index():
-    return render_template('shiva.html')
+    r = requests.get('http://127.0.0.1:8000/%s' % path)
+
+    return Response(response=r.content, status=r.status_code,
+                    headers=r.headers)
 
 @app.route('/api/<path:path>')
 def api_call(path):
     """
     """
-    r = requests.get('http://localhost:5000/%s' % path)
+    r = requests.get('http://127.0.0.1:5000/%s' % path)
 
     return Response(response=r.content, status=r.status_code,
                     headers=r.headers)
