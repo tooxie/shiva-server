@@ -8,5 +8,6 @@ MEDIA_DIRS = (
     # MediaDir('/home/fatmike/music/shiva'),
     # If in doubt, read the source.
 )
+LASTFM_API_KEY = ''
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.

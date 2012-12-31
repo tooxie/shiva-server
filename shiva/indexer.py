@@ -8,9 +8,6 @@ import pylast
 
 from shiva import api, settings
 
-def get_lastfm_api_key():
-    return file('lastfm.key', 'r').read().strip()
-
 
 class Indexer(object):
     def __init__(self, settings=None):
@@ -19,7 +16,7 @@ class Indexer(object):
         self.id3r = None
         self.PREV_ARTIST = None
         self.PREV_ALBUM = None
-        self.lastfm = pylast.LastFMNetwork(api_key=get_lastfm_api_key())
+        self.lastfm = pylast.LastFMNetwork(api_key=settings.LASTFM_API_KEY)
 
         if len(self.media_dirs) == 0:
             print('Remember to set the MEDIA_DIRS setting, otherwise I ' +

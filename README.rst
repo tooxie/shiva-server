@@ -49,12 +49,7 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Store your Last.fm API key in *shiva/lastfm.key*:
-
-::
-
-    $ echo "YourLastFMAPIKey" > shiva/lastfm.key
-
+* Set the LASTFM_API_KEY setting with the key you got from Last.fm.
 * Add shiva to the PYTHONPATH:
 
 ::
