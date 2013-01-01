@@ -1,5 +1,1 @@
-# -*- coding: utf-8 -*-
-from flask import Flask
-
-app = Flask(__name__)
-app.config.from_object('shiva.settings')
+from shiva.www.app import app

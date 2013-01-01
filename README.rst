@@ -39,11 +39,11 @@ Installation
 
     $ pip install -r requirements.pip
 
-* Rename shiva/settings/local.py.example to local.py:
+* Rename shiva/api/settings/local.py.example to local.py:
 
 ::
 
-    $ cp shiva/settings/local.py.example shiva/settings/local.py
+    $ cp shiva/api/settings/local.py.example shiva/api/settings/local.py
 
 * Edit it and configure the directories to scan for music.
 
@@ -67,7 +67,7 @@ Installation
 
 ::
 
-  $ python shiva/api.py
+  $ python shiva/api/app.py
 
 * Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
 
@@ -77,7 +77,7 @@ Scanning directories
 --------------------
 
 To tell Shiva which directories to scan for music, you will have to configure
-your `shiva/settings/local.py` file. There you will find a MEDIA_DIRS option
+your `shiva/app/config/local.py` file. There you will find a MEDIA_DIRS option
 where you need to supply `MediaDir` objects.
 
 This object allows for media configuration. By instantiating a MediaDir class
@@ -488,13 +488,6 @@ Known issues
   common issue to many libraries, at least the ones I tried.
 * The lyrics API may not find the lyrics unless the artist is in the correct
   case.
-* Some weird encoded file names may break the indexer. Doesn't happen with
-  every non-ascii character, but you may encounter this error. Sorry for that,
-  unicode errors are hard to track. Example error:
-
-::
-
-    UnicodeDecodeError: 'utf8' codec can't decode byte 0xe1 in position 50: invalid continuation byte
 
 
 Wish list

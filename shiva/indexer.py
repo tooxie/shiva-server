@@ -6,35 +6,41 @@ from datetime import datetime
 
 import pylast
 
-from shiva import api, settings
+from shiva.api import models as m
+from shiva.api.app import app, db
+from shiva.utils import ID3Manager
 
+q = db.session.query
 
 class Indexer(object):
-    def __init__(self, settings=None):
-        self.settings = settings
-        self.media_dirs = getattr(self.settings, 'MEDIA_DIRS', [])
+    def __init__(self, config=None):
+        self.config = config
+        self.media_dirs = config.get('MEDIA_DIRS', [])
         self.id3r = None
         self.PREV_ARTIST = None
         self.PREV_ALBUM = None
-        self.lastfm = pylast.LastFMNetwork(api_key=settings.LASTFM_API_KEY)
+        self.lastfm = pylast.LastFMNetwork(api_key=config['LASTFM_API_KEY'])
 
         if len(self.media_dirs) == 0:
             print('Remember to set the MEDIA_DIRS setting, otherwise I ' +
                   'don\'t know where to look for.')
 
     def get_artist(self, name):
-        artist = api.Artist.query.filter_by(name=name).first()
+        artist = q(m.Artist).filter_by(name=name).first()
         if not artist:
             cover = self.lastfm.get_artist(name).get_cover_image()
-            artist = api.Artist(name=name, image=cover)
-            api.db.session.add(artist)
+            artist = m.Artist(name=name, image=cover)
+            db.session.add(artist)
 
         return artist
 
     def get_release_year(self, lastfm_album):
         _date = lastfm_album.get_release_date()
         if not _date:
-            return None
+            if not self.get_id3_reader().release_year:
+                return None
+
+            return self.get_id3_reader().release_year
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
@@ -42,15 +48,15 @@ class Indexer(object):
         """Takes a path to a track, reads its metadata and stores everything in
         the database.
         """
-        session = api.db.session
+        session = db.session
         full_path = self.file_path.decode('utf-8')
 
         print(self.file_path)
 
-        if api.Track.query.filter_by(path=full_path).count():
+        if q(m.Track).filter_by(path=full_path).count():
             return True
 
-        track = api.Track(full_path)
+        track = m.Track(full_path)
 
         use_prev = None
         id3r = self.get_id3_reader()
@@ -83,14 +89,12 @@ class Indexer(object):
 
         artist = self.get_artist(id3r.artist)
 
-        album = api.Album.query.filter_by(name=id3r.album).first()
+        album = q(m.Album).filter_by(name=id3r.album).first()
         if not album:
-            _year = self.get_release_year(_album)
-            if not _year and id3r.release_year:
-                _year = id3r.release_year
-            album = api.Album(name=id3r.album, year=_year)
             _album = self.lastfm.get_album(self.lastfm.get_artist(artist.name),
-                                           album.name)
+                                           id3r.album)
+            album = m.Album(name=id3r.album,
+                            year=self.get_release_year(_album))
             album.cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
 
         if artist not in album.artists:
@@ -108,7 +112,7 @@ class Indexer(object):
 
     def get_id3_reader(self):
         if not self.id3r or not self.id3r.same_path(self.file_path):
-            self.id3r = api.ID3Manager(self.file_path)
+            self.id3r = ID3Manager(self.file_path)
 
         return self.id3r
 
@@ -122,7 +126,7 @@ class Indexer(object):
             return False
 
         ext = self.file_path[self.file_path.rfind('.') + 1:]
-        if ext not in getattr(self.settings, 'ACCEPTED_FORMATS', []):
+        if ext not in self.config.get('ACCEPTED_FORMATS', []):
             return False
 
         if not self.get_id3_reader().is_valid():
@@ -155,5 +159,5 @@ class Indexer(object):
                 self.walk(mdir)
 
 if __name__ == '__main__':
-    lola = Indexer(settings)
+    lola = Indexer(app.config)
     lola.run()
