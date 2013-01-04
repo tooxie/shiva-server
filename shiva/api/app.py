@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask
+from flask import Flask, g
 from flask.ext.restful import Api
 
 from shiva.api.models import db
@@ -10,6 +10,10 @@ app.config.from_object('shiva.api.config')
 
 db.app = app
 db.init_app(app)
+
+@app.before_request
+def before_request():
+    g.db = db
 
 api = Api(app)
 

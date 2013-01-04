@@ -82,6 +82,8 @@ class Track(db.Model):
     number = db.Column(db.Integer)
     slug = db.Column(db.String(), nullable=False)
 
+    lyrics = db.relationship('Lyrics', backref='track', uselist=False)
+
     album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'))
     artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
 
@@ -128,4 +130,21 @@ class Track(db.Model):
         return self._id3r
 
     def __repr__(self):
-        return "<Track('%s')>" % self.title
+        return "<Track ('%s')>" % self.title
+
+
+class Lyrics(db.Model):
+    """
+    """
+
+    __tablename__ = 'lyrics'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    source = db.Column(db.String(256))
+
+    track_pk = db.Column(db.Integer, db.ForeignKey('tracks.pk'),
+                         nullable=False)
+
+    def __repr__(self):
+        return "<Lyrics ('%s')>" % self.track.title

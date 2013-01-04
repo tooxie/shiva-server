@@ -10,5 +10,10 @@ MEDIA_DIRS = (
 )
 LASTFM_API_KEY = ''
 LOCATION = ''
+SCRAPERS = {
+    'lyrics': (
+    ),
+}
+METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.

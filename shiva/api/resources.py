@@ -8,6 +8,7 @@ from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 from shiva.api.fields import (AlbumCover, DownloadURI, FieldMap,
                               ForeignKeyField, InstanceURI, ManyToManyField)
 from shiva.api.models import Artist, Album, Track
+from shiva.api.lyrics import get_lyrics
 
 
 class JSONResponse(Response):
@@ -156,7 +157,7 @@ class TracksResource(Resource):
         'length': fields.Integer,
         'title': fields.String,
         'slug': fields.String,
-        'artist': ForeignKeyField(Album, {
+        'artist': ForeignKeyField(Artist, {
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('artist'),
         }),
@@ -215,34 +216,28 @@ class LyricsResource(Resource):
     """
     """
 
+    resource_fields = {
+        'id': FieldMap('pk', lambda x: int(x)),
+        'uri': InstanceURI('lyrics'),
+        'text': fields.String,
+        'source': fields.String,
+        'track': ForeignKeyField(Track, {
+            'id': FieldMap('pk', lambda x: int(x)),
+            'uri': InstanceURI('track'),
+        }),
+    }
+
     def get(self, track_id):
         track = Track.query.get(track_id)
-        lyricswiki = ('http://lyrics.wikia.com/api.php?'
-                      'artist=%(artist)s&song=%(track)s&fmt=realjson')
-        print(lyricswiki % {
-            'artist': urllib2.quote(track.artist.name),
-            'track': urllib2.quote(track.title),
-        })
-        response = requests.get(lyricswiki % {
-            'artist': urllib2.quote(track.artist.name),
-            'track': urllib2.quote(track.title),
-        })
-        lyrics = response.json().get('lyrics')
-        if lyrics != "Not found":
-            return {
-                'lyrics': lyrics,
-                'uri': response.json().get('url'),
-                'artist': {
-                    'id': track.artist.pk,
-                    'uri': '/artist/%i' % track.artist.pk,
-                },
-                'track': {
-                    'id': track.pk,
-                    'uri': '/track/%i' % track.pk,
-                },
-            }
+        if track.lyrics:
+            return marshal(track.lyrics, self.resource_fields)
 
-        return JSONResponse(404)
+        lyrics = get_lyrics(track)
+
+        if not lyrics:
+            return JSONResponse(404)
+
+        return marshal(lyrics, self.resource_fields)
 
 
 class ShowsResource(Resource):

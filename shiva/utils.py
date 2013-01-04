@@ -16,6 +16,15 @@ def slugify(text):
 
     return unicode(u'-'.join(result))
 
+def _import(class_path):
+    bits = class_path.split('.')
+    mod_name = '.'.join(bits[:-1])
+    cls_name = bits[-1]
+
+    mod = __import__(mod_name, None, None, cls_name)
+
+    return getattr(mod, cls_name)
+
 
 class ID3Manager(object):
     def __init__(self, mp3_path):
