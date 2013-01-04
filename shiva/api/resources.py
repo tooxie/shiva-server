@@ -5,10 +5,14 @@ import requests
 from flask import request, Response
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
-from shiva.api.fields import (AlbumCover, DownloadURI, FieldMap,
-                              ForeignKeyField, InstanceURI, ManyToManyField)
+from shiva.api.fields import (DownloadURI, FieldMap, ForeignKeyField,
+                              InstanceURI, ManyToManyField)
 from shiva.api.models import Artist, Album, Track
 from shiva.api.lyrics import get_lyrics
+
+DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
+                       'Vinyl_Close_Up.jpg')
+DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
 
 
 class JSONResponse(Response):
@@ -34,7 +38,7 @@ class ArtistResource(Resource):
         'name': fields.String,
         'uri': InstanceURI('artist'),
         'download_uri': DownloadURI('artist'),
-        'image': fields.String,
+        'image': fields.String(DEFAULT_ARTIST_IMAGE),
         'slug': fields.String,
     }
 
@@ -101,7 +105,7 @@ class AlbumResource(Resource):
             'uri': InstanceURI('artist'),
         }),
         'download_uri': DownloadURI('album'),
-        'cover': AlbumCover,
+        'cover': fields.String(DEFAULT_ALBUM_COVER),
     }
 
     def get(self, album_id=None):
