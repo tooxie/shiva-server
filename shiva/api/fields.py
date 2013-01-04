@@ -54,3 +54,8 @@ class ForeignKeyField(fields.Raw):
         obj = self.foreign_obj.query.get(_id)
 
         return marshal(obj, self.nested)
+
+
+class Boolean(fields.Raw):
+    def output(self, key, obj):
+        return bool(super(Boolean, self).output(key, obj))

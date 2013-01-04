@@ -19,8 +19,9 @@ class Artist(db.Model):
     pk = db.Column(db.Integer, primary_key=True)
     # TODO: Update the files' ID3 tags when changing this info.
     name = db.Column(db.String(128), nullable=False)
-    image = db.Column(db.String(256))
     slug = db.Column(db.String(), nullable=False)
+    image = db.Column(db.String(256))
+    events = db.Column(db.String(256))
 
     tracks = db.relationship('Track', backref='artist', lazy='dynamic')
 
