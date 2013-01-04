@@ -14,9 +14,11 @@ class MetroLyrics(LyricScraper):
     """
 
     def __init__(self, artist, title):
-        self.artist = urllib2.quote(artist)
-        self.title = urllib2.quote(title)
+        self.artist = artist
+        self.title = title
         self.search_url = 'http://www.metrolyrics.com/api/v1/search/artistsong'
+        self.title_re = re.compile(r'<title>(?P<artist>.*?) - '
+                                   r'(?P<title>.*?) LYRICS</title>')
 
         self.lyrics = None
         self.source = None
@@ -28,18 +30,19 @@ class MetroLyrics(LyricScraper):
 
         print(self.source)
         response = requests.get(self.source)
-        html = lxml.html.fromstring(response.text)
-        div = html.get_element_by_id('lyrics-body')
+        self.html = response.text
+        html = lxml.html.fromstring(self.html)
 
-        from_re = r'\n\[ From: .*? \]'
-        lyrics = re.sub(from_re, '', div.text_content())
+        if self.check():
+            div = html.get_element_by_id('lyrics-body')
+            lyrics = re.sub(r'\n\[ From: .*? \]', '', div.text_content())
 
-        self.lyrics = lyrics.strip()
+            self.lyrics = lyrics.strip()
 
     def search(self):
         params = {
-            'artist': self.artist,
-            'song': self.title,
+            'artist': urllib2.quote(self.artist),
+            'song': urllib2.quote(self.title),
             'X-API-KEY': app.config['METROLYRICS_API_KEY'],
         }
         _url = '?'.join((self.search_url, urllib.urlencode(params)))
@@ -47,3 +50,14 @@ class MetroLyrics(LyricScraper):
         response = requests.get(_url)
         if response.status_code == 200:
             self.source = response.json()['items'][0]['url']
+
+    def check(self):
+        match = self.title_re.search(self.html)
+
+        if match.group('artist').lower() != self.artist.lower():
+            return False
+
+        if match.group('title').lower() != self.title.lower():
+            return False
+
+        return True
