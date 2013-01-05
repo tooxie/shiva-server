@@ -514,6 +514,16 @@ Wish list
 * Tabs.
 
 
+Disclaimer
+==========
+
+Remember that when using this software you must comply with your country's
+laws. You and only you will be held responsible for any law infringement
+resulting from the misuse of this software.
+
+That said. Have fun.
+
+
 Why Shiva?
 ==========
 
