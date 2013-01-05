@@ -155,7 +155,9 @@ Fields
 Shows Resource
 --------------
 
-Returns a structure provided by BandsInTown.com as is.
+Information provided by `BandsInTown <http://www.bandsintown.com/>`__. This is
+the only resource that is not cached in the local database given to it's
+dynamic nature.
 
 Example request/response:
 
@@ -164,7 +166,6 @@ Example request/response:
     GET /artist/1/shows
     [
         {
-            "tickets_uri": "http://www.bandsintown.com/event/6041814/buy_tickets?app_id=MY_APP_ID&artist=Lagwagon",
             "other_artists": [
                 {
                     "mbid": "5c210861-2ce2-4be3-9307-bbcfc361cc01",
@@ -196,7 +197,6 @@ Example request/response:
 Fields
 ------
 
-* tickets_uri: BandsInTown's URI to buy tickets, if available.
 * other_artists: A list with artists that are not in Shiva's database.
 
   + mbid: MusicBrainz.com ID.
@@ -216,6 +216,19 @@ Fields
 
 * id: BandsInTown's ID for this event.
 * datetime: String representation of the date and time of the show.
+
+
+Parameters
+----------
+
+The Shows resource accepts, optionally, 2 pairs of parameters:
+
+* *latitude* and *longitude*.
+* *country* and *city*.
+
+By providing one of this two pairs you can filter down the result list only to
+a city. If only one of the pair is provided (e.g., only city) will be ignored,
+and if both pairs are provided, the coordinates will take precedence.
 
 
 ---------------

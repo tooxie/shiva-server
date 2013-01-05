@@ -4,7 +4,7 @@ from datetime import datetime
 
 from lxml import etree
 import requests
-from flask import request, Response
+from flask import request, Response, current_app as app
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
 from shiva.api.fields import (Boolean, DownloadURI, ForeignKeyField,
@@ -261,7 +261,6 @@ class ShowsResource(Resource):
         'datetime': fields.DateTime,
         'title': fields.String,
         'tickets_left': Boolean,
-        'tickets_uri': fields.String,
         'venue': fields.Nested({
             'latitude': fields.String,
             'longitude': fields.String,
@@ -269,21 +268,40 @@ class ShowsResource(Resource):
         }),
     }
 
-    def get(self, artist_id, latitude=None, longitude=None):
+    def get(self, artist_id):
         artist = Artist.query.get(artist_id)
 
         if not artist:
             return JSONResponse(404)
 
-        return list(self.fetch(artist.name, latitude, longitude))
+        latitude = request.args.get('latitude')
+        longitude = request.args.get('longitude')
 
-    def fetch(self, artist, latitude, longitude):
-        bit_uri = ('http://api.bandsintown.com/artists/%(artist)s/events.json?'
-                   'api_version=2.0&app_id=MY_APP_ID&location=%(location)s')
+        country = request.args.get('country')
+        city = request.args.get('city')
+
+        if latitude and longitude:
+            location = (latitude, longitude)
+        elif country and city:
+            location = (city, country)
+        else:
+            location = ()
+
+        return list(self.fetch(artist.name, location))
+
+    def fetch(self, artist, location):
+        bit_uri = ('http://api.bandsintown.com/artists/%(artist)s/events'
+                   '/search?format=json&app_id=%(app_id)s&api_version=2.0')
         bit_uri = bit_uri % {
             'artist': urllib2.quote(artist),
-            'location': urllib2.quote('%s, %s' % (latitude, longitude))}
+            'app_id': app.config['BANDSINTOWN_APP_ID'],
+        }
 
+        if location:
+            param = urllib2.quote('%s, %s' % location)
+            bit_uri = '&'.join((bit_uri, '='.join(('location', param))))
+
+        print(bit_uri)
         response = requests.get(bit_uri)
 
         for event in response.json():
@@ -304,7 +322,6 @@ class ShowModel(object):
         self.datetime = self.to_datetime(json['datetime'])
         self.title = json['title']
         self.tickets_left = (json['ticket_status'] == 'available')
-        self.tickets_uri = json['ticket_url']
         self.venue = json['venue']
 
     def split_artists(self, json):
@@ -334,6 +351,7 @@ class ShowModel(object):
         mb_uri = 'http://musicbrainz.org/ws/2/artist?query=%(artist)s' % {
             'artist': urllib2.quote(artist)
         }
+        print(mb_uri)
         response = requests.get(mb_uri)
         mb_xml = etree.fromstring(response.text)
         # /root/artist-list/artist.id
