@@ -253,7 +253,6 @@ class ShowsResource(Resource):
 
     resource_fields = {
         'id': fields.String,
-        'events_uri': fields.String,
         'artists': ManyToManyField(Artist, {
             'id': fields.Integer(attribute='pk'),
             'uri': InstanceURI('artist'),
@@ -323,6 +322,7 @@ class ShowModel(object):
             if artist.count():
                 my_artists.append(artist.first())
             else:
+                del artist_dict['thumb_url']
                 other_artists.append(artist_dict)
 
         return (my_artists, other_artists)

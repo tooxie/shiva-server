@@ -164,37 +164,58 @@ Example request/response:
     GET /artist/1/shows
     [
         {
-            "artists": [
+            "tickets_uri": "http://www.bandsintown.com/event/6041814/buy_tickets?app_id=MY_APP_ID&artist=Lagwagon",
+            "other_artists": [
                 {
-                    "image_url": "http://www.bandsintown.com/Lagwagon/photo/medium.jpg",
-                    "name": "Lagwagon",
-                    "mbid": "c7788fba-e635-4d8b-a937-01a68ab154e3",
-                    "facebook_tour_dates_url": "http://bnds.in/HE8iWo",
-                    "thumb_url": "http://www.bandsintown.com/Lagwagon/photo/small.jpg"
+                    "mbid": "5c210861-2ce2-4be3-9307-bbcfc361cc01",
+                    "facebook_tour_dates_url": "http://bnds.in/kVwY1Y",
+                    "image_url": "http://www.bandsintown.com/Pennywise/photo/medium.jpg",
+                    "name": "Pennywise",
                 }
             ],
-            "formatted_datetime": "Friday, January 18, 2013 at 7:00pm",
-            "ticket_type": "Tickets",
-            "formatted_location": "Hollywood, CA",
-            "title": "Lagwagon @ Hollywood Palladium in Hollywood, CA",
-            "facebook_share_url": "<annoyingly long fb url>",
-            "ticket_status": "available",
-            "id": "5869403",
-            "description": null,
+            "artists": [
+                {
+                    "id": 1,
+                    "uri": "/artist/1"
+                }
+            ],
+            "tickets_left": true,
+            "title": "Lagwagon @ Commodore Ballroom in Vancouver, Canada",
             "venue": {
-                "city": "Hollywood",
-                "name": "Hollywood Palladium",
-                "latitude": "34.0981410",
-                "region": "CA",
-                "country": "United States",
-                "longitude": "-118.3242730"
+                "latitude": "49.2805760",
+                "name": "Commodore Ballroom",
+                "longitude": "-123.1207430"
             },
-            "facebook_rsvp_url": "http://www.bandsintown.com/event/5869403/facebook_rsvp?app_id=MY_APP_ID&artist=Lagwagon&came_from=67",
-            "on_sale_datetime": "2012-11-02T10:00:00",
-            "datetime": "2013-01-18T19:00:00",
-            "ticket_url": "http://www.bandsintown.com/event/5869403/buy_tickets?app_id=MY_APP_ID&artist=Lagwagon"
+            "id": "6041814",
+            "datetime": "Thu, 21 Feb 2013 19:00:00 -0000"
+
         }
     ]
+
+
+Fields
+------
+
+* tickets_uri: BandsInTown's URI to buy tickets, if available.
+* other_artists: A list with artists that are not in Shiva's database.
+
+  + mbid: MusicBrainz.com ID.
+  + facebook_tour_dates_url: URI to BandsInTown's Facebook app for this artist.
+  + image_url: URI to an image of the artist.
+  + name: Name of the artist.
+
+* artists: A list of artist resources.
+* tickets_left: A boolean representing the availability (or not) of tickets for
+  the concert.
+* title: The title of the event.
+* venue: A structure identifying the venue where the event takes place.
+
+  + latitude: Venue's latitude.
+  + name: Venue's name.
+  + longitude: Venue's longitude.
+
+* id: BandsInTown's ID for this event.
+* datetime: String representation of the date and time of the show.
 
 
 ---------------
