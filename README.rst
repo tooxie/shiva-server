@@ -503,8 +503,15 @@ can fetch it. This list is in your local config file and looks like:
     }
 
 This will look for a class *ClassName*, in *shiva/api/lyrics/modulename.py*. If
-you want to add your own scraper just create a file under the lyrics directory,
-let's say *mylyrics.py* with this structure:
+more scrapers are added, each one of them is called sequentially, until one of
+them finds the lyrics and the rest are not executed.
+
+
+Adding scrapers
+~~~~~~~~~~~~~~~
+
+If you want to add your own scraper just create a file under the lyrics
+directory, let's say *mylyrics.py* with this structure:
 
 ::
 
