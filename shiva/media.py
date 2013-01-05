@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from flask import url_for
 import os
 
 
@@ -125,27 +124,27 @@ class MediaDir(object):
 
         return dirs
 
-    def get_song_url(self, song):
+    def urlize(self, path):
         """
         """
 
         url = None
         for mdir in self.get_dirs():
-            if song.path.startswith(mdir):
+            if path.startswith(mdir):
                 if self.url:
                     # Remove trailing slash to avoid double-slashed URL.
-                    url = song.path.replace(self.root, self.url.rstrip('/'))
+                    url = path.replace(self.root, self.url.rstrip('/'))
                 else:
-                    url = url_for('stream', song_pk=song.pk)
+                    url = path
 
         return url
 
-    def allowed_to_stream(self, song):
+    def allowed_to_stream(self, path):
         """
         """
 
         for mdir in self.get_dirs():
-            if song.path.startswith(mdir):
+            if path.startswith(mdir):
                 return True
 
         return False

@@ -8,7 +8,7 @@ from flask import request, Response, current_app as app
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField,
-                              InstanceURI, ManyToManyField)
+                              InstanceURI, ManyToManyField, StreamURI)
 from shiva.models import Artist, Album, Track
 from shiva.lyrics import get_lyrics
 
@@ -160,6 +160,7 @@ class TracksResource(Resource):
         'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
         'download_uri': DownloadURI('track'),
+        'stream_uri': StreamURI,
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,

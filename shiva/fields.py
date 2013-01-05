@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.ext.restful import fields, marshal
+from flask import current_app as app
 
 
 class InstanceURI(fields.String):
@@ -10,11 +11,16 @@ class InstanceURI(fields.String):
         return '/%s/%i' % (self.base_uri, obj.pk)
 
 
-class StreamURI(InstanceURI):
-    def output(self, key, obj):
-        uri = super(StreamURI, self).output(key, obj)
+class StreamURI(fields.Raw):
+    """ Only tracks can be streamed """
 
-        return '%s/stream' % uri
+    def output(self, key, obj):
+        for mdir in app.config['MEDIA_DIRS']:
+            stream_uri = mdir.urlize(getattr(obj, 'path', ''))
+            if stream_uri:
+                return stream_uri
+
+        return None
 
 
 class DownloadURI(InstanceURI):
