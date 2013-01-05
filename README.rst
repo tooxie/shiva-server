@@ -329,18 +329,24 @@ Example request/response:
 
     GET /track/484
     {
-        number: 4,
-        download_uri: "/track/484/download",
-        bitrate: 128,
-        slug: "dinosaurs-will-die",
-        album: {
-            id: 34,
-            uri: "/album/34"
+
+        "number": 4,
+        "bitrate": 128,
+        "slug": "dinosaurs-will-die",
+        "album": {
+            "id": 35,
+            "uri": "/album/35"
         },
-        title: "Dinosaurs Will Die",
-        uri: "/track/484",
-        id: 484,
-        length: 180
+        "title": "Dinosaurs Will Die",
+        "artist": {
+            "id": 2,
+            "uri": "/artist/2"
+        },
+        "uri": "/track/510",
+        "id": 510,
+        "length": 180,
+        "stream_uri": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3"
+
     }
 
 
@@ -350,7 +356,6 @@ Fields
 * album: The album to which this track belongs.
 * bitrate: In MP3s this value is directly proportional to the
   `sound quality <https://en.wikipedia.org/wiki/Bit_rate#MP3>`__.
-* download_uri: The URI to download this track.
 * id: The object's ID.
 * length: The length in seconds of the track.
 * number: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`__
@@ -359,6 +364,7 @@ Fields
   of the track's title.
 * title: The title of the track.
 * uri: The URI of this resource's instance.
+* stream_uri: The URI to access the file, according to the MEDIA_DIRS setting.
 
 
 Filtering
@@ -378,40 +384,40 @@ Example request/response:
     GET /tracks?artist=16
     [
         {
-            album: {
-                id: 36,
-                uri: "/album/36"
+            "number": 1,
+            "bitrate": 196,
+            "slug": "pay-cheque-heritage-ii",
+            "album": {
+                "id": 36,
+                "uri": "/album/36"
             },
-            length: 189,
-            artist: {
-                id: 16,
-                uri: "/artist/16"
+            "title": "Pay Cheque (Heritage II)",
+            "artist": {
+                "id": 16,
+                "uri": "/artist/16"
             },
-            number: 1,
-            title: "Pay Cheque (Heritage II)",
-            slug: "pay-cheque-heritage-ii",
-            download_uri: "/track/523/download",
-            bitrate: 196,
-            id: 523,
-            uri: "/track/523"
+            "uri": "/track/523",
+            "id": 523,
+            "length": 189,
+            "stream_uri": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3"
         },
         {
-            album: {
-                id: 36,
-                uri: "/album/36"
+            "number": 2,
+            "bitrate": 186,
+            "slug": "in-your-dreams",
+            "album": {
+                "id": 36,
+                "uri": "/album/36"
             },
-            length: 171,
-            artist: {
-                id: 16,
-                uri: "/artist/16"
+            "title": "In Your Dreams",
+            "artist": {
+                "id": 16,
+                "uri": "/artist/16"
             },
-            number: 2,
-            title: "In Your Dreams",
-            slug: "in-your-dreams",
-            download_uri: "/track/531/download",
-            bitrate: 186,
-            id: 531,
-            uri: "/track/531"
+            "uri": "/track/531",
+            "id": 531,
+            "length": 171,
+            "stream_uri": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3"
         }
     ]
 
@@ -421,35 +427,44 @@ By album
 
 ::
 
-    GET /tracks?album=17
+    GET /tracks?album=18
     [
+
         {
-            album: {
-                id: 17,
-                uri: "/album/17"
+            "album": {
+                "id": 18,
+                "uri": "/album/18"
             },
-            length: 132,
-            number: 1,
-            title: "Shapes",
-            slug: "shapes",
-            download_uri: "/track/263/download",
-            bitrate: 192,
-            id: 263,
-            uri: "/track/263"
+            "length": 132,
+            "stream_uri": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
+            "number": 1,
+            "title": "Shapes",
+            "slug": "shapes",
+            "artist": {
+                "id": 9,
+                "uri": "/artist/9"
+            },
+            "bitrate": 192,
+            "id": 277,
+            "uri": "/track/277"
         },
         {
-            album: {
-                id: 17,
-                uri: "/album/17"
+            "album": {
+                "id": 18,
+                "uri": "/album/18"
             },
-            length: 118,
-            number: 2,
-            title: "Stucked to The Ground",
-            slug: "stucked-to-the-ground",
-            download_uri: "/track/267/download",
-            bitrate: 192,
-            id: 267,
-            uri: "/track/267"
+            "length": 118,
+            "stream_uri": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
+            "number": 2,
+            "title": "Stucked to The Ground",
+            "slug": "stucked-to-the-ground",
+            "artist": {
+                "id": 9,
+                "uri": "/artist/9"
+            },
+            "bitrate": 192,
+            "id": 281,
+            "uri": "/track/281"
         }
     ]
 

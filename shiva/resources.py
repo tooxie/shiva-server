@@ -159,7 +159,6 @@ class TracksResource(Resource):
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
-        'download_uri': DownloadURI('track'),
         'stream_uri': StreamURI,
         'bitrate': fields.Integer,
         'length': fields.Integer,
