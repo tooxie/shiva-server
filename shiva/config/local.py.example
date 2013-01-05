@@ -11,6 +11,9 @@ MEDIA_DIRS = (
 LASTFM_API_KEY = ''
 SCRAPERS = {
     'lyrics': (
+        'azlyrics.AZLyrics',
+        'metrolyrics.MetroLyrics',
+        'letrascanciones.MP3Lyrics',
     ),
 }
 METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
