@@ -39,11 +39,11 @@ Installation
 
     $ pip install -r requirements.pip
 
-* Rename shiva/api/settings/local.py.example to local.py:
+* Rename shiva/settings/local.py.example to local.py:
 
 ::
 
-    $ cp shiva/api/settings/local.py.example shiva/api/settings/local.py
+    $ cp shiva/settings/local.py.example shiva/settings/local.py
 
 * Edit it and configure the directories to scan for music.
 
@@ -67,7 +67,7 @@ Installation
 
 ::
 
-  $ python shiva/api/app.py
+  $ python shiva/app.py
 
 * Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
 
@@ -502,7 +502,7 @@ can fetch it. This list is in your local config file and looks like:
         ),
     }
 
-This will look for a class *ClassName*, in *shiva/api/lyrics/modulename.py*. If
+This will look for a class *ClassName*, in *shiva/lyrics/modulename.py*. If
 more scrapers are added, each one of them is called sequentially, until one of
 them finds the lyrics and the rest are not executed.
 
@@ -515,7 +515,7 @@ directory, let's say *mylyrics.py* with this structure:
 
 ::
 
-    from shiva.api.lyrics import LyricScraper
+    from shiva.lyrics import LyricScraper
 
     class MyLyricsScraper(LyricScraper):
         """ Fetches lyrics from mylyrics.com """

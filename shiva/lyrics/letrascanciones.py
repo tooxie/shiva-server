@@ -5,7 +5,7 @@ import requests
 import lxml.html
 
 from shiva.utils import slugify
-from shiva.api.lyrics.base import LyricScraper
+from shiva.lyrics import LyricScraper
 
 
 class MP3Lyrics(LyricScraper):

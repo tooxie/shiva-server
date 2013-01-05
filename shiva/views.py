@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask import Response
 
-from shiva.api import models
+from shiva import models
 
 def download(track_id, ext):
     """

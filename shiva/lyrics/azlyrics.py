@@ -3,7 +3,7 @@ import urllib2
 
 import requests
 
-from shiva.api.lyrics.base import LyricScraper
+from shiva.lyrics import LyricScraper
 
 
 class AZLyrics(LyricScraper):

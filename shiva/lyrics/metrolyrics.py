@@ -6,7 +6,7 @@ import lxml.html
 import requests
 from flask import current_app as app
 
-from shiva.api.lyrics.base import LyricScraper
+from shiva.lyrics import LyricScraper
 
 
 class MetroLyrics(LyricScraper):

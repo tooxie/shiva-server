@@ -2,11 +2,11 @@
 from flask import Flask, g
 from flask.ext.restful import Api
 
-from shiva.api.models import db
-from shiva.api import resources
+from shiva.models import db
+from shiva import resources
 
 app = Flask(__name__)
-app.config.from_object('shiva.api.config')
+app.config.from_object('shiva.config')
 
 db.app = app
 db.init_app(app)
@@ -18,7 +18,7 @@ def before_request():
 api = Api(app)
 
 app.add_url_rule('/track/<int:track_id>/download.<ext>', 'download',
-                 'shiva.api.views.download')
+                 'shiva.views.download')
 
 # Artists
 api.add_resource(resources.ArtistResource, '/artists',

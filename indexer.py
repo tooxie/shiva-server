@@ -6,8 +6,8 @@ from datetime import datetime
 
 import pylast
 
-from shiva.api import models as m
-from shiva.api.app import app, db
+from shiva import models as m
+from shiva.app import app, db
 from shiva.utils import ID3Manager
 
 q = db.session.query

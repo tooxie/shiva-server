@@ -7,10 +7,10 @@ import requests
 from flask import request, Response, current_app as app
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
-from shiva.api.fields import (Boolean, DownloadURI, ForeignKeyField,
+from shiva.fields import (Boolean, DownloadURI, ForeignKeyField,
                               InstanceURI, ManyToManyField)
-from shiva.api.models import Artist, Album, Track
-from shiva.api.lyrics import get_lyrics
+from shiva.models import Artist, Album, Track
+from shiva.lyrics import get_lyrics
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')

@@ -1,6 +1,6 @@
 from flask import g, current_app as app
 
-from shiva.api.models import Lyrics
+from shiva.models import Lyrics
 from shiva.utils import _import
 
 
@@ -24,7 +24,7 @@ def get_lyrics(track):
         return None
 
     for scraper_cls in scrapers:
-        Scraper = _import('shiva.api.lyrics.%s' % scraper_cls)
+        Scraper = _import('shiva.lyrics.%s' % scraper_cls)
         if issubclass(Scraper, LyricScraper):
             scraper = Scraper(track.artist.name, track.title)
             if scraper.fetch():
