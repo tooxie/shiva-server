@@ -5,8 +5,8 @@ import requests
 from flask import request, Response
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
-from shiva.api.fields import (DownloadURI, FieldMap, ForeignKeyField,
-                              InstanceURI, ManyToManyField)
+from shiva.api.fields import (DownloadURI, ForeignKeyField, InstanceURI,
+                              ManyToManyField)
 from shiva.api.models import Artist, Album, Track
 from shiva.api.lyrics import get_lyrics
 
@@ -34,11 +34,11 @@ class ArtistResource(Resource):
 
     route_base = 'artists'
     resource_fields = {
-        'id': FieldMap('pk', lambda x: int(x)),
+        'id': fields.Integer(attribute='pk'),
         'name': fields.String,
         'uri': InstanceURI('artist'),
         'download_uri': DownloadURI('artist'),
-        'image': fields.String(DEFAULT_ARTIST_IMAGE),
+        'image': fields.String(default=DEFAULT_ARTIST_IMAGE),
         'slug': fields.String,
     }
 
@@ -95,17 +95,17 @@ class AlbumResource(Resource):
 
     route_base = 'albums'
     resource_fields = {
-        'id': FieldMap('pk', lambda x: int(x)),
+        'id': fields.Integer(attribute='pk'),
         'name': fields.String,
         'slug': fields.String,
         'year': fields.Integer,
         'uri': InstanceURI('album'),
         'artists': ManyToManyField(Artist, {
-            'id': FieldMap('pk', lambda x: int(x)),
+            'id': fields.Integer(attribute='pk'),
             'uri': InstanceURI('artist'),
         }),
         'download_uri': DownloadURI('album'),
-        'cover': fields.String(DEFAULT_ALBUM_COVER),
+        'cover': fields.String(default=DEFAULT_ALBUM_COVER),
     }
 
     def get(self, album_id=None):
@@ -154,7 +154,7 @@ class TracksResource(Resource):
 
     route_base = 'tracks'
     resource_fields = {
-        'id': FieldMap('pk', lambda x: int(x)),
+        'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
         'download_uri': DownloadURI('track'),
         'bitrate': fields.Integer,
@@ -162,11 +162,11 @@ class TracksResource(Resource):
         'title': fields.String,
         'slug': fields.String,
         'artist': ForeignKeyField(Artist, {
-            'id': FieldMap('pk', lambda x: int(x)),
+            'id': fields.Integer(attribute='pk'),
             'uri': InstanceURI('artist'),
         }),
         'album': ForeignKeyField(Album, {
-            'id': FieldMap('pk', lambda x: int(x)),
+            'id': fields.Integer(attribute='pk'),
             'uri': InstanceURI('album'),
         }),
         'number': fields.Integer,

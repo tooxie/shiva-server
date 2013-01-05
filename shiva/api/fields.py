@@ -2,18 +2,6 @@
 from flask.ext.restful import fields, marshal
 
 
-class FieldMap(fields.Raw):
-    def __init__(self, field_name, formatter):
-        self.field_name = field_name
-        self.formatter = formatter
-
-    def format(self, value):
-        self.formatter(value)
-
-    def output(self, key, obj):
-        return getattr(obj, self.field_name)
-
-
 class InstanceURI(fields.String):
     def __init__(self, base_uri):
         self.base_uri = base_uri
