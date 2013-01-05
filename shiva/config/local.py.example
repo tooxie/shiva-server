@@ -9,7 +9,6 @@ MEDIA_DIRS = (
     # If in doubt, read the source.
 )
 LASTFM_API_KEY = ''
-LOCATION = ''
 SCRAPERS = {
     'lyrics': (
     ),
