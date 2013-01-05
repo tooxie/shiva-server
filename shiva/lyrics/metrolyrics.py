@@ -44,11 +44,9 @@ class MetroLyrics(LyricScraper):
         return True
 
     def search(self):
-        params = {
-            'artist': urllib2.quote(self.artist),
-            'song': urllib2.quote(self.title),
-            'X-API-KEY': app.config['METROLYRICS_API_KEY'],
-        }
+        params = {'artist': self.artist,
+                  'song': self.title,
+                  'X-API-KEY': app.config['METROLYRICS_API_KEY']}
         _url = '?'.join((self.search_url, urllib.urlencode(params)))
         print('[SEARCH] %s' % _url)
         response = requests.get(_url)

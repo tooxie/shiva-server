@@ -26,7 +26,8 @@ def get_lyrics(track):
     for scraper_cls in scrapers:
         Scraper = _import('shiva.lyrics.%s' % scraper_cls)
         if issubclass(Scraper, LyricScraper):
-            scraper = Scraper(track.artist.name, track.title)
+            scraper = Scraper(track.artist.name.encode('utf-8'),
+                              track.title.encode('utf-8'))
             if scraper.fetch():
                 lyrics = Lyrics(text=scraper.lyrics, source=scraper.source,
                                 track=track)
