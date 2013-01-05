@@ -9,7 +9,10 @@ class LyricScraper(object):
     """
 
     def __init__(self, artist, title):
-        raise NotImplementedError
+        self.artist = artist
+        self.title = title
+        self.lyrics = None
+        self.source = None
 
     def fetch(self):
         raise NotImplementedError
@@ -24,8 +27,7 @@ def get_lyrics(track):
         Scraper = _import('shiva.api.lyrics.%s' % scraper_cls)
         if issubclass(Scraper, LyricScraper):
             scraper = Scraper(track.artist.name, track.title)
-            scraper.fetch()
-            if scraper.lyrics:
+            if scraper.fetch():
                 lyrics = Lyrics(text=scraper.lyrics, source=scraper.source,
                                 track=track)
                 g.db.session.add(lyrics)

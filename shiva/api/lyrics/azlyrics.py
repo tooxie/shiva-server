@@ -29,20 +29,24 @@ class AZLyrics(LyricScraper):
         if not self.source:
             return None
 
-        print(self.source)
         response = requests.get(self.source)
         self.html = response.text
 
-        if self.check():
-            lyrics = self.lyric_re.findall(self.html)[0]
-            lyrics = re.sub(r'<br[ /]+>', '\r', lyrics)
-            lyrics = re.sub(r'<.*?>', '', lyrics)
+        if not self.check():
+            return False
 
-            self.lyrics = lyrics.strip()
+        print('[FOUND] %s' % self.source)
+        lyrics = self.lyric_re.findall(self.html)[0]
+        lyrics = re.sub(r'<br[ /]?>', '\r', lyrics)
+        lyrics = re.sub(r'<.*?>', '', lyrics)
+
+        self.lyrics = lyrics.strip()
+
+        return True
 
     def search(self):
         query = urllib2.quote('%s %s' % (self.artist, self.title))
-        print(self.search_url % query)
+        print('[SEARCH] %s' % (self.search_url % query))
         response = requests.get(self.search_url % query)
         results = self.lyric_url_re.findall(response.text)
 

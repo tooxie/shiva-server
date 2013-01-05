@@ -28,16 +28,20 @@ class MetroLyrics(LyricScraper):
         if not self.source:
             return None
 
-        print(self.source)
         response = requests.get(self.source)
         self.html = response.text
         html = lxml.html.fromstring(self.html)
 
-        if self.check():
-            div = html.get_element_by_id('lyrics-body')
-            lyrics = re.sub(r'\n\[ From: .*? \]', '', div.text_content())
+        if not self.check():
+            return False
 
-            self.lyrics = lyrics.strip()
+        print('[FOUND] %s' % self.source)
+        div = html.get_element_by_id('lyrics-body')
+        lyrics = re.sub(r'\n\[ From: .*? \]', '', div.text_content())
+
+        self.lyrics = lyrics.strip()
+
+        return True
 
     def search(self):
         params = {
@@ -46,7 +50,7 @@ class MetroLyrics(LyricScraper):
             'X-API-KEY': app.config['METROLYRICS_API_KEY'],
         }
         _url = '?'.join((self.search_url, urllib.urlencode(params)))
-        print(_url)
+        print('[SEARCH] %s' % _url)
         response = requests.get(_url)
         if response.status_code == 200:
             self.source = response.json()['items'][0]['url']

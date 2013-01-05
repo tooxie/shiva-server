@@ -429,35 +429,78 @@ Example request/response:
 
 ::
 
-    GET /track/268/lyrics
+    GET /track/256/lyrics
     {
-        track: {
-            id: 268,
-            uri: "/track/268"
+        "track": {
+            "id": 256,
+            "uri": "/track/256"
         },
-        uri: "http://lyrics.wikia.com/Flip:Wrong_Side",
-        lyrics: "Along our way We've got to choose 'tween what's wrong or right Basically our l[...]",
-        artist: {
-            id: 8,
-            uri: "/artist/8"
-        }
+        "text": "When i came to this world mother told me\r what was right and what was wrong\r while dad explained me that\r religion, country and flag were things i must respect\r \r So, i decided\r to be political correct\r and a good child\r but then, I realized\r that nothing has changed since then...\r \r my family never told me\r why 30.000 people died in the '70's?\r where was the god\r that they promised me\r he was gonna take me to paradise?\r \r and why those children cry\r behind those war planes\r and those war guns\r oh, please father,\r i don't wanna be part of this...",
+        "source_uri": "http://lyrics.com/eterna-inocencia/my-family/",
+        "id": 6,
+        "uri": "/lyrics/6"
     }
 
 
-Keep in mind
-------------
+Fields
+------
 
-* Due to legal issues lyric-providers are not allowed to send the complete
-  text, but just a small snippet considered "Fair Use".
-* Instead, they are forced to send traffic to their website in order to track
-  users.
+* id: The object's ID.
+* source_uri: The URI where the lyrics were fetched from.
+* text: The lyric's text.
+* track: The track for which the lyrics are.
+* uri: The URI of this resource's instance.
 
-  + For more info read http://api.wikia.com/wiki/LyricWiki_API#FAQs
 
-* For that same reason this software does not store lyrics, but fetches them
-  every time. This is inefficient, I know.
-* Also, the LyricWiki API is, so to say, quite sensitive and may not find the
-  lyrics you request unless the artist is in the correct case.
+Adding more lyric sources
+-------------------------
+
+Everytime you request a lyric, Shiva checks if there's a lyric associated with
+that track in the database. If it's there it will immediately retrieve it,
+otherwise will iterate over a list of scrapers, asking each one of them if they
+can fetch it. This list is in your local config file and looks like:
+
+::
+
+    SCRAPERS = {
+        'lyrics': (
+            'modulename.ClassName',
+        ),
+    }
+
+This will look for a class *ClassName*, in *shiva/api/lyrics/modulename.py*. If
+you want to add your own scraper just create a file under the lyrics directory,
+let's say *mylyrics.py* with this structure:
+
+::
+
+    from shiva.api.lyrics import LyricScraper
+
+    class MyLyricsScraper(LyricScraper):
+        """ Fetches lyrics from mylyrics.com """
+
+        def fetch(self, artist, title):
+            # Magic happens here
+
+            return True  # Only if lyrics were found
+
+And then add it to the scrapers list:
+
+::
+
+    SCRAPERS = {
+        'lyrics': (
+            'modulename.ClassName',
+            'mylyrics.MyLyricsScraper',
+        ),
+    }
+
+Remember that the fetch() method has to return True in case the lyrics were
+found or False otherwise. It must also store the lyrics in *self.lyrics* and
+the URL where they fetched from in *self.source*. That's where Shiva looks for
+the information.
+
+For more details check the source of the other scrapers.
 
 
 Assumptions
@@ -486,8 +529,6 @@ Known issues
 
 * The ID3 reader doesn't always detect the bit rate correctly. Seems like a
   common issue to many libraries, at least the ones I tried.
-* The lyrics API may not find the lyrics unless the artist is in the correct
-  case.
 
 
 Wish list
@@ -510,7 +551,6 @@ Wish list
 * They can also upload their music.
 * Stream audio and video. (Radio mode)
 * Set up a radio and collaboratively pick the music.
-* Better lyrics engine.
 * Tabs.
 
 

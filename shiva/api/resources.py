@@ -220,7 +220,7 @@ class LyricsResource(Resource):
         'id': FieldMap('pk', lambda x: int(x)),
         'uri': InstanceURI('lyrics'),
         'text': fields.String,
-        'source': fields.String,
+        'source_uri': fields.String(attribute='source'),
         'track': ForeignKeyField(Track, {
             'id': FieldMap('pk', lambda x: int(x)),
             'uri': InstanceURI('track'),
