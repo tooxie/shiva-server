@@ -4,7 +4,7 @@ from datetime import datetime
 
 from lxml import etree
 import requests
-from flask import request, Response, current_app as app
+from flask import request, Response, current_app as app, g
 from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField,
@@ -86,8 +86,8 @@ class ArtistResource(Resource):
         if not artist:
             return JSONResponse(404)
 
-        db.session.delete(artist)
-        db.session.commit()
+        g.db.session.delete(artist)
+        g.db.session.commit()
 
         return {}
 
@@ -145,8 +145,8 @@ class AlbumResource(Resource):
         if not album:
             return JSONResponse(404)
 
-        db.session.delete(album)
-        db.session.commit()
+        g.db.session.delete(album)
+        g.db.session.commit()
 
         return {}
 
@@ -213,8 +213,8 @@ class TracksResource(Resource):
         if not track:
             return JSONResponse(404)
 
-        db.session.delete(track)
-        db.session.commit()
+        g.db.session.delete(track)
+        g.db.session.commit()
 
         return {}
 
