@@ -9,10 +9,15 @@ app.config.from_object(config)
 app.static_folder = 'static'
 
 @app.route('/')
-def index():
-    response = requests.get('%s/%s' % (app.config['NODEJS_URL'], path))
+@app.route('/<path:path>')
+def index(path=None):
+    if not path:
+        response = requests.get(app.config['NODEJS_URL'])
+    else:
+        response = requests.get('/'.join(((app.config['NODEJS_URL']), path)))
 
     return Response(response=response.content, status=response.status_code,
+                    mimetype=response.headers['Content-Type'],
                     headers=response.headers)
 
 @app.route('/api/<path:path>')
