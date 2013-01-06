@@ -134,8 +134,6 @@ class MediaDir(object):
                 if self.url:
                     # Remove trailing slash to avoid double-slashed URL.
                     url = path.replace(self.root, self.url.rstrip('/'))
-                else:
-                    url = path
 
         return url
 

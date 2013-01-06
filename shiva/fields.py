@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask.ext.restful import fields, marshal
-from flask import current_app as app
+from flask import current_app as app, request
 
 
 class InstanceURI(fields.String):
@@ -20,7 +20,7 @@ class StreamURI(fields.Raw):
             if stream_uri:
                 return stream_uri
 
-        return None
+        return '%strack/%s/download' % (request.url_root, obj.pk)
 
 
 class DownloadURI(InstanceURI):
