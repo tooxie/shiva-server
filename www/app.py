@@ -2,7 +2,7 @@
 from flask import Flask, Response, render_template
 import requests
 
-from shiva.www import config
+import config
 
 app = Flask(__name__)
 app.config.from_object(config)
