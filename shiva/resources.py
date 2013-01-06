@@ -9,7 +9,7 @@ from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
 
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField,
                               InstanceURI, ManyToManyField, StreamURI)
-from shiva.models import Artist, Album, Track
+from shiva.models import Artist, Album, Track, Lyrics
 from shiva.lyrics import get_lyrics
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
@@ -62,21 +62,6 @@ class ArtistResource(Resource):
             return JSONResponse(404)
 
         return marshal(artist, self.resource_fields)
-
-    def post(self, artist_id=None):
-        if artist_id:
-            return JSONResponse(405)
-
-        # artist = new Artist(name=request.form.get('name'))
-        # artist.save()
-
-        return JSONResponse(201, headers=[('Location', '/artist/1337')])
-
-    def put(self, artist_id=None):
-        if not artist_id:
-            return JSONResponse(405)
-
-        return {}
 
     def delete(self, artist_id=None):
         if not artist_id:
@@ -245,6 +230,26 @@ class LyricsResource(Resource):
             return JSONResponse(404)
 
         return marshal(lyrics, self.resource_fields)
+
+    def post(self, track_id):
+        text = request.form.get('text', None)
+        if not text:
+            return JSONResponse(400)
+
+        track = Track.query.get(track_id)
+        lyric = Lyrics(track=track, text=text)
+
+        g.db.session.add(lyric)
+        g.db.commit()
+
+        return JSONResponse(200)
+
+    def delete(self, track_id):
+        track = Track.query.get(track_id)
+        g.db.session.delete(track.lyrics)
+        g.db.session.commit()
+
+        return JSONResponse(200)
 
 
 class ShowsResource(Resource):
