@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, Response, render_template
+from flask import Flask, Response, request
 
 import config
 
@@ -16,21 +16,29 @@ def index(path=None):
     else:
         uri = app.config['NODEJS_URL']
 
-    request = urllib.urlopen(uri)
+    if request.query_string:
+        uri = '?'.join((uri, request.query_string))
 
-    mimetype = request.headers.get('Content-Type', 'text/html')
+    _request = urllib.urlopen(uri)
+
+    mimetype = _request.headers.get('Content-Type', 'text/html')
     mimetype = mimetype.split(';')[0].strip()
 
-    return Response(request.read(), status=request.getcode(),
+    return Response(_request.read(), status=_request.getcode(),
                     mimetype=mimetype)
 
 @app.route('/api/<path:path>')
 def api_call(path):
     """
     """
-    request = urllib.urlopen('%s/%s' % (app.config['SHIVA_URL'], path))
+    uri = '%s/%s' % (app.config['SHIVA_URL'], path)
 
-    return Response(request.read(), status=request.getcode(),
+    if request.query_string:
+        uri = '?'.join((uri, request.query_string))
+
+    _request = urllib.urlopen(uri)
+
+    return Response(_request.read(), status=_request.getcode(),
                     mimetype='application/javascript')
 
 if __name__ == '__main__':
