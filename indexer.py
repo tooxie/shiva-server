@@ -22,7 +22,7 @@ class Indexer(object):
         self.lastfm = pylast.LastFMNetwork(api_key=config['LASTFM_API_KEY'])
 
         if len(self.media_dirs) == 0:
-            print('Remember to set the MEDIA_DIRS setting, otherwise I ' +
+            print('Remember to set the MEDIA_DIRS setting, otherwise I '
                   'don\'t know where to look for.')
 
     def get_artist(self, name):
