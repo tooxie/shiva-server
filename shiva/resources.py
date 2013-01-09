@@ -18,6 +18,12 @@ DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
 
 
 class JSONResponse(Response):
+    """
+    A subclass of flask.Response that sets the Content-Type header by default
+    to "application/json"
+
+    """
+
     def __init__(self, status=200, **kwargs):
         params = {
             'headers': [],
@@ -28,6 +34,14 @@ class JSONResponse(Response):
         params.update(kwargs)
 
         super(JSONResponse, self).__init__(**params)
+
+
+def full_tree():
+    """ Checks the GET parameters to see if a full tree was requested """
+
+    arg = request.args.get('fulltree')
+
+    return (arg and arg not in ('false', '0'))
 
 
 class ArtistResource(Resource):
@@ -49,7 +63,12 @@ class ArtistResource(Resource):
         if not artist_id:
             return list(self.get_all())
 
-        return self.get_one(artist_id)
+        artist = self.get_one(artist_id)
+
+        if full_tree():
+            return self.get_full_tree(artist)
+
+        return marshal(artist, self.resource_fields)
 
     def get_all(self):
         for artist in Artist.query.order_by(Artist.name):
@@ -61,7 +80,18 @@ class ArtistResource(Resource):
         if not artist:
             return JSONResponse(404)
 
-        return marshal(artist, self.resource_fields)
+        return artist
+
+    def get_full_tree(self, artist):
+        _artist = marshal(artist, self.resource_fields)
+        _artist['albums'] = []
+
+        albums = AlbumResource()
+
+        for album in artist.albums:
+            _artist['albums'].append(albums.get_full_tree(album))
+
+        return _artist
 
     def delete(self, artist_id=None):
         if not artist_id:
@@ -100,7 +130,12 @@ class AlbumResource(Resource):
         if not album_id:
             return list(self.get_many())
 
-        return self.get_one(album_id)
+        album = self.get_one(album_id)
+
+        if full_tree():
+            return self.get_full_tree(album)
+
+        return marshal(album, self.resource_fields)
 
     def get_many(self):
         artist_pk = request.args.get('artist')
@@ -113,7 +148,6 @@ class AlbumResource(Resource):
         for album in albums.order_by(Album.year, Album.name, Album.pk):
             yield marshal(album, self.resource_fields)
 
-    @marshal_with(resource_fields)
     def get_one(self, album_id):
         album = Album.query.get(album_id)
 
@@ -121,6 +155,17 @@ class AlbumResource(Resource):
             abort(404)
 
         return album
+
+    def get_full_tree(self, album):
+        _album = marshal(album, self.resource_fields)
+        _album['tracks'] = []
+
+        tracks = TracksResource()
+
+        for track in album.tracks:
+            _album['tracks'].append(tracks.get_full_tree(track))
+
+        return _album
 
     def delete(self, album_id=None):
         if not album_id:
@@ -164,7 +209,12 @@ class TracksResource(Resource):
         if not track_id:
             return list(self.get_many())
 
-        return self.get_one(track_id)
+        track = self.get_one(track_id)
+
+        if full_tree():
+            return self.get_full_tree(track, include_scraped=True)
+
+        return marshal(track, self.resource_fields)
 
     # TODO: Pagination
     def get_many(self):
@@ -181,7 +231,6 @@ class TracksResource(Resource):
         for track in tracks.order_by(Track.album_pk, Track.number, Track.pk):
             yield marshal(track, self.resource_fields)
 
-    @marshal_with(resource_fields)
     def get_one(self, track_id):
         track = Track.query.get(track_id)
 
@@ -189,6 +238,29 @@ class TracksResource(Resource):
             abort(404)
 
         return track
+
+    def get_full_tree(self, track, include_scraped=False):
+        """
+        Retrives the full tree for a track. If the include_scraped option is
+        not set then a normal track structure will be retrieved. If its set
+        external resources that need to be scraped, like lyrics, will also be
+        included.
+
+        This is disabled by default to avois DoS'ing lyrics' websites when
+        requesting many tracks at once.
+
+        """
+
+        _track = marshal(track, self.resource_fields)
+
+        if include_scraped:
+            lyrics = LyricsResource()
+            _track['lyrics'] = lyrics.get_for(track)
+
+        # tabs = TabsResource()
+        # _track['tabs'] = tabs.get()
+
+        return _track
 
     def delete(self, track_id=None):
         if not track_id:
@@ -220,7 +292,9 @@ class LyricsResource(Resource):
     }
 
     def get(self, track_id):
-        track = Track.query.get(track_id)
+        return get_for(Track.query.get(track_id))
+
+    def get_for(self, track):
         if track.lyrics:
             return marshal(track.lyrics, self.resource_fields)
 
