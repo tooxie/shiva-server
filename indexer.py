@@ -2,6 +2,7 @@
 # K-Pg
 import os
 from datetime import datetime
+import logging
 
 import pylast
 
@@ -10,6 +11,7 @@ from shiva.app import app, db
 from shiva.utils import ID3Manager
 
 q = db.session.query
+logger = logging.getLogger()
 
 
 class Indexer(object):
@@ -22,8 +24,8 @@ class Indexer(object):
         self.lastfm = pylast.LastFMNetwork(api_key=config['LASTFM_API_KEY'])
 
         if len(self.media_dirs) == 0:
-            print('Remember to set the MEDIA_DIRS setting, otherwise I '
-                  'don\'t know where to look for.')
+            logger.error('Remember to set the MEDIA_DIRS setting, otherwise I '
+                         'don\'t know where to look for.')
 
     def get_artist(self, name):
         artist = q(m.Artist).filter_by(name=name).first()
@@ -51,7 +53,7 @@ class Indexer(object):
         session = db.session
         full_path = self.file_path.decode('utf-8')
 
-        print(self.file_path)
+        logger.info(self.file_path)
 
         if q(m.Track).filter_by(path=full_path).count():
             return True
