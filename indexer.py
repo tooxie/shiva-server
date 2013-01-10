@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # K-Pg
 import os
-import pickle
 from datetime import datetime
 
 import pylast
@@ -11,6 +10,7 @@ from shiva.app import app, db
 from shiva.utils import ID3Manager
 
 q = db.session.query
+
 
 class Indexer(object):
     def __init__(self, config=None):
