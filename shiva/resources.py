@@ -295,7 +295,7 @@ class LyricsResource(Resource):
     }
 
     def get(self, track_id):
-        return get_for(Track.query.get(track_id))
+        return self.get_for(Track.query.get(track_id))
 
     def get_for(self, track):
         if track.lyrics:
