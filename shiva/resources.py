@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-import urllib2
 from datetime import datetime
+import logging
+import urllib2
 
-from lxml import etree
-import requests
 from flask import request, Response, current_app as app, g
 from flask.ext.restful import abort, fields, marshal, Resource
+from lxml import etree
+import requests
 
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, StreamURI)
 from shiva.models import Artist, Album, Track, Lyrics
 from shiva.lyrics import get_lyrics
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
@@ -301,7 +304,7 @@ class LyricsResource(Resource):
         try:
             lyrics = get_lyrics(track)
         except Exception, e:
-            print(e)
+            logging.debug(e)
             lyrics = None
 
         if not lyrics:
@@ -386,7 +389,8 @@ class ShowsResource(Resource):
             param = urllib2.quote('%s, %s' % location)
             bit_uri = '&'.join((bit_uri, '='.join(('location', param))))
 
-        print(bit_uri)
+        logger.info(bit_uri)
+
         try:
             response = requests.get(bit_uri)
         except requests.exceptions.RequestException:
@@ -439,7 +443,9 @@ class ShowModel(object):
         mb_uri = 'http://musicbrainz.org/ws/2/artist?query=%(artist)s' % {
             'artist': urllib2.quote(artist)
         }
-        print(mb_uri)
+
+        logger.info(mb_uri)
+
         response = requests.get(mb_uri)
         mb_xml = etree.fromstring(response.text)
         # /root/artist-list/artist.id
