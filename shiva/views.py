@@ -3,6 +3,7 @@ from flask import Response
 
 from shiva import models
 
+
 def download(track_id, ext):
     """
     """
@@ -16,4 +17,4 @@ def download(track_id, ext):
     )
 
     return Response(response=track_file.read(), mimetype='audio/mpeg',
-            headers=[filename_header])
+                    headers=[filename_header])
