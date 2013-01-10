@@ -5,10 +5,10 @@ from datetime import datetime
 from lxml import etree
 import requests
 from flask import request, Response, current_app as app, g
-from flask.ext.restful import abort, fields, marshal, marshal_with, Resource
+from flask.ext.restful import abort, fields, marshal, Resource
 
-from shiva.fields import (Boolean, DownloadURI, ForeignKeyField,
-                              InstanceURI, ManyToManyField, StreamURI)
+from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
+                          ManyToManyField, StreamURI)
 from shiva.models import Artist, Album, Track, Lyrics
 from shiva.lyrics import get_lyrics
 
@@ -298,7 +298,11 @@ class LyricsResource(Resource):
         if track.lyrics:
             return marshal(track.lyrics, self.resource_fields)
 
-        lyrics = get_lyrics(track)
+        try:
+            lyrics = get_lyrics(track)
+        except Exception, e:
+            print(e)
+            lyrics = None
 
         if not lyrics:
             return JSONResponse(404)
@@ -366,7 +370,9 @@ class ShowsResource(Resource):
         else:
             location = ()
 
-        return list(self.fetch(artist.name, location))
+        response = self.fetch(artist.name, location)
+
+        return list(response) if response else []
 
     def fetch(self, artist, location):
         bit_uri = ('http://api.bandsintown.com/artists/%(artist)s/events'
@@ -381,7 +387,10 @@ class ShowsResource(Resource):
             bit_uri = '&'.join((bit_uri, '='.join(('location', param))))
 
         print(bit_uri)
-        response = requests.get(bit_uri)
+        try:
+            response = requests.get(bit_uri)
+        except requests.exceptions.RequestException:
+            return
 
         for event in response.json():
             yield marshal(ShowModel(artist, event), self.resource_fields)
