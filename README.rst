@@ -558,6 +558,98 @@ the information.
 For more details check the source of the other scrapers.
 
 
+-----------------------
+The *fulltree* modifier
+-----------------------
+
+The 3 main resources accept a *fulltree* parameter when retrieving an intance.
+Those are:
+
+* /artist/<int:artist_id>
+* /album/<int:album_id>
+* /track/<int:track_id>
+
+Whenever you set *fulltree* to any value that evaluates to True (i.e., any
+string except 'false' and '0') Shiva will include not only the information of
+the object you are requesting, but also the child objects. Here's an example:
+
+::
+
+    GET /artist/2?fulltree=true
+    {
+        "name": "Eterna Inocencia",
+        "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
+        "download_uri": "/artist/2/download",
+        "uri": "/artist/2",
+        "events_uri": null,
+        "id": 2,
+        "slug": "eterna-inocencia",
+        "albums": [
+            {
+                "artists": [
+                    {
+                        "id": 2,
+                        "uri": "/artist/2"
+                    }
+                ],
+                "download_uri": "/album/2/download",
+                "name": "Tomalo Con Calma EP",
+                "year": 2002,
+                "uri": "/album/2",
+                "cover": "http://spe.fotolog.com/photo/30/54/51/alkoldinamita/1230537010699_f.jpg",
+                "id": 2,
+                "slug": "tomalo-con-calma-ep",
+                "tracks": [
+                    {
+                        "album": {
+                            "id": 2,
+                            "uri": "/album/2"
+                        },
+                        "length": 161,
+                        "stream_uri": "http://localhost:5000/track/27/download",
+                        "number": 0,
+                        "title": "02 - Rio Lujan",
+                        "slug": "02-rio-lujan",
+                        "artist": {
+                            "id": 2,
+                            "uri": "/artist/2"
+                        },
+                        "bitrate": 192,
+                        "id": 27,
+                        "uri": "/track/27"
+                    },
+                    {
+                        "album": {
+                            "id": 2,
+                            "uri": "/album/2"
+                        },
+                        "length": 262,
+                        "stream_uri": "http://localhost:5000/track/28/download",
+                        "number": 0,
+                        "title": "03 - Estoy herido en mi interior",
+                        "slug": "03-estoy-herido-en-mi-interior",
+                        "artist": {
+                            "id": 2,
+                            "uri": "/artist/2"
+                        },
+                        "bitrate": 192,
+                        "id": 28,
+                        "uri": "/track/28"
+                    },
+                ]
+            }
+        ]
+    }
+
+
+Using *fulltree* on tracks
+--------------------------
+
+The behaviour on a track resource is a little different. In the previous example tracks are the leaves of the tree, but when the fulltree of a track is requested then all the scraped resources are also included, like lyrics.
+
+This is not the default behaviour to avoid DoS'ing scraped websites when fetching the complete discography of an artist.
+
+
 Assumptions
 ===========
 
