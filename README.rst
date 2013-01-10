@@ -129,12 +129,12 @@ Example request/response:
 
     GET /artist/3
     {
-        name: "Eterna Inocencia",
-        image: "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        uri: "/artist/3",
-        slug: "eterna-inocencia",
-        download_uri: "/artist/3/download",
-        id: 3
+        "name": "Eterna Inocencia",
+        "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
+        "uri": "/artist/3",
+        "slug": "eterna-inocencia",
+        "download_uri": "/artist/3/download",
+        "id": 3
     }
 
 
@@ -240,23 +240,23 @@ Example request/response:
 
     GET /album/9
     {
-        artists: [
+        "artists": [
             {
-                id: 2,
-                uri: "/artist/2"
+                "id": 2,
+                "uri": "/artist/2"
             },
             {
-                id: 5,
-                uri: "/artist/5"
+                "id": 5,
+                "uri": "/artist/5"
             }
         ],
-        download_uri: "/album/9/download",
-        name: "NOFX & Rancid - BYO Split Series (Vol. III)",
-        year: 2002,
-        uri: "/album/9",
-        cover: "http://userserve-ak.last.fm/serve/300x300/72986694.jpg",
-        id: 9,
-        slug: "nofx-rancid-byo-split-series-vol-iii"
+        "download_uri": "/album/9/download",
+        "name": "NOFX & Rancid - BYO Split Series (Vol. III)",
+        "year": 2002,
+        "uri": "/album/9",
+        "cover": "http://userserve-ak.last.fm/serve/300x300/72986694.jpg",
+        "id": 9,
+        "slug": "nofx-rancid-byo-split-series-vol-iii"
     }
 
 
@@ -287,34 +287,34 @@ Example request/response:
     GET /albums/?artist=7
     [
         {
-            artists: [
+            "artists": [
                 {
-                    id: 7,
-                    uri: "/artist/7"
+                    "id": 7,
+                    "uri": "/artist/7"
                 }
             ],
-            download_uri: "/album/12/download",
-            name: "Anesthesia",
-            year: 1995,
-            uri: "/album/12",
-            cover: "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
-            id: 12,
-            slug: "anesthesia"
+            "download_uri": "/album/12/download",
+            "name": "Anesthesia",
+            "year": 1995,
+            "uri": "/album/12",
+            "cover": "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
+            "id": 12,
+            "slug": "anesthesia"
         },
         {
-            artists: [
+            "artists": [
                 {
-                    id: 7,
-                    uri: "/artist/7"
+                    "id": 7,
+                    "uri": "/artist/7"
                 }
             ],
-            download_uri: "/album/27/download",
-            name: "Kum Kum",
-            year: 1996,
-            uri: "/album/27",
-            cover: "http://userserve-ak.last.fm/serve/300x300/62372889.jpg",
-            id: 27,
-            slug: "kum-kum"
+            "download_uri": "/album/27/download",
+            "name": "Kum Kum",
+            "year": 1996,
+            "uri": "/album/27",
+            "cover": "http://userserve-ak.last.fm/serve/300x300/62372889.jpg",
+            "id": 27,
+            "slug": "kum-kum"
         }
     ]
 
