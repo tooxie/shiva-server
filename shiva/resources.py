@@ -47,6 +47,37 @@ def full_tree():
     return (arg and arg not in ('false', '0'))
 
 
+def paginate(queryset):
+    """
+    Function that receives a queryset and paginates it based on the GET
+    parameters.
+
+    """
+
+    try:
+        page_size = int(request.args.get('page_size', 0))
+    except ValueError:
+        page_size = 0
+
+    try:
+        page_number = int(request.args.get('page', 0))
+    except ValueError:
+        page_number = 0
+
+    if not page_size or not page_number:
+        return queryset
+
+    total = queryset.count()
+
+    if total < page_size:
+        return queryset
+
+    limit = page_size
+    offset = page_size * (page_number - 1)
+
+    return queryset.limit(limit).offset(offset)
+
+
 class ArtistResource(Resource):
     """
     """
@@ -74,7 +105,7 @@ class ArtistResource(Resource):
         return marshal(artist, self.resource_fields)
 
     def get_all(self):
-        for artist in Artist.query.order_by(Artist.name):
+        for artist in paginate(Artist.query.order_by(Artist.name)):
             yield marshal(artist, self.resource_fields)
 
     def get_one(self, artist_id):
@@ -148,7 +179,8 @@ class AlbumResource(Resource):
         else:
             albums = Album.query
 
-        for album in albums.order_by(Album.year, Album.name, Album.pk):
+        queryset = albums.order_by(Album.year, Album.name, Album.pk)
+        for album in paginate(queryset):
             yield marshal(album, self.resource_fields)
 
     def get_one(self, album_id):
@@ -231,7 +263,8 @@ class TracksResource(Resource):
         else:
             tracks = Track.query
 
-        for track in tracks.order_by(Track.album_pk, Track.number, Track.pk):
+        queryset = tracks.order_by(Track.album_pk, Track.number, Track.pk)
+        for track in paginate(queryset):
             yield marshal(track, self.resource_fields)
 
     def get_one(self, track_id):
