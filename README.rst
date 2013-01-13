@@ -645,9 +645,30 @@ the object you are requesting, but also the child objects. Here's an example:
 Using *fulltree* on tracks
 --------------------------
 
-The behaviour on a track resource is a little different. In the previous example tracks are the leaves of the tree, but when the fulltree of a track is requested then all the scraped resources are also included, like lyrics.
+The behaviour on a track resource is a little different. In the previous
+example tracks are the leaves of the tree, but when the fulltree of a track is
+requested then all the scraped resources are also included, like lyrics.
 
-This is not the default behaviour to avoid DoS'ing scraped websites when fetching the complete discography of an artist.
+This is not the default behaviour to avoid DoS'ing scraped websites when
+fetching the complete discography of an artist.
+
+
+----------
+Pagination
+----------
+
+All the listings are not paginated by default. Whenever you request a list of
+either *artists*, *albums* or *tracks* the server will retrieve every possible
+result unless otherwise specified.
+
+It is possible to paginate results by passing the *page_size* and the *page*
+parameters to the resource. They must both be present and be positive integers.
+If not,  they will both be ignored and the whole set of elements will be
+retrieved.
+
+::
+
+    GET /artists?page_size=10&page=3
 
 
 Assumptions
