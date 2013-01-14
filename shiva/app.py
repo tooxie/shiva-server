@@ -20,19 +20,20 @@ api = Api(app)
 
 # Artists
 api.add_resource(resources.ArtistResource, '/artists',
-                 '/artist/<int:artist_id>', endpoint='artist')
-api.add_resource(resources.ShowsResource,
-                 '/artist/<int:artist_id>/shows', endpoint='shows')
+                 '/artist/<int:artist_id>', '/artist/<artist_slug>',
+                 endpoint='artist')
+api.add_resource(resources.ShowsResource, '/artist/<int:artist_id>/shows',
+                 '/artist/<artist_slug>/shows', endpoint='shows')
 
 # Albums
-api.add_resource(resources.AlbumResource, '/albums',
-                 '/album/<int:album_id>', endpoint='album')
+api.add_resource(resources.AlbumResource, '/albums', '/album/<int:album_id>',
+                 '/album/<album_slug>', endpoint='album')
 
 # Tracks
-api.add_resource(resources.TracksResource, '/tracks',
-                 '/track/<int:track_id>', endpoint='track')
-api.add_resource(resources.LyricsResource,
-                 '/track/<int:track_id>/lyrics', endpoint='lyrics')
+api.add_resource(resources.TracksResource, '/tracks', '/track/<int:track_id>',
+                 '/track/<track_slug>', endpoint='track')
+api.add_resource(resources.LyricsResource, '/track/<int:track_id>/lyrics',
+                 '/track/<track_slug>/lyrics', endpoint='lyrics')
 
 
 @app.before_request

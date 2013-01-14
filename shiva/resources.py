@@ -93,11 +93,14 @@ class ArtistResource(Resource):
         'events_uri': fields.String(attribute='events'),
     }
 
-    def get(self, artist_id=None):
-        if not artist_id:
+    def get(self, artist_id=None, artist_slug=None):
+        if not artist_id and not artist_slug:
             return list(self.get_all())
 
-        artist = self.get_one(artist_id)
+        if not artist_id and artist_slug:
+            artist = self.get_by_slug(artist_slug)
+        else:
+            artist = self.get_one(artist_id)
 
         if full_tree():
             return self.get_full_tree(artist)
@@ -110,6 +113,14 @@ class ArtistResource(Resource):
 
     def get_one(self, artist_id):
         artist = Artist.query.get(artist_id)
+
+        if not artist:
+            return JSONResponse(404)
+
+        return artist
+
+    def get_by_slug(self, artist_slug):
+        artist = Artist.query.filter_by(slug=artist_slug).first()
 
         if not artist:
             return JSONResponse(404)
@@ -160,11 +171,14 @@ class AlbumResource(Resource):
         'cover': fields.String(default=DEFAULT_ALBUM_COVER),
     }
 
-    def get(self, album_id=None):
-        if not album_id:
+    def get(self, album_id=None, album_slug=None):
+        if not album_id and not album_slug:
             return list(self.get_many())
 
-        album = self.get_one(album_id)
+        if not album_id and album_slug:
+            album = self.get_by_slug(album_slug)
+        else:
+            album = self.get_one(album_id)
 
         if full_tree():
             return self.get_full_tree(album)
@@ -185,6 +199,14 @@ class AlbumResource(Resource):
 
     def get_one(self, album_id):
         album = Album.query.get(album_id)
+
+        if not album:
+            abort(404)
+
+        return album
+
+    def get_by_slug(self, album_slug):
+        album = Album.query.filter_by(slug=album_slug).first()
 
         if not album:
             abort(404)
@@ -240,11 +262,14 @@ class TracksResource(Resource):
         'number': fields.Integer,
     }
 
-    def get(self, track_id=None):
-        if not track_id:
+    def get(self, track_id=None, track_slug=None):
+        if not track_id and not track_slug:
             return list(self.get_many())
 
-        track = self.get_one(track_id)
+        if not track_id and track_slug:
+            track = self.get_by_slug(track_slug)
+        else:
+            track = self.get_one(track_id)
 
         if full_tree():
             return self.get_full_tree(track, include_scraped=True)
@@ -269,6 +294,14 @@ class TracksResource(Resource):
 
     def get_one(self, track_id):
         track = Track.query.get(track_id)
+
+        if not track:
+            abort(404)
+
+        return track
+
+    def get_by_slug(self, track_slug):
+        track = Track.query.filter_by(slug=track_slug).first()
 
         if not track:
             abort(404)
@@ -327,8 +360,16 @@ class LyricsResource(Resource):
         }),
     }
 
-    def get(self, track_id):
-        return self.get_for(Track.query.get(track_id))
+    def get(self, track_id=None, track_slug=None):
+        if not track_id and not track_slug:
+            return JSONResponse(404)
+
+        if not track_id and track_slug:
+            track = Track.query.filter_by(slug=track_slug).first()
+        else:
+            track = Track.query.get(track_id)
+
+        return self.get_for(track)
 
     def get_for(self, track):
         if track.lyrics:
@@ -387,8 +428,14 @@ class ShowsResource(Resource):
         }),
     }
 
-    def get(self, artist_id):
-        artist = Artist.query.get(artist_id)
+    def get(self, artist_id=None, artist_slug=None):
+        if not artist_id and not artist_slug:
+            return JSONResponse(404)
+
+        if not artist_id and artist_slug:
+            artist = Artist.query.filter_by(slug=artist_slug).first()
+        else:
+            artist = Artist.query.get(artist_id)
 
         if not artist:
             return JSONResponse(404)
@@ -410,17 +457,18 @@ class ShowsResource(Resource):
 
         return list(response) if response else []
 
-    def fetch(self, artist, location):
+    def fetch(self, artist_name, location):
         bit_uri = ('http://api.bandsintown.com/artists/%(artist)s/events'
                    '/search?format=json&app_id=%(app_id)s&api_version=2.0')
         bit_uri = bit_uri % {
-            'artist': urllib2.quote(artist),
+            'artist': urllib2.quote(artist_name),
             'app_id': app.config['BANDSINTOWN_APP_ID'],
         }
 
-        if location:
-            param = urllib2.quote('%s, %s' % location)
-            bit_uri = '&'.join((bit_uri, '='.join(('location', param))))
+        _location = urllib2.quote('%s, %s' % location) if location else \
+                'use_geoip'
+
+        bit_uri = '&'.join((bit_uri, '='.join(('location', _location))))
 
         logger.info(bit_uri)
 
@@ -430,7 +478,7 @@ class ShowsResource(Resource):
             return
 
         for event in response.json():
-            yield marshal(ShowModel(artist, event), self.resource_fields)
+            yield marshal(ShowModel(artist_name, event), self.resource_fields)
 
 
 class ShowModel(object):
