@@ -538,3 +538,16 @@ class ShowModel(object):
 
     def __getitem__(self, key):
         return getattr(self, key, None)
+
+
+class ClientResource(Resource):
+    def get(self):
+        clients = [
+            {
+                'name': 'Shiva-Client',
+                'uri': 'https://github.com/tooxie/shiva-client',
+                'author': u'Alvaro Mouriño <alvaro@mourino.net>',
+            },
+        ]
+
+        return clients
