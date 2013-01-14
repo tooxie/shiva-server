@@ -671,6 +671,27 @@ retrieved.
     GET /artists?page_size=10&page=3
 
 
+--------------------------
+Using slugs instead of IDs
+--------------------------
+
+It is possible to use slugs instead of IDs when requesting an specific
+resource. It will work the exact same way because slugs, as IDs, are unique. An
+example on the /artist resource:
+
+::
+
+    GET /artist/eterna-inocencia
+    {
+        "name": "Eterna Inocencia",
+        "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
+        "uri": "/artist/3",
+        "slug": "eterna-inocencia",
+        "download_uri": "/artist/3/download",
+        "id": 3
+    }
+
+
 Assumptions
 ===========
 
