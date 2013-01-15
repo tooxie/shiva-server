@@ -3,11 +3,25 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from shiva.utils import slugify, ID3Manager
+from shiva.utils import slugify as do_slug, ID3Manager
 
 db = SQLAlchemy()
 
 __all__ = ('db', 'Artist', 'Album', 'Track')
+
+def slugify(model, field_name):
+    """
+    Given the instance of a model and a field to slugify, generates a unique
+    slug. If a standard one exists in the DB, the object's ID is appended to it
+    to generate a unique one.
+
+    """
+
+    slug = do_slug(getattr(model, field_name, ''))
+    if model.__class__.query.filter_by(slug=slug).count():
+        slug += '-%i' % model.pk
+
+    return slug
 
 
 class Artist(db.Model):
@@ -27,7 +41,7 @@ class Artist(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Artist, self).__setattr__('slug', slugify(value))
+            super(Artist, self).__setattr__('slug', slugify(self, 'name'))
 
         super(Artist, self).__setattr__(attr, value)
 
@@ -60,7 +74,7 @@ class Album(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Album, self).__setattr__('slug', slugify(value))
+            super(Album, self).__setattr__('slug', slugify(self, 'name'))
 
         super(Album, self).__setattr__(attr, value)
 
@@ -102,7 +116,7 @@ class Track(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'title':
-            super(Track, self).__setattr__('slug', slugify(value))
+            super(Track, self).__setattr__('slug', slugify(self, 'title'))
 
         super(Track, self).__setattr__(attr, value)
 
