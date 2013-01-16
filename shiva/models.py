@@ -9,17 +9,26 @@ db = SQLAlchemy()
 
 __all__ = ('db', 'Artist', 'Album', 'Track')
 
+
 def slugify(model, field_name):
     """
     Given the instance of a model and a field to slugify, generates a unique
-    slug. If a standard one exists in the DB, the object's ID is appended to it
-    to generate a unique one.
+    slug. If a standard one exists in the DB, or the generated slug is
+    numeric-only, a hyphen and the object's ID is appended to it to generate a
+    unique and alphanumeric one.
 
     """
 
     slug = do_slug(getattr(model, field_name, ''))
-    if model.__class__.query.filter_by(slug=slug).count():
-        slug += '-%i' % model.pk
+    try:
+        is_int = isinstance(int(slug), int)
+    except ValueError:
+        is_int = False
+
+    exists = bool(model.__class__.query.filter_by(slug=slug).count())
+
+    if is_int or exists:
+        slug += u'-%i' % model.pk
 
     return slug
 
