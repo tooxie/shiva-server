@@ -708,6 +708,22 @@ example on the /artist resource:
     }
 
 
+-------------------
+Uniqueness of slugs
+-------------------
+
+Slugs are generated from the following fields
+
+* Artist.name
+* Album.name
+* Track.title
+
+If the slug clashes with an existing one, then a hyphen and a unique ID will be
+appended to it. Due to the possibility of `using slugs instead of IDs`_, if an
+slug results in a numeric string a hyphen and a unique ID will be appended to
+remove the ambiguity.
+
+
 Assumptions
 ===========
 
