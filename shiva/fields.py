@@ -20,14 +20,14 @@ class StreamURI(fields.Raw):
             if stream_uri:
                 return stream_uri
 
-        return '%strack/%s/download' % (request.url_root, obj.pk)
+        return '%strack/%s/download.mp3' % (request.url_root, obj.pk)
 
 
 class DownloadURI(InstanceURI):
     def output(self, key, obj):
         uri = super(DownloadURI, self).output(key, obj)
 
-        return '%s/download' % uri
+        return '%s/download.mp3' % uri
 
 
 class ManyToManyField(fields.Raw):
