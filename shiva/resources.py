@@ -219,7 +219,7 @@ class AlbumResource(Resource):
 
         tracks = TracksResource()
 
-        for track in album.tracks:
+        for track in album.tracks.order_by('number', 'title'):
             _album['tracks'].append(tracks.get_full_tree(track))
 
         return _album

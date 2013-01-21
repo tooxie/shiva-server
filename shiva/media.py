@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import urllib2
 
 
 class MediaDir(object):
@@ -127,15 +128,16 @@ class MediaDir(object):
     def urlize(self, path):
         """
         """
-
         url = None
         for mdir in self.get_dirs():
             if path.startswith(mdir):
                 if self.url:
                     # Remove trailing slash to avoid double-slashed URL.
-                    url = path.replace(self.root, self.url.rstrip('/'))
+                    url_path = path[len(self.root):]
 
-        return url
+        url_path = str(url_path.encode('utf-8'))
+
+        return ''.join((self.url.rstrip('/'), urllib2.quote(url_path)))
 
     def allowed_to_stream(self, path):
         """
