@@ -39,11 +39,11 @@ Installation
 
     $ pip install -r requirements.pip
 
-* Rename shiva/settings/local.py.example to local.py:
+* Rename shiva/config/local.py.example to local.py:
 
 ::
 
-    $ cp shiva/settings/local.py.example shiva/settings/local.py
+    $ cp shiva/config/local.py.example shiva/config/local.py
 
 * Edit it and configure the directories to scan for music.
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import urllib2
 
 
@@ -113,8 +112,7 @@ class MediaDir(object):
         if self.root:
             if self.dirs:
                 for music_dir in self.dirs:
-                    # dirs.append(os.path.join(self.root, music_dir))
-                    dirs.append('/%s' % '/'.join(p.strip('/') \
+                    dirs.append('/%s' % '/'.join(p.strip('/')
                                 for p in (self.root, music_dir)).lstrip('/'))
             else:
                 dirs.append(self.root)
@@ -125,19 +123,23 @@ class MediaDir(object):
 
         return dirs
 
+    # TODO: Simplify this method and document it better.
     def urlize(self, path):
         """
         """
+
         url = None
         for mdir in self.get_dirs():
             if path.startswith(mdir):
                 if self.url:
                     # Remove trailing slash to avoid double-slashed URL.
-                    url_path = path[len(self.root):]
+                    url = path[len(self.root):]
+                    url = str(url.encode('utf-8'))
 
-        url_path = str(url_path.encode('utf-8'))
+        if self.url:
+            url = ''.join((self.url.rstrip('/'), urllib2.quote(url)))
 
-        return ''.join((self.url.rstrip('/'), urllib2.quote(url_path)))
+        return url
 
     def allowed_to_stream(self, path):
         """
