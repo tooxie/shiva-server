@@ -3,7 +3,7 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from shiva.utils import slugify as do_slug, ID3Manager
+from shiva.utils import slugify as do_slug, randstr, ID3Manager
 
 db = SQLAlchemy()
 
@@ -20,6 +20,8 @@ def slugify(model, field_name):
     """
 
     slug = do_slug(getattr(model, field_name, ''))
+    if not slug:
+        slug = randstr(6)
     try:
         is_int = isinstance(int(slug), int)
     except ValueError:
@@ -28,7 +30,11 @@ def slugify(model, field_name):
     exists = bool(model.__class__.query.filter_by(slug=slug).count())
 
     if is_int or exists:
-        slug += u'-%i' % model.pk
+        extra = model.pk
+        if not extra:
+            extra = randstr(6)
+
+        slug += u'-%s' % extra
 
     return slug
 
