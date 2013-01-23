@@ -56,6 +56,12 @@ Installation
 
   $ export PYTHONPATH=$PYTHONPATH:`pwd`
 
+* Create the database:
+
+::
+
+  $ python -c "from shiva.app import db; db.create_all()"
+
 * Run the indexer:
 
 ::
