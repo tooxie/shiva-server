@@ -82,7 +82,7 @@ Scanning directories
 --------------------
 
 To tell Shiva which directories to scan for music, you will have to configure
-your `shiva/app/config/local.py` file. There you will find a MEDIA_DIRS option
+your `shiva/config/local.py` file. There you will find a MEDIA_DIRS option
 where you need to supply `MediaDir` objects.
 
 This object allows for media configuration. By instantiating a MediaDir class
@@ -559,7 +559,13 @@ directory, let's say *mylyrics.py* with this structure:
         def fetch(self, artist, title):
             # Magic happens here
 
-            return True  # Only if lyrics were found
+            if not lyrics:
+                return False
+
+            self.lyrics = lyrics
+            self.source = lyrics_url
+
+            return True
 
 And then add it to the scrapers list:
 
