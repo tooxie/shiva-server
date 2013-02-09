@@ -736,6 +736,32 @@ slug results in a numeric string a hyphen and a unique ID will be appended to
 remove the ambiguity.
 
 
+----------------
+Random resources
+----------------
+
+You can request a random instance of a given resource for *artists*, *albums*
+or *tracks*. To do so you need to issue a GET request on one of the following
+resources:
+
+* /random/artist
+* /random/album
+* /random/track
+
+They all will return a consistent structure containing *id* and *uri*, as
+follows:
+
+::
+
+    GET /random/artist
+    {
+        "id": 3,
+        "uri": "/artist/3"
+    }
+
+You will have to issue another request to obtain the details of the instance.
+
+
 Assumptions
 ===========
 
