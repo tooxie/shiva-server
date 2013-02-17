@@ -114,8 +114,9 @@ class Track(db.Model):
 
     lyrics = db.relationship('Lyrics', backref='track', uselist=False)
 
-    album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'))
-    artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'))
+    album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'), nullable=True)
+    artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'),
+                          nullable=True)
 
     def __init__(self, path):
         if type(path) not in (unicode, str, file):

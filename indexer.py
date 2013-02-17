@@ -1,42 +1,91 @@
 # -*- coding: utf-8 -*-
 # K-Pg
-import os
 from datetime import datetime
-import logging
-
-import pylast
+import os
+import sys
 
 from shiva import models as m
 from shiva.app import app, db
 from shiva.utils import ID3Manager
 
 q = db.session.query
-logger = logging.getLogger()
+
+USAGE = """Usage: %s [-h] [--lastfm] [--nometadata]
+
+Music indexer for the Shiva-Server API.
+
+Index your music collection and (optionally) retrieve album covers and artist
+pictures from Last.FM.
+
+optional arguments:
+    -h, --help    Show this help message and exit
+    --lastfm      Retrieve artist and album covers from Last.FM API.
+    --nometadata  Don't read file's metadata when indexing.
+""" % sys.argv[0]
+
+if '--help' in sys.argv or '-h' in sys.argv:
+    print(USAGE)
+    sys.exit(0)
 
 
 class Indexer(object):
-    def __init__(self, config=None):
+    def __init__(self, config=None, use_lastfm=False, no_metadata=False):
         self.config = config
+        self.use_lastfm = use_lastfm
+        self.no_metadata = no_metadata
+
+        self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
         self.id3r = None
-        self.PREV_ARTIST = None
-        self.PREV_ALBUM = None
-        self.lastfm = pylast.LastFMNetwork(api_key=config['LASTFM_API_KEY'])
+        self.artists = {}
+        self.albums = {}
+
+        if self.use_lastfm:
+            import pylast
+
+            api_key = config['LASTFM_API_KEY']
+            self.lastfm = pylast.LastFMNetwork(api_key=api_key)
 
         if len(self.media_dirs) == 0:
-            logger.error('Remember to set the MEDIA_DIRS setting, otherwise I '
-                         'don\'t know where to look for.')
+            print("Remember to set the MEDIA_DIRS option, otherwise I don't "
+                  'know where to look for.')
 
     def get_artist(self, name):
-        artist = q(m.Artist).filter_by(name=name).first()
-        if not artist:
-            cover = self.lastfm.get_artist(name).get_cover_image()
+        if name in self.artists:
+            return self.artists[name]
+        else:
+            cover = None
+            if self.use_lastfm:
+                cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
-            db.session.add(artist)
+            self.session.add(artist)
+            self.artists[name] = artist
 
         return artist
 
-    def get_release_year(self, lastfm_album):
+    def get_album(self, name):
+        if name in self.albums:
+            return self.albums[name]
+        else:
+            release_year = self.get_release_year()
+            cover = None
+            if self.use_lastfm:
+                _artist = self.lastfm.get_artist(artist.name)
+                _album = self.lastfm.get_album(_artist, id3r.album)
+                release_year = self.get_release_year(_album)
+                cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
+
+            album = m.Album(name=name, year=release_year, cover=cover)
+            self.session.add(album)
+            self.albums[name] = album
+
+        return album
+
+
+    def get_release_year(self, lastfm_album=None):
+        if not self.use_lastfm or not lastfm_album:
+            return self.get_id3_reader().release_year
+
         _date = lastfm_album.get_release_date()
         if not _date:
             if not self.get_id3_reader().release_year:
@@ -47,68 +96,37 @@ class Indexer(object):
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
     def save_track(self):
-        """Takes a path to a track, reads its metadata and stores everything in
-        the database.
         """
-        session = db.session
+        Takes a path to a track, reads its metadata and stores everything in
+        the database.
+
+        """
+
         full_path = self.file_path.decode('utf-8')
 
-        logger.info(self.file_path)
-
-        if q(m.Track).filter_by(path=full_path).count():
-            return True
+        print(self.file_path)
 
         track = m.Track(full_path)
+        if self.no_metadata:
+            self.session.add(track)
+
+            return True
+        else:
+            if q(m.Track).filter_by(path=full_path).count():
+                return True
 
         use_prev = None
         id3r = self.get_id3_reader()
-        if not id3r.artist:
-            _prev = self.PREV_ARTIST
-            if _prev:
-                use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
-
-            if use_prev == 'y':
-                _artist = _prev
-            else:
-                _artist = unicode(raw_input('Artist name: ').strip())
-
-            self.PREV_ARTIST = _artist
-            id3r.artist = _artist
-
-        use_prev = None
-        if not id3r.album:
-            _prev = self.PREV_ALBUM
-            if _prev:
-                use_prev = raw_input('Use %s? [y/N] ' % _prev).strip()
-
-            if use_prev == 'y':
-                _album = _prev
-            else:
-                _album = unicode(raw_input('Album name: ').strip())
-
-            self.PREV_ALBUM = _album
-            id3r.album = _album
 
         artist = self.get_artist(id3r.artist)
+        album = self.get_album(id3r.album)
 
-        album = q(m.Album).filter_by(name=id3r.album).first()
-        if not album:
-            _album = self.lastfm.get_album(self.lastfm.get_artist(artist.name),
-                                           id3r.album)
-            album = m.Album(name=id3r.album,
-                            year=self.get_release_year(_album))
-            album.cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
-
-        if artist not in album.artists:
+        if artist is not None and artist not in album.artists:
             album.artists.append(artist)
-
-        session.add(album)
 
         track.album = album
         track.artist = artist
-        session.add(track)
-
-        session.commit()
+        self.session.add(track)
 
         return True
 
@@ -161,5 +179,17 @@ class Indexer(object):
                 self.walk(mdir)
 
 if __name__ == '__main__':
-    lola = Indexer(app.config)
+    use_lastfm = '--lastfm' in sys.argv
+    no_metadata = '--nometadata' in sys.argv
+
+    if use_lastfm and not app.config.get('LASTFM_API_KEY'):
+        print('ERROR: You need a Last.FM API key if you set the --lastfm '
+              'flag.\n')
+        sys.exit(1)
+
+    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata)
     lola.run()
+
+    # Petit performance hack: Every track will be added to the session but they
+    # will be written down to disk only once, at the end.
+    lola.session.commit()

@@ -16,10 +16,12 @@ What is Shiva?
 Prerequisites
 =============
 
-You are going to need a Last.fm API key. You can get one at
+If you want Shiva to automatically fetch artists' images from Last.FM while
+indexing you are going to need an API key. You can get one at
 http://www.last.fm/api/account/create
 
-This is used to fetch the artists' images.
+This makes the whole indexing slower because issues a request on a per-album
+and per-artist basis, but does a lot of work automatically for you.
 
 
 Installation
@@ -49,7 +51,6 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Set the LASTFM_API_KEY setting with the key you got from Last.fm.
 * Add shiva to the PYTHONPATH:
 
 ::
@@ -75,6 +76,27 @@ Installation
   $ python shiva/app.py
 
 * Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
+
+
+-----------------
+Indexer arguments
+-----------------
+
+The indexer receives the following command line arguments.
+
+* --lastfm
+* --nometadata
+
+If you set the *--lastfm* flag Shiva will retrieve artist and album images from
+Last.FM, but for this to work you need to get an API key (See `Prerequisites`_)
+and include it in your *local.py* config file.
+
+The *--nometadata* option saves dummy tracks with only path information,
+ignoring the file's metadata. This means that album and artists will not be
+saved.
+
+If both flags are set, *--nometadata* will take precedence and *--lastfm* will
+be ignored.
 
 
 --------------------
