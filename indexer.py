@@ -182,6 +182,9 @@ if __name__ == '__main__':
     use_lastfm = '--lastfm' in sys.argv
     no_metadata = '--nometadata' in sys.argv
 
+    if no_metadata:
+        use_lastfm = False
+
     if use_lastfm and not app.config.get('LASTFM_API_KEY'):
         print('ERROR: You need a Last.FM API key if you set the --lastfm '
               'flag.\n')
