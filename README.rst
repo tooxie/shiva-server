@@ -5,6 +5,12 @@ Shiva
 Dinosaurs will slowly die.
 
 
+License
+=======
+
+Please read the LICENSE file distributed with this software.
+
+
 What is Shiva?
 ==============
 
