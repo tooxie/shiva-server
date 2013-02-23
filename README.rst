@@ -84,6 +84,29 @@ Installation
 * Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
 
 
+----------------
+Using virtualenv
+----------------
+
+Usually is a good idea to use virtualenv to keep each project isolated and
+avoid dependencies conflicts. To do so you should follow the following steps
+after cloning the source and before installing the requirements:
+
+* Create the virtual environment:
+
+::
+
+  $ virtualenv venv
+
+* Activate it:
+
+::
+
+  $ source ./venv/bin/activate
+
+Then continue with the installation process as described previously.
+
+
 -----------------
 Indexer arguments
 -----------------
