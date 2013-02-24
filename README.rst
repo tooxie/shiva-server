@@ -38,8 +38,8 @@ Installation
 
 ::
 
-    $ git clone https://github.com/tooxie/python-shiva.git
-    $ cd python-shiva
+    $ git clone https://github.com/tooxie/shiva-server.git
+    $ cd shiva-server
 
 * Install dependencies:
 
