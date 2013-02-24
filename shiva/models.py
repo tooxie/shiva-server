@@ -129,6 +129,7 @@ class Track(db.Model):
 
         self.set_path(_path)
         self._id3r = None
+        self.extension = 'mp3'  # default extension
 
     def __setattr__(self, attr, value):
         if attr == 'title':
@@ -151,6 +152,12 @@ class Track(db.Model):
                 self.length = self.get_id3_reader().length
                 self.number = self.get_id3_reader().track_number
                 self.title = self.get_id3_reader().title
+
+    def set_extension(self, extension):
+        self.extension = extension
+
+    def get_extension(self):
+        return self.extension
 
     def get_id3_reader(self):
         """Returns an object with the ID3 info reader.

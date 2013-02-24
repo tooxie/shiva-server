@@ -20,7 +20,8 @@ class StreamURI(fields.Raw):
             if stream_uri:
                 return stream_uri
 
-        return '%strack/%s/download.mp3' % (request.url_root, obj.pk)
+        return '%strack/%s/download.%s' % (request.url_root, obj.pk,
+                                           obj.get_extension())
 
 
 class DownloadURI(InstanceURI):

@@ -138,3 +138,7 @@ class ID3Manager(object):
         """Computes the size of the mp3 file in filesystem.
         """
         return os.stat(self.reader.path).st_size
+
+
+def convert(track):
+    return True

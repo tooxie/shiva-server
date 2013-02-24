@@ -10,8 +10,9 @@ import requests
 
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, StreamURI)
-from shiva.models import Artist, Album, Track, Lyrics
 from shiva.lyrics import get_lyrics
+from shiva.models import Artist, Album, Track, Lyrics
+from shiva.utils import convert
 
 logger = logging.getLogger(__name__)
 
@@ -270,6 +271,10 @@ class TracksResource(Resource):
             track = self.get_by_slug(track_slug)
         else:
             track = self.get_one(track_id)
+
+        # Checks for requested format and converts it if not present
+        track.set_extension(ext)
+        convert(track)
 
         if full_tree():
             return self.get_full_tree(track, include_scraped=True)
