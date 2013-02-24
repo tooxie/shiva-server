@@ -147,3 +147,6 @@ class ID3Manager(object):
         """ Computes the size (in bytes) of the file in filesystem. """
 
         return os.stat(self.reader.path).st_size
+
+
+        return os.stat(self.reader.path).st_size

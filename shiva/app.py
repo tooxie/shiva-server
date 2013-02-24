@@ -34,6 +34,8 @@ api.add_resource(resources.TracksResource, '/tracks', '/track/<int:track_id>',
                  '/track/<track_slug>', endpoint='track')
 api.add_resource(resources.LyricsResource, '/track/<int:track_id>/lyrics',
                  '/track/<track_slug>/lyrics', endpoint='lyrics')
+api.add_resource(resources.ConvertResource, '/track/<int:track_id>/convert',
+                 '/track/<track_slug>/convert', endpoint='convert')
 
 # Random
 api.add_resource(resources.RandomResource, '/random/<resource_name>',

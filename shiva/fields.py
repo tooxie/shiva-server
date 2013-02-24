@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+import urllib
+
 from flask.ext.restful import fields, marshal
-from flask import current_app as app, request
+
+from shiva.converter import get_converter
 
 
 class InstanceURI(fields.String):
@@ -11,16 +14,29 @@ class InstanceURI(fields.String):
         return '/%s/%i' % (self.base_uri, obj.pk)
 
 
-class StreamURI(fields.Raw):
-    """ Only tracks can be streamed """
+class TrackFiles(fields.Raw):
+    """
+    Returns a list of files, one for each available mediatype, for a given
+    track.
 
-    def output(self, key, obj):
-        for mdir in app.config['MEDIA_DIRS']:
-            stream_uri = mdir.urlize(getattr(obj, 'path', ''))
-            if stream_uri:
-                return stream_uri
+    """
 
-        return '%strack/%s/download.mp3' % (request.url_root, obj.pk)
+    def output(self, key, track):
+        converter = get_converter()(track.path)
+        paths = {}
+
+        for mimetype in converter.get_mimetypes():
+            if converter.exists_for_mimetype(mimetype):
+                paths[mimetype.name] = converter.get_dest_uri(mimetype)
+            else:
+                # HACK: Not very happy about this code because it includes a
+                # GET parameter. I think it shouldn't. But for now is good
+                # enough. FIXME.
+                get_params = urllib.urlencode({'mimetype': mimetype.name})
+                paths[mimetype.name] = '/track/%s/convert?%s' % (track.pk,
+                                                                 get_params)
+
+        return paths
 
 
 class DownloadURI(InstanceURI):

@@ -3,16 +3,18 @@ from datetime import datetime
 import logging
 import urllib2
 
-from flask import request, Response, current_app as app, g
+from flask import request, Response, redirect, current_app as app, g
 from flask.ext.restful import abort, fields, marshal, Resource
 from lxml import etree
 import requests
 
 from shiva import get_version, get_contributors
+from shiva.converter import get_converter
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
-                          ManyToManyField, StreamURI)
-from shiva.models import Artist, Album, Track, Lyrics
+                          ManyToManyField, TrackFiles)
 from shiva.lyrics import get_lyrics
+from shiva.mimetype import MimeType
+from shiva.models import Artist, Album, Track, Lyrics
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +246,7 @@ class TracksResource(Resource):
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
-        'stream_uri': StreamURI,
+        'files': TrackFiles,
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,

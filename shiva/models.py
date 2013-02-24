@@ -129,6 +129,7 @@ class Track(db.Model):
 
         self.set_path(_path)
         self._id3r = None
+        self.extension = 'mp3'  # default extension
 
     def __setattr__(self, attr, value):
         if attr == 'title':
