@@ -89,7 +89,7 @@ Using virtualenv
 ----------------
 
 Usually is a good idea to use virtualenv to keep each project isolated and
-avoid dependencies conflicts. To do so you should follow the following steps
+avoid dependency conflicts. To do so you should follow the following steps
 after cloning the source and before installing the requirements:
 
 * Create the virtual environment:
