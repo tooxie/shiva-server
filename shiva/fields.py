@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from flask.ext.restful import fields, marshal
-from flask import current_app as app, request
+
+from shiva.converter import get_converter
 
 
 class InstanceURI(fields.String):
@@ -11,17 +12,24 @@ class InstanceURI(fields.String):
         return '/%s/%i' % (self.base_uri, obj.pk)
 
 
-class StreamURI(fields.Raw):
-    """ Only tracks can be streamed """
+class TrackFiles(fields.Raw):
+    """
+    Returns a list of files, one for each available mediatype, for a given
+    track.
 
-    def output(self, key, obj):
-        for mdir in app.config['MEDIA_DIRS']:
-            stream_uri = mdir.urlize(getattr(obj, 'path', ''))
-            if stream_uri:
-                return stream_uri
+    """
 
-        return '%strack/%s/download.%s' % (request.url_root, obj.pk,
-                                           obj.get_extension())
+    def output(self, key, track):
+        converter = get_converter()(track.path)
+        paths = {}
+
+        for name, mimetype in converter.mimetypes.iteritems():
+            if converter.exists_for_mimetype(mimetype):
+                paths[name] = converter.get_dest_uri(mimetype)
+            else:
+                paths[name] = '/track/%s/convert' % track.pk
+
+        return paths
 
 
 class DownloadURI(InstanceURI):

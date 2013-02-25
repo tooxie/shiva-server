@@ -3,16 +3,16 @@ from datetime import datetime
 import logging
 import urllib2
 
-from flask import request, Response, current_app as app, g
+from flask import request, Response, redirect, current_app as app, g
 from flask.ext.restful import abort, fields, marshal, Resource
 from lxml import etree
 import requests
 
+from shiva.converter import get_converter
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
-                          ManyToManyField, StreamURI)
+                          ManyToManyField, TrackFiles)
 from shiva.lyrics import get_lyrics
 from shiva.models import Artist, Album, Track, Lyrics
-from shiva.utils import convert
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +247,7 @@ class TracksResource(Resource):
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
-        'stream_uri': StreamURI,
+        'files': TrackFiles,
         'bitrate': fields.Integer,
         'length': fields.Integer,
         'title': fields.String,
@@ -271,10 +271,6 @@ class TracksResource(Resource):
             track = self.get_by_slug(track_slug)
         else:
             track = self.get_one(track_id)
-
-        # Checks for requested format and converts it if not present
-        track.set_extension(ext)
-        convert(track)
 
         if full_tree():
             return self.get_full_tree(track, include_scraped=True)
@@ -410,6 +406,37 @@ class LyricsResource(Resource):
         g.db.session.commit()
 
         return JSONResponse(200)
+
+
+class ConvertResource(Resource):
+    """
+    """
+
+    def get(self, track_id):
+        track = Track.query.get(track_id)
+        mimename = request.args.get('mimetype')
+        if not track:
+            print('no track')
+        if not mimename:
+            print('no mimename')
+
+        if not track or not mimename:
+            return JSONResponse(404)
+
+        converter = get_converter()(track.path)
+        mimetype = converter.get_mimetypes().get(mimename)
+        if not mimetype:
+            print('no mimetype')
+        if not mimetype:
+            return JSONResponse(404)
+
+        if not converter.exists_for_mimetype(mimetype):
+            converter.convert_to(mimetype)
+
+        uri = converter.get_dest_uri(mimetype)
+        print(uri)
+
+        return JSONResponse(status=301, headers={'Location': uri})
 
 
 class ShowsResource(Resource):

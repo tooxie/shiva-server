@@ -29,6 +29,8 @@ http://www.last.fm/api/account/create
 This makes the whole indexing slower because issues a request on a per-album
 and per-artist basis, but does a lot of work automatically for you.
 
+Also, you need *ffmpeg* installed in your system.
+
 
 Installation
 ============

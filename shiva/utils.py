@@ -140,5 +140,4 @@ class ID3Manager(object):
         return os.stat(self.reader.path).st_size
 
 
-def convert(track):
-    return True
+        return os.stat(self.reader.path).st_size

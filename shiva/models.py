@@ -153,12 +153,6 @@ class Track(db.Model):
                 self.number = self.get_id3_reader().track_number
                 self.title = self.get_id3_reader().title
 
-    def set_extension(self, extension):
-        self.extension = extension
-
-    def get_extension(self):
-        return self.extension
-
     def get_id3_reader(self):
         """Returns an object with the ID3 info reader.
         """

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import urllib2
-import os
 
 
 class MediaDir(object):
@@ -151,16 +150,3 @@ class MediaDir(object):
                 return True
 
         return False
-
-
-def get_duplicates_path(track):
-    """
-    Retrieves the path on which a track's duplicates, i.e. that same track
-    converted to other formats, will be stored.
-
-    In this case they will be stored along the original track, in the same
-    directory.
-
-    """
-
-    return os.path.dirname(track.path)
