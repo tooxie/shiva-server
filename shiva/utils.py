@@ -10,9 +10,11 @@ PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
 
 def slugify(text):
-    """Generates an ASCII-only slug."""
+    """ Generates an ASCII-only slug. """
+
     if not text:
         return ''
+
     result = []
     text = text
     for word in PUNCT_RE.split(text.lower()):
@@ -24,6 +26,8 @@ def slugify(text):
 
 
 def randstr(length=None):
+    """ Generates a random string of the given length. """
+
     if length < 1:
         return ''
 
@@ -36,6 +40,8 @@ def randstr(length=None):
 
 
 def _import(class_path):
+    """ Imports a module or class from a string in dot notation. """
+
     bits = class_path.split('.')
     mod_name = '.'.join(bits[:-1])
     cls_name = bits[-1]
@@ -138,6 +144,6 @@ class ID3Manager(object):
         return self.reader.tag.title
 
     def get_size(self):
-        """Computes the size of the mp3 file in filesystem.
-        """
+        """ Computes the size (in bytes) of the file in filesystem. """
+
         return os.stat(self.reader.path).st_size
