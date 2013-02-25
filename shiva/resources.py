@@ -83,7 +83,6 @@ class ArtistResource(Resource):
     """
     """
 
-    route_base = 'artists'
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'name': fields.String,
@@ -157,7 +156,6 @@ class AlbumResource(Resource):
     """
     """
 
-    route_base = 'albums'
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'name': fields.String,
@@ -243,7 +241,6 @@ class TracksResource(Resource):
     """
     """
 
-    route_base = 'tracks'
     resource_fields = {
         'id': fields.Integer(attribute='pk'),
         'uri': InstanceURI('track'),
