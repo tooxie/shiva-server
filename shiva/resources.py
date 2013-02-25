@@ -24,7 +24,7 @@ DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
 class JSONResponse(Response):
     """
     A subclass of flask.Response that sets the Content-Type header by default
-    to "application/json"
+    to "application/json".
 
     """
 
@@ -41,7 +41,7 @@ class JSONResponse(Response):
 
 
 def full_tree():
-    """ Checks the GET parameters to see if a full tree was requested """
+    """ Checks the GET parameters to see if a full tree was requested. """
 
     arg = request.args.get('fulltree')
 

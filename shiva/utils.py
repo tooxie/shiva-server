@@ -10,7 +10,7 @@ PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
 
 def slugify(text):
-    """Generates an ASCII-only slug."""
+    """ Generates an ASCII-only slug. """
     if not text:
         return ''
     result = []
@@ -135,9 +135,6 @@ class ID3Manager(object):
         return self.reader.tag.title
 
     def get_size(self):
-        """Computes the size of the mp3 file in filesystem.
-        """
-        return os.stat(self.reader.path).st_size
-
+        """ Computes the size (in bytes) of the file in filesystem. """
 
         return os.stat(self.reader.path).st_size
