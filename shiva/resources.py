@@ -411,27 +411,20 @@ class ConvertResource(Resource):
 
     def get(self, track_id):
         track = Track.query.get(track_id)
-        mimename = request.args.get('mimetype')
         if not track:
-            print('no track')
-        if not mimename:
-            print('no mimename')
-
-        if not track or not mimename:
             return JSONResponse(404)
 
         converter = get_converter()(track.path)
-        mimetype = converter.get_mimetypes().get(mimename)
-        if not mimetype:
-            print('no mimetype')
-        if not mimetype:
-            return JSONResponse(404)
+        mimename = request.args.get('mimetype')
 
-        if not converter.exists_for_mimetype(mimetype):
-            converter.convert_to(mimetype)
+        if mimename:
+            mimetype = converter.get_mimetypes().get(mimename)
+            if not converter.exists_for_mimetype(mimetype):
+                converter.convert_to(mimetype)
+        else:
+            converter.convert_all()
 
         uri = converter.get_dest_uri(mimetype)
-        print(uri)
 
         return JSONResponse(status=301, headers={'Location': uri})
 
