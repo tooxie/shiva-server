@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import urllib
+
 from flask.ext.restful import fields, marshal
 
 from shiva.converter import get_converter
@@ -27,7 +29,11 @@ class TrackFiles(fields.Raw):
             if converter.exists_for_mimetype(mimetype):
                 paths[name] = converter.get_dest_uri(mimetype)
             else:
-                paths[name] = '/track/%s/convert' % track.pk
+                # HACK: Not very happy about this code because it includes a
+                # GET parameter. I think it shouldn't. But for now is good
+                # enough. FIXME.
+                get_params = urllib.urlencode({'mimetype': name})
+                paths[name] = '/track/%s/convert?%s' % (track.pk, get_params)
 
         return paths
 

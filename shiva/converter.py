@@ -66,9 +66,8 @@ class Converter(object):
 
     def convert_to(self, mimetype):
         path = self.get_dest_fullpath(mimetype)
-        cmd = ['ffmpeg', '-i', self.path, '-acodec', mimetype['codec'], path]
-
-        print(''.join(cmd))
+        cmd = ['ffmpeg', '-i', self.path, '-aq', '60', '-acodec',
+               mimetype['codec'], path]
 
         proc = subprocess.call(cmd)
 
