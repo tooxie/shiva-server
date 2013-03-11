@@ -21,12 +21,16 @@ optional arguments:
     -h, --help    Show this help message and exit
     --lastfm      Retrieve artist and album covers from Last.FM API.
     --nometadata  Don't read file's metadata when indexing.
+    -v, --verbose Show debugging messages about the progress.
 """ % sys.argv[0]
 
 if '--help' in sys.argv or '-h' in sys.argv:
     print(USAGE)
     sys.exit(0)
 
+VERBOSE = False
+if '--verbose' in sys.argv or '-v' in sys.argv:
+    VERBOSE = True
 
 class Indexer(object):
     def __init__(self, config=None, use_lastfm=False, no_metadata=False):
@@ -147,9 +151,13 @@ class Indexer(object):
 
         ext = self.file_path[self.file_path.rfind('.') + 1:]
         if ext not in self.config.get('ACCEPTED_FORMATS', []):
+            if (VERBOSE):
+                print(self.file_path + "is not in ACCEPTED_FORMATS")
             return False
 
         if not self.get_id3_reader().is_valid():
+            if (VERBOSE):
+                print(self.file_path + "fails id3 reader")
             return False
 
         return True
