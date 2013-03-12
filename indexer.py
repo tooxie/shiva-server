@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # K-Pg
+import logging
 from datetime import datetime
 import os
 import sys
@@ -172,8 +173,12 @@ class Indexer(object):
                 if os.path.isdir(self.file_path):
                     self.walk(self.file_path)
                 else:
-                    if self.is_track():
-                        self.save_track()
+                    try:
+                        if self.is_track():
+                            self.save_track()
+                    except Exception, e:
+                        logging.warning("%s not imported - %s" % (
+                            self.file_path, e.message))
 
         return True
 
