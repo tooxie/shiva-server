@@ -73,7 +73,7 @@ Installation
 
 ::
 
-  $ python shiva/indexer.py
+  $ python indexer.py
 
 * Run the server:
 
