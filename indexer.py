@@ -54,6 +54,10 @@ class Indexer(object):
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
                   'know where to look for.')
 
+        if len(config.get('ACCEPTED_FORMATS', [])) == 0:
+            print("Remember to set the ACCEPTED_FORMATS option, otherwise I don't "
+                  'know what files are suitable.')
+
     def get_artist(self, name):
         if name in self.artists:
             return self.artists[name]
