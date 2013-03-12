@@ -73,7 +73,7 @@ Installation
 
 ::
 
-  $ python shiva/indexer.py
+  $ python ./indexer.py
 
 * Run the server:
 
@@ -81,7 +81,7 @@ Installation
 
   $ python shiva/app.py
 
-* Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
+* Go to http://127.0.0.1:9002/<resource> (See `Resources`_)
 
 
 ----------------
