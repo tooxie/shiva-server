@@ -50,7 +50,7 @@ Installation
 * Create and activate your virtalenv (highly recommended)::
 
     $ virtualenv .
-    $ souce bin/activate
+    $ source bin/activate
 
 * Install::
 
