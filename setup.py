@@ -23,7 +23,8 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'shiva-server = shiva.app:main'
+            'shiva-server = shiva.app:main',
+            'shiva-indexer = shiva.indexer:main'
         ]
     }
 )
