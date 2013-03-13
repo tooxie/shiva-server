@@ -92,7 +92,7 @@ Installation
 
   $ shiva-server
 
-* Go to ``http://127.0.0.1:9002/<resource>`` (see `Resources`_).
+* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See `Resources`_)
 
 
 -----------------
