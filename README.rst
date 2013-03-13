@@ -47,9 +47,14 @@ Installation
     $ git clone https://github.com/tooxie/shiva-server.git
     $ cd shiva-server
 
-* Install dependencies::
+* Create and activate your virtalenv (highly recommended)::
 
-    $ pip install -r requirements.pip
+    $ virtualenv .
+    $ souce bin/activate
+
+* Install::
+
+    $ python setup.py develop
 
 * Rename shiva/config/local.py.example to local.py::
 
@@ -58,10 +63,6 @@ Installation
 * Edit it and configure the directories to scan for music.
 
   + See `Scanning directories`_ for more info.
-
-* Add shiva to the PYTHONPATH::
-
-  $ export PYTHONPATH=$PYTHONPATH:`pwd`
 
 * Create the database::
 
@@ -73,7 +74,7 @@ Installation
 
 * Run the server::
 
-  $ python shiva/app.py
+  $ shiva-server
 
 * Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
 
