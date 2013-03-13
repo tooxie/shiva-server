@@ -60,5 +60,10 @@ def after_request(response):
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
-if __name__ == '__main__':
+
+def main():
     app.run(host='0.0.0.0', port=9002, debug=True)
+
+
+if __name__ == '__main__':
+    main()
