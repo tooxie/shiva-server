@@ -33,6 +33,10 @@ You will need C headers for libxml. On Ubuntu::
 
     sudo apt-get install libxml2-dev libxslt-dev
 
+On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the headers with::
+
+    brew install libxml2 libxslt
+
 
 Installation
 ============
