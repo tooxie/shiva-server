@@ -34,22 +34,16 @@ Installation
 ============
 
 
-* Get the source:
-
-::
+* Get the source::
 
     $ git clone https://github.com/tooxie/shiva-server.git
     $ cd shiva-server
 
-* Install dependencies:
-
-::
+* Install dependencies::
 
     $ pip install -r requirements.pip
 
-* Rename shiva/config/local.py.example to local.py:
-
-::
+* Rename shiva/config/local.py.example to local.py::
 
     $ cp shiva/config/local.py.example shiva/config/local.py
 
@@ -57,27 +51,19 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Add shiva to the PYTHONPATH:
-
-::
+* Add shiva to the PYTHONPATH::
 
   $ export PYTHONPATH=$PYTHONPATH:`pwd`
 
-* Create the database:
-
-::
+* Create the database::
 
   $ python -c "from shiva.app import db; db.create_all()"
 
-* Run the indexer:
-
-::
+* Run the indexer::
 
   $ python shiva/indexer.py
 
-* Run the server:
-
-::
+* Run the server::
 
   $ python shiva/app.py
 
@@ -92,15 +78,11 @@ Usually is a good idea to use virtualenv to keep each project isolated and
 avoid dependency conflicts. To do so you should follow the following steps
 after cloning the source and before installing the requirements:
 
-* Create the virtual environment:
-
-::
+* Create the virtual environment::
 
   $ virtualenv venv
 
-* Activate it:
-
-::
+* Activate it::
 
   $ source ./venv/bin/activate
 
@@ -196,9 +178,7 @@ Artists Resource
 ----------------
 
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /artist/3
     {
@@ -231,9 +211,7 @@ Information provided by `BandsInTown <http://www.bandsintown.com/>`__. This is
 the only resource that is not cached in the local database given to it's
 dynamic nature.
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /artist/1/shows
     [
@@ -307,9 +285,7 @@ and if both pairs are provided, the coordinates will take precedence.
 Albums Resource
 ---------------
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /album/9
     {
@@ -353,9 +329,7 @@ Filtering
 The album list accepts an `artist` parameter in which case will filter the list
 of albums only to those corresponding to that artist.
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /albums/?artist=7
     [
@@ -396,9 +370,7 @@ Example request/response:
 Track Resource
 --------------
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /track/484
     {
@@ -450,9 +422,7 @@ only to those tracks corresponding to a given `album` or `artist`.
 By artist
 ~~~~~~~~~
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /tracks?artist=16
     [
@@ -546,9 +516,7 @@ By album
 Lyrics Resource
 ---------------
 
-Example request/response:
-
-::
+Example request/response::
 
     GET /track/256/lyrics
     {
@@ -579,9 +547,7 @@ Adding more lyric sources
 Everytime you request a lyric, Shiva checks if there's a lyric associated with
 that track in the database. If it's there it will immediately retrieve it,
 otherwise will iterate over a list of scrapers, asking each one of them if they
-can fetch it. This list is in your local config file and looks like:
-
-::
+can fetch it. This list is in your local config file and looks like::
 
     SCRAPERS = {
         'lyrics': (
@@ -598,9 +564,7 @@ Adding scrapers
 ~~~~~~~~~~~~~~~
 
 If you want to add your own scraper just create a file under the lyrics
-directory, let's say *mylyrics.py* with this structure:
-
-::
+directory, let's say *mylyrics.py* with this structure::
 
     from shiva.lyrics import LyricScraper
 
@@ -618,9 +582,7 @@ directory, let's say *mylyrics.py* with this structure:
 
             return True
 
-And then add it to the scrapers list:
-
-::
+And then add it to the scrapers list::
 
     SCRAPERS = {
         'lyrics': (
@@ -650,9 +612,7 @@ Those are:
 
 Whenever you set *fulltree* to any value that evaluates to True (i.e., any
 string except 'false' and '0') Shiva will include not only the information of
-the object you are requesting, but also the child objects. Here's an example:
-
-::
+the object you are requesting, but also the child objects. Here's an example::
 
     GET /artist/2?fulltree=true
     {
@@ -756,9 +716,7 @@ Using slugs instead of IDs
 
 It is possible to use slugs instead of IDs when requesting an specific
 resource. It will work the exact same way because slugs, as IDs, are unique. An
-example on the /artist resource:
-
-::
+example on the /artist resource::
 
     GET /artist/eterna-inocencia
     {
@@ -800,9 +758,7 @@ resources:
 * /random/track
 
 They all will return a consistent structure containing *id* and *uri*, as
-follows:
-
-::
+follows::
 
     GET /random/artist
     {
