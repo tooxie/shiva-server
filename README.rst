@@ -76,7 +76,7 @@ Installation
 
   $ shiva-server
 
-* Go to http://127.0.0.1:9002/<resource> (See `Resources`_)
+* Go to http://127.0.0.1:9002/artists and http://127.0.0.1:9002/<resource> (See `Resources`_)
 
 
 ----------------
