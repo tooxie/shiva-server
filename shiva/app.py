@@ -47,5 +47,10 @@ api.add_resource(resources.ClientResource, '/clients', endpoint='client')
 def before_request():
     g.db = db
 
-if __name__ == '__main__':
+def main():
     app.run(host='0.0.0.0', port=9002, debug=True)
+
+
+if __name__ == '__main__':
+    main()
+
