@@ -46,20 +46,27 @@ Installation
 
 * Get the source::
 
-  .. code:: sh
+.. code:: sh
 
       $ git clone https://github.com/tooxie/shiva-server.git
       $ cd shiva-server
 
-* Install dependencies::
+* Create and activate your virtalenv (highly recommended)::
 
-  .. code:: sh
+.. code:: sh
 
-      $ pip install -r requirements.pip
+    $ virtualenv .
+    $ source bin/activate
+
+* Install::
+
+.. code:: sh
+
+    $ python setup.py develop
 
 * Rename shiva/config/local.py.example to local.py::
 
-  .. code:: sh
+.. code:: sh
 
       $ cp shiva/config/local.py.example shiva/config/local.py
 
@@ -67,54 +74,25 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Add shiva to the PYTHONPATH::
-
-  .. code:: sh
-
-      $ export PYTHONPATH=$PYTHONPATH:`pwd`
-
 * Create the database::
 
-  .. code:: sh
+.. code:: sh
 
       $ python -c "from shiva.app import db; db.create_all()"
 
 * Run the indexer::
 
-  .. code:: sh
+.. code:: sh
 
-      $ python indexer.py
+  $ shiva-indexer
 
 * Run the server::
 
-  .. code:: sh
+.. code:: sh
 
-      $ python shiva/app.py
+  $ shiva-server
 
 * Go to ``http://127.0.0.1:9002/<resource>`` (see `Resources`_).
-
-
-----------------
-Using virtualenv
-----------------
-
-Usually is a good idea to use virtualenv to keep each project isolated and
-avoid dependency conflicts. To do so you should follow the following steps
-after cloning the source and before installing the requirements:
-
-* Create the virtual environment::
-
-  .. code:: sh
-
-      $ virtualenv venv
-
-* Activate it::
-
-  .. code:: sh
-
-      $ source ./venv/bin/activate
-
-Then continue with the installation process as described previously.
 
 
 -----------------
