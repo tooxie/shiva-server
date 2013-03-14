@@ -62,10 +62,10 @@ class ID3Manager(object):
         if self.reader.tag.artist is None:
             self.reader.tag.artist = u''
 
-	if self.reader.tag.version != (2, 2, 0):
+        if self.reader.tag.version != (2, 2, 0):
             self.reader.tag.save(mp3_path)
-	else:
-	    print "MP3 Not Indexed, version ID3 version 2.2.0"
+        else:
+            print "MP3 Not Indexed, version ID3 version 2.2.0"
 
     def __getattribute__(self, attr):
         _super = super(ID3Manager, self)
