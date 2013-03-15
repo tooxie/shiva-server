@@ -62,7 +62,10 @@ class ID3Manager(object):
         if self.reader.tag.artist is None:
             self.reader.tag.artist = u''
 
-        self.reader.tag.save(mp3_path)
+        try:
+            self.reader.tag.save(mp3_path)
+        except (AttributeError, NotImplementedError), e:
+            print('[ERROR] %s' % e)
 
     def __getattribute__(self, attr):
         _super = super(ID3Manager, self)
