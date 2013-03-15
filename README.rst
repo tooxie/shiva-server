@@ -271,7 +271,7 @@ Fields
 
 * other_artists: A list with artists that are not in Shiva's database.
 
-  + mbid: MusicBrainz.com ID.
+  + mbid: MusicBrainz.org ID.
   + facebook_tour_dates_url: URI to BandsInTown's Facebook app for this artist.
   + image_url: URI to an image of the artist.
   + name: Name of the artist.
