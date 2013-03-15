@@ -43,8 +43,9 @@ class Indexer(object):
         if self.use_lastfm:
             import pylast
 
+            self.pylast = pylast
             api_key = config['LASTFM_API_KEY']
-            self.lastfm = pylast.LastFMNetwork(api_key=api_key)
+            self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
 
         if len(self.media_dirs) == 0:
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
@@ -63,17 +64,18 @@ class Indexer(object):
 
         return artist
 
-    def get_album(self, name):
+    def get_album(self, name, artist):
         if name in self.albums:
             return self.albums[name]
         else:
             release_year = self.get_release_year()
             cover = None
             if self.use_lastfm:
+                id3r = self.get_id3_reader()
                 _artist = self.lastfm.get_artist(artist.name)
                 _album = self.lastfm.get_album(_artist, id3r.album)
                 release_year = self.get_release_year(_album)
-                cover = _album.get_cover_image(size=pylast.COVER_EXTRA_LARGE)
+                cover = _album.get_cover_image(size=self.pylast.COVER_EXTRA_LARGE)
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
@@ -119,7 +121,7 @@ class Indexer(object):
         id3r = self.get_id3_reader()
 
         artist = self.get_artist(id3r.artist)
-        album = self.get_album(id3r.album)
+        album = self.get_album(id3r.album, artist)
 
         if artist is not None and artist not in album.artists:
             album.artists.append(artist)
