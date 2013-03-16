@@ -428,7 +428,7 @@ class ShowsResource(Resource):
 
     def get(self, artist_id=None, artist_slug=None):
         if not artist_id and not artist_slug:
-            return JSONResponse(404)
+            abort(404)
 
         if not artist_id and artist_slug:
             artist = Artist.query.filter_by(slug=artist_slug).first()
@@ -436,7 +436,7 @@ class ShowsResource(Resource):
             artist = Artist.query.get(artist_id)
 
         if not artist:
-            return JSONResponse(404)
+            abort(404)
 
         latitude = request.args.get('latitude')
         longitude = request.args.get('longitude')
@@ -549,7 +549,7 @@ class RandomResource(Resource):
         if get_resource and callable(get_resource):
             return get_resource()
 
-        return JSONResponse(404)
+        abort(404)
 
     def get_random_for(self, model, resource_name):
         from random import random
