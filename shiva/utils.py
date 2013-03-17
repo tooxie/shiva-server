@@ -41,99 +41,115 @@ def ignored(*exceptions):
         pass
 
 
-class ID3Manager(object):
-    def __init__(self, mp3_path):
-        import eyed3  # FIXME: Replace ASAP
+class MetadataManager(object):
+    """A format-agnostic metadata wrapper around Mutagen.
 
-        self.mp3_path = mp3_path
-        self.reader = eyed3.load(mp3_path)
+    This makes reading/writing audio metadata easy across all possible audio
+    formats by using properties for the different keys.
 
-        if not self.reader.tag:
-            self.reader.tag = eyed3.id3.Tag()
-            self.reader.tag.track_num = (None, None)
+    In order to persist changes to the metadata, the ``save()`` method needs to
+    be called.
 
-        if self.reader.tag.album is None:
-            self.reader.tag.album = u''
+    """
+    def __init__(self, filepath):
+        self._original_path = filepath
+        self.reader = mutagen.File(filepath, easy=True)
 
-        if self.reader.tag.artist is None:
-            self.reader.tag.artist = u''
+    # Metadata properties
 
-        try:
-            self.reader.tag.save(mp3_path)
-        except Exception, e:
-            print('[ERROR] %s' % e)
+    @property
+    def title(self):
+        return self._getter('title')
 
-    def __getattribute__(self, attr):
-        _super = super(ID3Manager, self)
-        try:
-            _getter = _super.__getattribute__('get_%s' % attr)
-        except AttributeError:
-            _getter = None
-        if _getter:
-            return _getter()
+    @property
+    def artist(self):
+        """The artist name."""
+        return self._getter('artist')
 
-        return super(ID3Manager, self).__getattribute__(attr)
+    @artist.setter
+    def artist(self, value):
+        self.reader['artist'] = value
 
-    def __setattr__(self, attr, value):
-        value = value.strip() if isinstance(value, (str, unicode)) else value
-        _setter = getattr(self, 'set_%s' % attr, None)
-        if _setter:
-            _setter(value)
+    @property
+    def album(self):
+        """The album name."""
+        return self._getter('album')
 
-        super(ID3Manager, self).__setattr__(attr, value)
+    @album.setter
+    def album(self, value):
+        self.reader['album'] = value
 
-    def is_valid(self):
-        if not self.reader.path:
-            return False
+    @property
+    def release_year(self):
+        """The album release year."""
+        return self._getter('date')
 
-        return True
+    @release_year.setter
+    def release_year(self, value):
+        self.reader['year'] = value
 
-    def get_path(self):
-        return self.mp3_path
+    @property
+    def track_number(self):
+        """The track number."""
+        return self._getter('tracknumber')
 
-    def same_path(self, path):
-        return path == self.mp3_path
+    @track_number.setter
+    def track_number(self, value):
+        self.reader['tracknumber'] = value
 
-    def get_artist(self):
-        return self.reader.tag.artist.strip()
+    @property
+    def genre(self):
+        """The music genre."""
+        return self._getter('genre')
 
-    def set_artist(self, name):
-        self.reader.tag.artist = name
-        self.reader.tag.save()
+    @genre.setter
+    def genre(self, value):
+        self.genre = value
 
-    def get_album(self):
-        return self.reader.tag.album.strip()
-
-    def set_album(self, name):
-        self.reader.tag.album = name
-        self.reader.tag.save()
-
-    def get_release_year(self):
-        rdate = self.reader.tag.release_date
-        return rdate.year if rdate else None
-
-    def set_release_year(self, year):
-        self.release_date.year = year
-        self.reader.tag.save()
-
-    def get_bitrate(self):
-        return self.reader.info.bit_rate[1]
-
-    def get_length(self):
+    @property
+    def length(self):
+        """The length of the song in seconds."""
         return self.reader.info.time_secs
 
-    def get_track_number(self):
-        return self.reader.tag.track_num[0]
+    @property
+    def bitrate(self):
+        """The audio bitrate."""
+        return self.reader.info.bitrate
 
-    def get_title(self):
-        if not self.reader.tag.title:
-            _title = raw_input('Song title: ').decode('utf-8').strip()
-            self.reader.tag.title = _title
-            self.reader.tag.save()
+    @property
+    def sample_rate(self):
+        """The audio sample rate."""
+        return self.reader.info.sample_rate
 
-        return self.reader.tag.title
+    @property
+    def filename(self):
+        """The file name of this audio file."""
+        return os.path.basename(self.reader.filename)
 
-    def get_size(self):
-        """ Computes the size (in bytes) of the file in filesystem. """
+    @property
+    def filepath(self):
+        """The absolute path to this audio file."""
+        return os.path.abspath(self.reader.filename)
 
-        return os.stat(self.reader.path).st_size
+    @property
+    def origpath(self):
+        """The original path with which this class was instantiated. This
+        function avoids a call to ``os.path``.  Usually you'll want to use
+        either :meth:`.filename` or :meth:`.filepath` instead."""
+        return self._original_path
+
+    @property
+    def filesize(self):
+        """The size of this audio file in the filesystem."""
+        return os.stat(self.reader.filename).st_size
+
+    # Helper functions
+
+    def _getter(self, attr, fallback=None):
+        """Return the first list item of the specified attribute or fall back
+        to a default value if attribute is not available."""
+        return self.reader[attr][0] if attr in self.reader else fallback
+
+    def save(self):
+        """Save changes to file metadata."""
+        self.reader.save()
