@@ -174,10 +174,6 @@ class Indexer(object):
                 else:
                     if self.is_track():
                         self.save_track()
-        else:
-            self.file_path = dir_name
-            if self.is_track():
-                self.save_track()
 
         return True
 
