@@ -34,6 +34,8 @@ class Indexer(object):
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
 
+        self.count = 0
+
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
         self.id3r = None
@@ -159,6 +161,10 @@ class Indexer(object):
     def walk(self, dir_name):
         """Recursively walks through a directory looking for tracks.
         """
+
+        self.count += 1
+        if self.count % 10 == 0:
+          self.session.commit()
 
         if os.path.isdir(dir_name):
             for name in os.listdir(dir_name):
