@@ -33,25 +33,24 @@ and per-artist basis, but does a lot of work automatically for you.
 Installation
 ============
 
-
 * Get the source:
 
-::
+  .. code:: sh
 
-    $ git clone https://github.com/tooxie/shiva-server.git
-    $ cd shiva-server
+      $ git clone https://github.com/tooxie/shiva-server.git
+      $ cd shiva-server
 
 * Install dependencies:
 
-::
+  .. code:: sh
 
-    $ pip install -r requirements.pip
+      $ pip install -r requirements.pip
 
 * Rename shiva/config/local.py.example to local.py:
 
-::
+  .. code:: sh
 
-    $ cp shiva/config/local.py.example shiva/config/local.py
+      $ cp shiva/config/local.py.example shiva/config/local.py
 
 * Edit it and configure the directories to scan for music.
 
@@ -59,29 +58,29 @@ Installation
 
 * Add shiva to the PYTHONPATH:
 
-::
+  .. code:: sh
 
-  $ export PYTHONPATH=$PYTHONPATH:`pwd`
+      $ export PYTHONPATH=$PYTHONPATH:`pwd`
 
 * Create the database:
 
-::
+  .. code:: sh
 
-  $ python -c "from shiva.app import db; db.create_all()"
+      $ python -c "from shiva.app import db; db.create_all()"
 
 * Run the indexer:
 
-::
+  .. code:: sh
 
-  $ python indexer.py
+      $ python indexer.py
 
 * Run the server:
 
-::
+  .. code:: sh
 
-  $ python shiva/app.py
+      $ python shiva/app.py
 
-* Go to http://127.0.0.1:5000/<resource> (See `Resources`_)
+* Go to ``http://127.0.0.1:5000/<resource>`` (see `Resources`_).
 
 
 ----------------
@@ -94,15 +93,15 @@ after cloning the source and before installing the requirements:
 
 * Create the virtual environment:
 
-::
+  .. code:: sh
 
-  $ virtualenv venv
+      $ virtualenv venv
 
 * Activate it:
 
-::
+  .. code:: sh
 
-  $ source ./venv/bin/activate
+      $ source ./venv/bin/activate
 
 Then continue with the installation process as described previously.
 
@@ -113,19 +112,19 @@ Indexer arguments
 
 The indexer receives the following command line arguments.
 
-* --lastfm
-* --nometadata
+* ``--lastfm``
+* ``--nometadata``
 
-If you set the *--lastfm* flag Shiva will retrieve artist and album images from
-Last.FM, but for this to work you need to get an API key (See `Prerequisites`_)
-and include it in your *local.py* config file.
+If you set the ``--lastfm`` flag Shiva will retrieve artist and album images
+from Last.FM, but for this to work you need to get an API key (see
+`Prerequisites`_) and include it in your ``local.py`` config file.
 
-The *--nometadata* option saves dummy tracks with only path information,
+The ``--nometadata`` option saves dummy tracks with only path information,
 ignoring the file's metadata. This means that album and artists will not be
 saved.
 
-If both flags are set, *--nometadata* will take precedence and *--lastfm* will
-be ignored.
+If both flags are set, ``--nometadata`` will take precedence and ``--lastfm``
+will be ignored.
 
 
 --------------------
@@ -133,27 +132,27 @@ Scanning directories
 --------------------
 
 To tell Shiva which directories to scan for music, you will have to configure
-your `shiva/config/local.py` file. There you will find a MEDIA_DIRS option
-where you need to supply `MediaDir` objects.
+your ``shiva/config/local.py`` file. There you will find a ``MEDIA_DIRS``
+option where you need to supply ``MediaDir`` objects.
 
-This object allows for media configuration. By instantiating a MediaDir class
-you can tell Shiva where to look for the media files and how to serve those
-files. It's possible to configure the system to look for files on a directory
-and serve those files through a different server.
+This object allows for media configuration. By instantiating a ``MediaDir``
+class you can tell Shiva where to look for the media files and how to serve
+those files. It's possible to configure the system to look for files on a
+directory and serve those files through a different server.
 
-::
+.. code:: python
 
     MediaDir(root='/srv/http', dirs=('/music', '/songs),
              url='http://localhost:8080/')
 
-Given that configuration Shiva will scan the directories /srv/http/music and
-/srv/http/songs for media files, but they will be served through
-http://localhost:8080/music/ and http://localhost:8080/songs/
+Given that configuration Shiva will scan the directories ``/srv/http/music``
+and ``/srv/http/songs`` for media files, but they will be served through
+``http://localhost:8080/music/`` and ``http://localhost:8080/songs/``.
 
 If just a dir is provided Shiva will serve it through the same instance. This
-is *NOT* recommended, but is useful for developing.
+is **NOT** recommended, but is useful for developing.
 
-::
+.. code:: python
 
     MediaDir('/home/fatmike/music')
 
@@ -163,7 +162,7 @@ For more information, check the source of `shiva/media.py`.
 Client
 ======
 
-* `Shiva-Client <https://github.com/tooxie/shiva-client>`_.
+* `Shiva-Client <https://github.com/tooxie/shiva-client>`_
 
 A web-based front-end built as a single page application using HTML5
 technologies. It includes its own test web server so you need not to install
@@ -181,26 +180,24 @@ Resources
 
 You have the following resources available:
 
-* /artists
-* /artist/<int:artist_id>
-* /artist/<int:artist_id>/shows
-* /albums
-* /album/<int:album_id>
-* /tracks
-* /track/<int:track_id>
-* /track/<int:track_id>/lyrics
+* ``/artists``
+* ``/artist/<int:artist_id>``
+* ``/artist/<int:artist_id>/shows``
+* ``/albums``
+* ``/album/<int:album_id>``
+* ``/tracks``
+* ``/track/<int:track_id>``
+* ``/track/<int:track_id>/lyrics``
 
 
 ----------------
 Artists Resource
 ----------------
 
+Example response for the request ``GET /artist/3``:
 
-Example request/response:
+.. code:: javascript
 
-::
-
-    GET /artist/3
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
@@ -214,28 +211,27 @@ Example request/response:
 Fields
 ------
 
-* download_uri: The URI to download this artist's tracks. (NOT IMPLEMENTED)
-* id: The object's ID.
-* image: Link to a photo. (Provided by last.fm)
-* name: Artist's name.
-* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+* ``download_uri``: The URI to download this artist's tracks. *(NOT IMPLEMENTED)*
+* ``id``: The object's ID.
+* ``image``: Link to a photo. (Provided by last.fm)
+* ``name``: The artist's name.
+* ``slug``: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`_
   of the artist's name.
-* uri: The URI of this resource's instance.
+* ``uri``: The URI of this resource's instance.
 
 
 --------------
 Shows Resource
 --------------
 
-Information provided by `BandsInTown <http://www.bandsintown.com/>`__. This is
+Information provided by `BandsInTown <http://www.bandsintown.com/>`_. This is
 the only resource that is not cached in the local database given to it's
 dynamic nature.
 
-Example request/response:
+Example response for the request ``GET /artist/1/shows``:
 
-::
+.. code:: javascript
 
-    GET /artist/1/shows
     [
         {
             "other_artists": [
@@ -269,34 +265,35 @@ Example request/response:
 Fields
 ------
 
-* other_artists: A list with artists that are not in Shiva's database.
+* ``other_artists``: A list with artists that are not in Shiva's database.
 
-  + mbid: MusicBrainz.org ID.
-  + facebook_tour_dates_url: URI to BandsInTown's Facebook app for this artist.
-  + image_url: URI to an image of the artist.
-  + name: Name of the artist.
+  + ``mbid``: MusicBrainz.org ID.
+  + ``facebook_tour_dates_ur``l: URI to BandsInTown's Facebook app for this
+    artist.
+  + ``image_url``: URI to an image of the artist.
+  + ``name``: Name of the artist.
 
-* artists: A list of artist resources.
-* tickets_left: A boolean representing the availability (or not) of tickets for
-  the concert.
-* title: The title of the event.
-* venue: A structure identifying the venue where the event takes place.
+* ``artists``: A list of artist resources.
+* ``tickets_left``: A boolean representing the availability (or not) of
+  tickets for the concert.
+* ``title``: The title of the event.
+* ``venue``: A structure identifying the venue where the event takes place.
 
-  + latitude: Venue's latitude.
-  + name: Venue's name.
-  + longitude: Venue's longitude.
+  + ``latitude``: Venue's latitude.
+  + ``name``: Venue's name.
+  + ``longitude``: Venue's longitude.
 
-* id: BandsInTown's ID for this event.
-* datetime: String representation of the date and time of the show.
+* ``id``: BandsInTown's ID for this event.
+* ``datetime``: String representation of the date and time of the show.
 
 
 Parameters
 ----------
 
-The Shows resource accepts, optionally, 2 pairs of parameters:
+The Shows resource accepts, optionally, two pairs of parameters:
 
-* *latitude* and *longitude*.
-* *country* and *city*.
+* ``latitude`` and ``longitude``
+* ``country`` and ``city``
 
 By providing one of this two pairs you can filter down the result list only to
 a city. If only one of the pair is provided (e.g., only city) will be ignored,
@@ -307,11 +304,10 @@ and if both pairs are provided, the coordinates will take precedence.
 Albums Resource
 ---------------
 
-Example request/response:
+Example response for the request ``GET /album/9``:
 
-::
+.. code:: javascript
 
-    GET /album/9
     {
         "artists": [
             {
@@ -336,28 +332,27 @@ Example request/response:
 Fields
 ------
 
-* artists: A list of the artists involved in that record.
-* cover: A link to an image of the album's cover. (Provided by last.fm)
-* download_uri: The URI to download this album. (NOT IMPLEMENTED)
-* id: The object's ID.
-* name: The album's name.
-* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+* ``artists``: A list of the artists involved in that record.
+* ``cover``: A link to an image of the album's cover. (Provided by last.fm)
+* ``download_uri``: The URI to download this album. (NOT IMPLEMENTED)
+* ``id``: The object's ID.
+* ``name``: The album's name.
+* ``slug``: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`_
   of the album's name.
-* uri: The URI of this resource's instance.
-* year: The release year of the album.
+* ``uri``: The URI of this resource's instance.
+* ``year``: The release year of the album.
 
 
 Filtering
 ---------
 
-The album list accepts an `artist` parameter in which case will filter the list
-of albums only to those corresponding to that artist.
+The album list accepts an ``artist`` parameter in which case will filter the
+list of albums only to those corresponding to that artist.
 
-Example request/response:
+Example response for the request ``GET /albums/?artist=7``:
 
-::
+.. code:: javascript
 
-    GET /albums/?artist=7
     [
         {
             "artists": [
@@ -396,11 +391,10 @@ Example request/response:
 Track Resource
 --------------
 
-Example request/response:
+Example response for the request ``GET /track/484``:
 
-::
+.. code:: javascript
 
-    GET /track/484
     {
 
         "number": 4,
@@ -426,35 +420,34 @@ Example request/response:
 Fields
 ------
 
-* album: The album to which this track belongs.
-* bitrate: In MP3s this value is directly proportional to the
-  `sound quality <https://en.wikipedia.org/wiki/Bit_rate#MP3>`__.
-* id: The object's ID.
-* length: The length in seconds of the track.
-* number: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`__
+* ``album``: The album to which this track belongs.
+* ``bitrate``: In MP3s this value is directly proportional to the `sound
+  quality <https://en.wikipedia.org/wiki/Bit_rate#MP3>`_.
+* ``id``: The object's ID.
+* ``length``: The length in seconds of the track.
+* ``number``: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`_
   of this track with respect to this album.
-* slug: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`__
+* ``slug``: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`_
   of the track's title.
-* title: The title of the track.
-* uri: The URI of this resource's instance.
-* stream_uri: The URI to access the file, according to the MEDIA_DIRS setting.
+* ``title``: The title of the track.
+* ``uri``: The URI of this resource's instance.
+* ``stream_uri``: The URI to access the file, according to the MEDIA_DIRS setting.
 
 
 Filtering
 ---------
 
-The track listing accepts 1 of 2 possible parameters to filter down the list
-only to those tracks corresponding to a given `album` or `artist`.
+The track listing accepts one of two possible parameters to filter down the
+list only to those tracks corresponding to a given ``album`` or ``artist``.
 
 
 By artist
 ~~~~~~~~~
 
-Example request/response:
+Example response for the request ``GET /tracks?artist=16``:
 
-::
+.. code:: javascript
 
-    GET /tracks?artist=16
     [
         {
             "number": 1,
@@ -498,9 +491,10 @@ Example request/response:
 By album
 ~~~~~~~~
 
-::
+Example response for the request ``GET /tracks?album=18``:
 
-    GET /tracks?album=18
+.. code:: javascript
+
     [
 
         {
@@ -546,11 +540,10 @@ By album
 Lyrics Resource
 ---------------
 
-Example request/response:
+Example response for the request ``GET /track/256/lyrics``:
 
-::
+.. code:: javascript
 
-    GET /track/256/lyrics
     {
         "track": {
             "id": 256,
@@ -566,11 +559,11 @@ Example request/response:
 Fields
 ------
 
-* id: The object's ID.
-* source_uri: The URI where the lyrics were fetched from.
-* text: The lyric's text.
-* track: The track for which the lyrics are.
-* uri: The URI of this resource's instance.
+* ``id``: The object's ID.
+* ``source_uri``: The URI where the lyrics were fetched from.
+* ``text``: The lyric's text.
+* ``track``: The track for which the lyrics are.
+* ``uri``: The URI of this resource's instance.
 
 
 Adding more lyric sources
@@ -579,9 +572,9 @@ Adding more lyric sources
 Everytime you request a lyric, Shiva checks if there's a lyric associated with
 that track in the database. If it's there it will immediately retrieve it,
 otherwise will iterate over a list of scrapers, asking each one of them if they
-can fetch it. This list is in your local config file and looks like:
+can fetch it. This list is in your local config file and looks like this:
 
-::
+.. code:: python
 
     SCRAPERS = {
         'lyrics': (
@@ -589,7 +582,7 @@ can fetch it. This list is in your local config file and looks like:
         ),
     }
 
-This will look for a class *ClassName*, in *shiva/lyrics/modulename.py*. If
+This will look for a class ``ClassName`` in ``shiva/lyrics/modulename.py``. If
 more scrapers are added, each one of them is called sequentially, until one of
 them finds the lyrics and the rest are not executed.
 
@@ -598,9 +591,9 @@ Adding scrapers
 ~~~~~~~~~~~~~~~
 
 If you want to add your own scraper just create a file under the lyrics
-directory, let's say *mylyrics.py* with this structure:
+directory, let's say ``mylyrics.py`` with this structure:
 
-::
+.. code:: python
 
     from shiva.lyrics import LyricScraper
 
@@ -620,7 +613,7 @@ directory, let's say *mylyrics.py* with this structure:
 
 And then add it to the scrapers list:
 
-::
+.. code:: python
 
     SCRAPERS = {
         'lyrics': (
@@ -629,32 +622,34 @@ And then add it to the scrapers list:
         ),
     }
 
-Remember that the fetch() method has to return True in case the lyrics were
-found or False otherwise. It must also store the lyrics in *self.lyrics* and
-the URL where they fetched from in *self.source*. That's where Shiva looks for
-the information.
+Remember that the ``fetch()`` method has to return ``True`` in case the lyrics
+were found or ``False`` otherwise. It must also store the lyrics in
+``self.lyrics`` and the URL where they fetched from in ``self.source``. That's
+where Shiva looks for the information.
 
 For more details check the source of the other scrapers.
 
 
------------------------
-The *fulltree* modifier
------------------------
+-------------------------
+The ``fulltree`` modifier
+-------------------------
 
-The 3 main resources accept a *fulltree* parameter when retrieving an intance.
+The three main resources accept a ``fulltree`` parameter when retrieving an
+instance.
 Those are:
 
-* /artist/<int:artist_id>
-* /album/<int:album_id>
-* /track/<int:track_id>
+* ``/artist/<int:artist_id>``
+* ``/album/<int:album_id>``
+* ``/track/<int:track_id>``
 
-Whenever you set *fulltree* to any value that evaluates to True (i.e., any
-string except 'false' and '0') Shiva will include not only the information of
-the object you are requesting, but also the child objects. Here's an example:
+Whenever you set ``fulltree`` to any value that evaluates to ``True`` (i.e.,
+any string except ``'false'`` and ``'0'``) Shiva will include not only the
+information of the object you are requesting, but also the child objects.
 
-::
+Here's an example response for the request ``GET /artist/2?fulltree=true``:
 
-    GET /artist/2?fulltree=true
+.. code:: javascript
+
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
@@ -721,8 +716,8 @@ the object you are requesting, but also the child objects. Here's an example:
     }
 
 
-Using *fulltree* on tracks
---------------------------
+Using ``fulltree`` on tracks
+----------------------------
 
 The behaviour on a track resource is a little different. In the previous
 example tracks are the leaves of the tree, but when the fulltree of a track is
@@ -740,14 +735,12 @@ All the listings are not paginated by default. Whenever you request a list of
 either *artists*, *albums* or *tracks* the server will retrieve every possible
 result unless otherwise specified.
 
-It is possible to paginate results by passing the *page_size* and the *page*
-parameters to the resource. They must both be present and be positive integers.
-If not,  they will both be ignored and the whole set of elements will be
-retrieved.
+It is possible to paginate results by passing the ``page_size`` and the
+``page`` parameters to the resource. They must both be present and be positive
+integers. If not,  they will both be ignored and the whole set of elements
+will be retrieved.
 
-::
-
-    GET /artists?page_size=10&page=3
+An example request is ``GET /artists?page_size=10&page=3``.
 
 
 --------------------------
@@ -756,11 +749,12 @@ Using slugs instead of IDs
 
 It is possible to use slugs instead of IDs when requesting an specific
 resource. It will work the exact same way because slugs, as IDs, are unique. An
-example on the /artist resource:
+example on the ``/artist`` resource:
 
-::
+Example response for the request ``GET /artist/eterna-inocencia``:
 
-    GET /artist/eterna-inocencia
+.. code:: javascript
+
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
@@ -775,11 +769,11 @@ example on the /artist resource:
 Uniqueness of slugs
 -------------------
 
-Slugs are generated from the following fields
+Slugs are generated from the following fields:
 
-* Artist.name
-* Album.name
-* Track.title
+* ``Artist.name``
+* ``Album.name``
+* ``Track.title``
 
 If the slug clashes with an existing one, then a hyphen and a unique ID will be
 appended to it. Due to the possibility of `using slugs instead of IDs`_, if an
@@ -795,16 +789,15 @@ You can request a random instance of a given resource for *artists*, *albums*
 or *tracks*. To do so you need to issue a GET request on one of the following
 resources:
 
-* /random/artist
-* /random/album
-* /random/track
+* ``/random/artist``
+* ``/random/album``
+* ``/random/track``
 
-They all will return a consistent structure containing *id* and *uri*, as
-follows:
+They all will return a consistent structure containing ``id`` and ``uri``, as
+in this example response for the request ``GET /random/artist``:
 
-::
+.. code:: javascript
 
-    GET /random/artist
     {
         "id": 3,
         "uri": "/artist/3"
@@ -821,13 +814,13 @@ worked on and improved/removed.
 
 * Only music files. No videos.
 
-  + Actually, only mp3 files.
+  + Actually, only MP3 files.
 
 * No users.
 
   + Therefore, no customization.
   + And no privacy (You can still use
-    `htpasswd <https://httpd.apache.org/docs/2.2/programs/htpasswd.html>`__,
+    `htpasswd <https://httpd.apache.org/docs/2.2/programs/htpasswd.html>`_,
     thou.)
 
 * No uploading of files.
@@ -846,7 +839,7 @@ Wish list
 
 * Index your music and videos.
 
-  + Which formats? Ogg? Wav?
+  + Which formats? Ogg Vorbis? FLAC? WAV?
 
 * Batch-edit ID3 tags.
 * Download your songs in batch.
