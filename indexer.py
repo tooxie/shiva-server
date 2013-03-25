@@ -74,11 +74,14 @@ class Indexer(object):
             release_year = self.get_release_year()
             cover = None
             if self.use_lastfm:
-                id3r = self.get_id3_reader()
-                _artist = self.lastfm.get_artist(artist.name)
-                _album = self.lastfm.get_album(_artist, id3r.album)
-                release_year = self.get_release_year(_album)
-                cover = _album.get_cover_image(size=self.pylast.COVER_EXTRA_LARGE)
+                try:
+                    _artist = self.lastfm.get_artist(artist.name)
+                    _album = self.lastfm.get_album(_artist, name)
+                    release_year = self.get_release_year(_album)
+                    cover = _album.get_cover_image(size=self.pylast.COVER_EXTRA_LARGE)
+                except self.pylast.WSError, error:
+                    #TODO: proper log error
+                    print error
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
