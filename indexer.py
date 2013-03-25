@@ -165,7 +165,7 @@ class Indexer(object):
 
         self.count += 1
         if self.count % 10 == 0:
-          self.session.commit()
+            self.session.commit()
 
         if os.path.isdir(dir_name):
             for name in os.listdir(dir_name):
@@ -173,12 +173,12 @@ class Indexer(object):
                 if os.path.isdir(self.file_path):
                     self.walk(self.file_path)
                 else:
-                    try:
-                        if self.is_track():
+                    if self.is_track():
+                        try:
                             self.save_track()
-                    except Exception, e:
-                        logging.warning("%s not imported - %s" % (
-                            self.file_path, e.message))
+                        except Exception, e:
+                            logging.warning("%s not imported - %s" % (
+                                self.file_path, e.message))
 
         return True
 
