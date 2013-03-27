@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import urllib2
 
 
@@ -120,6 +121,30 @@ class MediaDir(object):
             if self.dirs:
                 for music_dir in self.dirs:
                     dirs.append(music_dir)
+
+        return dirs
+
+    def _is_valid_path(self, path):
+        """Validates that the given path exists.
+        """
+
+        if not os.path.exists(path):
+            print("[WARNING] Path '%s' does not exist. Ignoring." % path)
+            return False
+
+        return True
+
+    def get_valid_dirs(self):
+        """Returns a list containing valid (existing) directories to look for
+        multimedia files.
+
+        """
+
+        dirs = []
+
+        for path in self.get_dirs():
+            if self._is_valid_path(path):
+                dirs.append(path)
 
         return dirs
 

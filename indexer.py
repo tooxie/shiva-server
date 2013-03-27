@@ -187,7 +187,7 @@ class Indexer(object):
 
     def run(self):
         for mobject in self.media_dirs:
-            for mdir in mobject.get_dirs():
+            for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
 
 if __name__ == '__main__':
