@@ -42,6 +42,9 @@ api.add_resource(resources.RandomResource, '/random/<resource_name>',
 # Clients
 api.add_resource(resources.ClientResource, '/clients', endpoint='client')
 
+# About
+api.add_resource(resources.AboutResource, '/about', endpoint='about')
+
 
 @app.before_request
 def before_request():
