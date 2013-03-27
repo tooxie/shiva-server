@@ -160,8 +160,8 @@ is **NOT** recommended, but is useful for developing.
 For more information, check the source of `shiva/media.py`.
 
 
-Client
-======
+Clients
+=======
 
 * `Shiva-Client <https://github.com/tooxie/shiva-client>`_
 
@@ -269,7 +269,7 @@ Fields
 * ``other_artists``: A list with artists that are not in Shiva's database.
 
   + ``mbid``: MusicBrainz.org ID.
-  + ``facebook_tour_dates_ur``l: URI to BandsInTown's Facebook app for this
+  + ``facebook_tour_dates_url``: URI to BandsInTown's Facebook app for this
     artist.
   + ``image_url``: URI to an image of the artist.
   + ``name``: Name of the artist.
