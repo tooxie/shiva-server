@@ -6,13 +6,18 @@ from shiva import models
 
 
 def download(track_id, ext):
+    """Reads the requested file and serves it as attachment. FOR TESTING
+    PURPOSES ONLY, DO NOT USE IN PRODUCTION.
+
     """
-    """
+
     if ext != 'mp3':
         return Response('', status=404)
+
     track = models.Track.query.get(track_id)
     if track is None:
         abort(404)
+
     track_file = open(track.get_path(), 'r')
     filename_header = (
         'Content-Disposition', 'attachment; filename="%s.mp3"' % track.title

@@ -105,7 +105,7 @@ class MediaDir(object):
         return path
 
     def get_dirs(self):
-        """Returns a tuple containing directories to look for multimedia files.
+        """Returns a list containing directories to look for multimedia files.
         """
 
         dirs = []
