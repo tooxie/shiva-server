@@ -14,9 +14,10 @@ Please read the LICENSE file distributed with this software.
 What is Shiva?
 ==============
 
-* An API to your music.
-* A music player.
-* A music collection organizer.
+The Mozilla Hacks blog kindly published a nice article that explains the ideas
+that inspire this software:
+`Shiva: More than a RESTful API to your music collection
+<https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to-your-music-collection/>`_
 
 
 Prerequisites
