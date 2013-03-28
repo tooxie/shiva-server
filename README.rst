@@ -169,6 +169,11 @@ A web-based front-end built as a single page application using HTML5
 technologies. It includes its own test web server so you need not to install
 one.
 
+
+------------------
+Wish you were here
+------------------
+
 Or you can also build your own client and put your own ideas into practice. I
 encourage you to do so. Build your own music player that meets your exact
 needs.
