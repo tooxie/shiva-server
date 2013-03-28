@@ -8,7 +8,7 @@ from flask.ext.restful import abort, fields, marshal, Resource
 from lxml import etree
 import requests
 
-from shiva import get_version
+from shiva import get_version, get_contributors
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, StreamURI)
 from shiva.models import Artist, Album, Track, Lyrics
@@ -595,8 +595,9 @@ class AboutResource(Resource):
         info = {
             'name': 'Shiva',
             'version': get_version(),
-            'uri': 'https://github.com/tooxie/shiva-server',
             'author': u'Alvaro Mouriño <alvaro@mourino.net>',
+            'uri': 'https://github.com/tooxie/shiva-server',
+            'contributors': get_contributors(),
         }
 
         return info
