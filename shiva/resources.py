@@ -585,6 +585,11 @@ class ClientResource(Resource):
                 'uri': 'https://github.com/tooxie/shiva-client',
                 'author': u'Alvaro Mouriño <alvaro@mourino.net>',
             },
+            {
+                'name': 'Shiva4J',
+                'uri': 'https://github.com/instant-solutions/shiva4j',
+                'author': u'David Andinger <david.andlinger@instant-it.at>',
+            },
         ]
 
         return clients

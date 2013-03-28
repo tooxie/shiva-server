@@ -169,6 +169,10 @@ A web-based front-end built as a single page application using HTML5
 technologies. It includes its own test web server so you need not to install
 one.
 
+* `Shiva4J <https://github.com/instant-solutions/shiva4j>`_
+
+Java implementation of the Shiva protocol. Runs on android.
+
 
 ------------------
 Wish you were here
