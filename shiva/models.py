@@ -3,7 +3,7 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from shiva.utils import slugify as do_slug, randstr, ID3Manager
+from shiva.utils import slugify as do_slug, randstr, MetadataManager
 
 db = SQLAlchemy()
 
@@ -46,7 +46,7 @@ class Artist(db.Model):
     __tablename__ = 'artists'
 
     pk = db.Column(db.Integer, primary_key=True)
-    # TODO: Update the files' ID3 tags when changing this info.
+    # TODO: Update the files' Metadata when changing this info.
     name = db.Column(db.String(128), nullable=False)
     slug = db.Column(db.String(128), unique=True, nullable=False)
     image = db.Column(db.String(256))
@@ -98,8 +98,7 @@ class Album(db.Model):
 
 
 class Track(db.Model):
-    """
-    """
+    """Track model."""
 
     __tablename__ = 'tracks'
 
@@ -110,6 +109,7 @@ class Track(db.Model):
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
     length = db.Column(db.Integer)
+    # TODO number should probably be renamed to track or track_number
     number = db.Column(db.Integer)
 
     lyrics = db.relationship('Lyrics', backref='track', uselist=False)
@@ -119,7 +119,7 @@ class Track(db.Model):
                           nullable=True)
 
     def __init__(self, path):
-        if type(path) not in (unicode, str, file):
+        if not isinstance(path, (basestring, file)):
             raise ValueError('Invalid parameter for Track. Path or File '
                              'expected, got %s' % type(path))
 
@@ -128,7 +128,7 @@ class Track(db.Model):
             _path = path.name
 
         self.set_path(_path)
-        self._id3r = None
+        self._meta = None
 
     def __setattr__(self, attr, value):
         if attr == 'title':
@@ -146,19 +146,18 @@ class Track(db.Model):
         if path != self.get_path():
             self.path = path
             if os.path.exists(self.get_path()):
-                self.file_size = self.get_id3_reader().size
-                self.bitrate = self.get_id3_reader().bitrate
-                self.length = self.get_id3_reader().length
-                self.number = self.get_id3_reader().track_number
-                self.title = self.get_id3_reader().title
+                meta = self.get_metadata_reader()
+                self.file_size = meta.filesize
+                self.bitrate = meta.bitrate
+                self.length = meta.length
+                self.number = meta.track_number
+                self.title = meta.title
 
-    def get_id3_reader(self):
-        """Returns an object with the ID3 info reader.
-        """
-        if not getattr(self, '_id3r', None):
-            self._id3r = ID3Manager(self.get_path())
-
-        return self._id3r
+    def get_metadata_reader(self):
+        """Return a MetadataManager object."""
+        if not getattr(self, '_meta', None):
+            self._meta = MetadataManager(self.get_path())
+        return self._meta
 
     def __repr__(self):
         return "<Track ('%s')>" % self.title

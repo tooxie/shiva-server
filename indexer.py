@@ -21,7 +21,7 @@ import sys
 
 from shiva import models as m
 from shiva.app import app, db
-from shiva.utils import ID3Manager
+from shiva.utils import MetadataManager
 
 q = db.session.query
 
@@ -38,7 +38,9 @@ class Indexer(object):
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
-        self.id3r = None
+
+        self._meta = None
+
         self.artists = {}
         self.albums = {}
 
@@ -49,7 +51,7 @@ class Indexer(object):
             api_key = config['LASTFM_API_KEY']
             self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
 
-        if len(self.media_dirs) == 0:
+        if not len(self.media_dirs):
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
                   'know where to look for.')
 
@@ -91,14 +93,14 @@ class Indexer(object):
 
     def get_release_year(self, lastfm_album=None):
         if not self.use_lastfm or not lastfm_album:
-            return self.get_id3_reader().release_year
+            return self.get_metadata_reader().release_year
 
         _date = lastfm_album.get_release_date()
         if not _date:
-            if not self.get_id3_reader().release_year:
+            if not self.get_metadata_reader().release_year:
                 return None
 
-            return self.get_id3_reader().release_year
+            return self.get_metadata_reader().release_year
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
@@ -117,17 +119,15 @@ class Indexer(object):
         track = m.Track(full_path)
         if self.no_metadata:
             self.session.add(track)
-
             return True
         else:
             if q(m.Track).filter_by(path=full_path).count():
                 return True
 
-        use_prev = None
-        id3r = self.get_id3_reader()
+        meta = self.get_metadata_reader()
 
-        artist = self.get_artist(id3r.artist)
-        album = self.get_album(id3r.album, artist)
+        artist = self.get_artist(meta.artist)
+        album = self.get_album(meta.album, artist)
 
         if artist is not None and artist not in album.artists:
             album.artists.append(artist)
@@ -136,13 +136,16 @@ class Indexer(object):
         track.artist = artist
         self.session.add(track)
 
+        self.count += 1
+        if self.count % 10 == 0:
+            self.session.commit()
+
         return True
 
-    def get_id3_reader(self):
-        if not self.id3r or not self.id3r.same_path(self.file_path):
-            self.id3r = ID3Manager(self.file_path)
-
-        return self.id3r
+    def get_metadata_reader(self):
+        if not self._meta or self._meta.origpath != self.file_path:
+            self._meta = MetadataManager(self.file_path)
+        return self._meta
 
     def is_track(self):
         """Tries to guess whether the file is a valid track or not.
@@ -156,38 +159,27 @@ class Indexer(object):
         ext = self.file_path[self.file_path.rfind('.') + 1:]
         if ext not in self.config.get('ACCEPTED_FORMATS', []):
             if not self.quiet:
-                print(self.file_path + "is not in ACCEPTED_FORMATS")
-            return False
-
-        if not self.get_id3_reader().is_valid():
-            if not self.quiet:
-                print(self.file_path + "fails id3 reader")
+                print(self.file_path + ' is not in ACCEPTED_FORMATS')
             return False
 
         return True
 
-    def walk(self, dir_name):
-        """Recursively walks through a directory looking for tracks.
-        """
+    def walk(self, target):
+        """Recursively walks through a directory looking for tracks."""
 
-        self.count += 1
-        if self.count % 10 == 0:
-            self.session.commit()
+        # If target is a file, try to save it as a track
+        if os.path.isfile(target):
+            self.file_path = target
+            if self.is_track():
+                self.save_track()
 
-        if os.path.isdir(dir_name):
-            for name in os.listdir(dir_name):
-                self.file_path = os.path.join(dir_name, name)
-                if os.path.isdir(self.file_path):
-                    self.walk(self.file_path)
-                else:
+        # Otherwise, recursively walk the directory looking for files
+        else:
+            for root, dirs, files in os.walk(target):
+                for name in files:
+                    self.file_path = os.path.join(root, name)
                     if self.is_track():
-                        try:
-                            self.save_track()
-                        except Exception, e:
-                            logging.warning("%s not imported - %s" % (
-                                self.file_path, e.message))
-
-        return True
+                        self.save_track()
 
     def run(self):
         for mobject in self.media_dirs:
@@ -195,7 +187,7 @@ class Indexer(object):
                 self.walk(mdir)
 
 
-def main():
+if __name__ == '__main__':
     from docopt import docopt
     arguments = docopt(__doc__)
 

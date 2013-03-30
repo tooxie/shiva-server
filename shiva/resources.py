@@ -499,8 +499,8 @@ class ShowModel(object):
         self.venue = json['venue']
 
     def split_artists(self, json):
-        if len(json) == 0:
-            ([], [])
+        if not len(json):
+            return ([], [])
         elif len(json) == 1:
             artist = Artist.query.filter_by(name=json[0]['name']).first()
 
