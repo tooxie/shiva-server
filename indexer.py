@@ -34,7 +34,7 @@ class Indexer(object):
         self.verbose = verbose
         self.quiet = quiet
 
-        self.count = 0
+        self.track_count = 0
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -140,8 +140,8 @@ class Indexer(object):
         if self.verbose:
             print 'Added track: %s' % full_path
 
-        self.count += 1
-        if self.count % 10 == 0:
+        self.track_count += 1
+        if self.track_count % 10 == 0:
             self.session.commit()
             if self.verbose:
                 print 'Writing to database...'
