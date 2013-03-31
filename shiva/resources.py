@@ -591,8 +591,7 @@ class ClientResource(Resource):
                 'name': 'Shiva4J',
                 'uri': 'https://github.com/instant-solutions/shiva4j',
                 'authors': [
-                    u'David Andinger <david.andlinger@instant-it.at>',
-                    u'Max Holzleitner <max.holzleitner@instant-it.at>',
+                    u'instant:solutions <office@instant-it.at>'
                 ],
             },
         ]
