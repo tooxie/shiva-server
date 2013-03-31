@@ -114,7 +114,7 @@ class MetadataManager(object):
     @property
     def length(self):
         """The length of the song in seconds."""
-        return self.reader.info.length
+        return int(round(self.reader.info.length))
 
     @property
     def bitrate(self):

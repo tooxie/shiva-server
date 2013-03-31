@@ -108,6 +108,7 @@ class Track(db.Model):
     slug = db.Column(db.String(128), unique=True)
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
+    # TODO could be float if number weren't converted to an int in metadata manager
     length = db.Column(db.Integer)
     # TODO number should probably be renamed to track or track_number
     number = db.Column(db.Integer)
