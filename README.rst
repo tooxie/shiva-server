@@ -23,6 +23,8 @@ that inspire this software:
 Prerequisites
 =============
 
+You need ``ffmpeg`` installed in your system.
+
 If you want Shiva to automatically fetch artists' images from Last.FM while
 indexing you are going to need an API key. You can get one at
 http://www.last.fm/api/account/create
@@ -166,7 +168,7 @@ Clients
 * `Shiva-Client <https://github.com/tooxie/shiva-client>`_
 
 A web-based front-end built as a single page application using HTML5
-technologies. It includes its own test web server so you need not to install
+technologies. It includes its own test web server so you don't need to install
 one.
 
 * `Shiva4J <https://github.com/instant-solutions/shiva4j>`_
@@ -401,7 +403,7 @@ Example response for the request ``GET /albums/?artist=7``:
 Track Resource
 --------------
 
-Example response for the request ``GET /track/484``:
+Example response for the request ``GET /track/510``:
 
 .. code:: javascript
 
@@ -422,7 +424,10 @@ Example response for the request ``GET /track/484``:
         "uri": "/track/510",
         "id": 510,
         "length": 180,
-        "stream_uri": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3"
+        "files": {
+            "audio/mp3": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
+            "audio/ogg": "/track/510/convert?mimetype=audio%2Fogg"
+        }
 
     }
 
@@ -441,7 +446,8 @@ Fields
   of the track's title.
 * ``title``: The title of the track.
 * ``uri``: The URI of this resource's instance.
-* ``stream_uri``: The URI to access the file, according to the MEDIA_DIRS setting.
+* ``files``: A list of URIs to access the files in the different formats,
+  according to the MEDIA_DIRS setting.
 
 
 Filtering
@@ -475,7 +481,10 @@ Example response for the request ``GET /tracks?artist=16``:
             "uri": "/track/523",
             "id": 523,
             "length": 189,
-            "stream_uri": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3"
+            "files": {
+                "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3",
+                "audio/ogg": "/track/523/convert?mimetype=audio%2Fogg"
+            }
         },
         {
             "number": 2,
@@ -493,7 +502,10 @@ Example response for the request ``GET /tracks?artist=16``:
             "uri": "/track/531",
             "id": 531,
             "length": 171,
-            "stream_uri": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3"
+            "files": {
+                "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3",
+                "audio/ogg": "/track/523/convert?mimetype=audio%2Fogg"
+            }
         }
     ]
 
@@ -513,7 +525,10 @@ Example response for the request ``GET /tracks?album=18``:
                 "uri": "/album/18"
             },
             "length": 132,
-            "stream_uri": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
+            "files": {
+                "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
+                "audio/ogg": "/track/277/convert?mimetype=audio%2Fogg"
+            }
             "number": 1,
             "title": "Shapes",
             "slug": "shapes",
@@ -531,7 +546,10 @@ Example response for the request ``GET /tracks?album=18``:
                 "uri": "/album/18"
             },
             "length": 118,
-            "stream_uri": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
+            "files": {
+                "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
+                "audio/ogg": "/track/281/convert?mimetype=audio%2Fogg"
+            }
             "number": 2,
             "title": "Stucked to The Ground",
             "slug": "stucked-to-the-ground",
@@ -690,7 +708,10 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                             "uri": "/album/2"
                         },
                         "length": 161,
-                        "stream_uri": "http://localhost:5000/track/27/download",
+                        "files": {
+                            "audio/mp3": "http://localhost:5000/track/27/download",
+                            "audio/ogg": "/track/27/convert?mimetype=audio%2Fogg"
+                        }
                         "number": 0,
                         "title": "02 - Rio Lujan",
                         "slug": "02-rio-lujan",
@@ -708,7 +729,10 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                             "uri": "/album/2"
                         },
                         "length": 262,
-                        "stream_uri": "http://localhost:5000/track/28/download",
+                        "files": {
+                            "audio/mp3": "http://localhost:5000/track/28/download",
+                            "audio/ogg": "/track/28/convert?mimetype=audio%2Fogg"
+                        }
                         "number": 0,
                         "title": "03 - Estoy herido en mi interior",
                         "slug": "03-estoy-herido-en-mi-interior",
@@ -816,6 +840,101 @@ in this example response for the request ``GET /random/artist``:
 You will have to issue another request to obtain the details of the instance.
 
 
+Format conversion
+=================
+
+Even though Shiva's indexer only supports MP3 files, it is possible to convert
+those files to serve them in different formats. For this you are going to need
+``ffmpeg`` installed in your system.
+
+If you have ``fmpeg`` compiled but not installed, you can give Shiva the path
+to the binary in a setting, in this format:
+
+.. code:: python
+
+    FFMPEG_PATH = '/usr/bin/ffmpeg'
+
+You will notice that track objects contain a ``files`` attribute:
+
+.. code:: javascript
+
+    {
+        "id": 510,
+        "uri": "/track/510",
+        "files": {
+            "audio/mp3": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
+            "audio/ogg": "/track/510/convert?mimetype=audio%2Fogg"
+        }
+    }
+
+In that attribute you will find a list of all the supported formats. Just
+follow the link of the format you need and Shiva will convert it if necessary
+and serve it for you. As a client, that's all you care about.
+
+But you may have noticed that the URI for the ``audio/ogg`` format goes through
+Shiva. This is because the file has not been yet converted, once you call that
+URI, Shiva will convert the file on the fly, cache it and redirect to the file.
+The next time the same track is requested, if the file exists it will be served
+through the file server instead of Shiva:
+
+.. code:: javascript
+
+    {
+        "id": 510,
+        "uri": "/track/510",
+        "files": {
+            "audio/mp3": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
+            "audio/ogg": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.ogg"
+        }
+    }
+
+It's completely transparent for the client. If you want an OGG file, you just
+follow the "audio/ogg" URI blindly, and you will get your file. The first time
+will take a little longer, though.
+
+
+--------------------
+Your converter sucks
+--------------------
+
+So, you don't want to use ``ffmpeg``, or you want to call it with different
+parameters, or chache files differently. That's ok, I won't take it personally.
+
+To overwrite the Converter class to use, just define it in your config:
+
+.. code:: python
+
+    from shiva.myconverter import MyBetterConverter
+
+    CONVERTER_CLASS = MyBetterConverter
+
+One option is to extend ``shiva.converter.Converter`` and overwrite the methods
+that offend you.
+
+The other option is to write a completely new Converter class. If you do so,
+make sure to have at least the following 3 methods:
+
+* ``exists_for_mimetype(MimeType mimetype)``: Checks if a cached version of the
+  file exists.
+* ``convert_to(MimeType mimetype)``: Converts to a different format.
+* ``get_dest_uri(MimeType mimetype)``: Retrieves the URI to the converted file.
+
+The ``shiva.resources.ConverterResource`` class makes use of them.
+
+
+------------------
+The MimeType class
+------------------
+
+All mimetypes are represented by a ``shiva.mimetype.MimeType`` class. The
+constructor receives the name of a mimetype, checks if it's valid, i.e. that
+it's in the ``MIMETYPES`` setting, and raises a InvalidMimeTypeError exception
+if it's not.
+
+It also holds information about the codecs used for audio and video, and the
+file extension.
+
+
 Assumptions
 ===========
 
@@ -831,7 +950,7 @@ worked on and improved/removed.
   + Therefore, no customization.
   + And no privacy (You can still use
     `htpasswd <https://httpd.apache.org/docs/2.2/programs/htpasswd.html>`_,
-    thou.)
+    though.)
 
 * No uploading of files.
 * No update of ID3 info when DB info changes.
