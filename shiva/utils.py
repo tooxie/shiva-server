@@ -64,7 +64,7 @@ class ID3Manager(object):
 
         try:
             self.reader.tag.save(mp3_path)
-        except (AttributeError, NotImplementedError), e:
+        except Exception, e:
             print('[ERROR] %s' % e)
 
     def __getattribute__(self, attr):
