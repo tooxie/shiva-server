@@ -155,18 +155,18 @@ class Indexer(object):
         return self._meta
 
     def is_track(self):
-        """Tries to guess whether the file is a valid track or not.
-        """
-        if os.path.isdir(self.file_path):
+        """Try to guess whether the file is a valid track or not."""
+        if not os.path.isfile(self.file_path):
             return False
 
         if '.' not in self.file_path:
             return False
 
-        ext = self.file_path[self.file_path.rfind('.') + 1:]
-        if ext not in self.config.get('ACCEPTED_FORMATS', []):
+        ext = self.file_path.rsplit('.', 1)[1]
+        if ext not in self.get_metadata_reader().VALID_FILE_EXTENSIONS:
             if not self.quiet:
-                print(self.file_path + ' is not in ACCEPTED_FORMATS')
+                msg = 'Skipped file with unknown file extension: %s'
+                print msg % self.file_path
             return False
 
         return True
