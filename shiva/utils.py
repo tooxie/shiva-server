@@ -1,26 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import re
 from random import random
 from hashlib import md5
-
-import translitcodec
-
-PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
-
-
-def slugify(text):
-    """Generates an ASCII-only slug."""
-    if not text:
-        return ''
-    result = []
-    text = text
-    for word in PUNCT_RE.split(text.lower()):
-        word = word.encode('translit/long')
-        if word:
-            result.append(word)
-
-    return unicode(u'-'.join(result))
 
 
 def randstr(length=None):
