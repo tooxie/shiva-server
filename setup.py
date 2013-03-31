@@ -13,14 +13,15 @@ setup(
     package_dir={'': '.'},
     packages=find_packages('.'),
     install_requires=[
-        'Flask==0.9',
+        'eyed3==0.7.1',
         'Flask-Restful==0.1.2',
         'Flask-SQLAlchemy==0.16',
-        'eyed3==0.7.1',
+        'Flask==0.9',
+        'lxml==3.1beta1',
+        'pyLast==0.5.11',
+        'python-slugify==0.0.3',
         'requests==1.0.4',
         'translitcodec==0.3',
-        'pyLast==0.5.11',
-        'lxml==3.1beta1'
     ],
     entry_points={
         'console_scripts': [
