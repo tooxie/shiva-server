@@ -113,16 +113,17 @@ class Indexer(object):
 
         full_path = self.file_path.decode('utf-8')
 
-        if self.verbose:
-            print(self.file_path)
-
         track = m.Track(full_path)
         if self.no_metadata:
             self.session.add(track)
-            return True
+            if self.verbose:
+                print 'Added track without metadata: %s' % full_path
+            return
         else:
             if q(m.Track).filter_by(path=full_path).count():
-                return True
+                if self.verbose:
+                    print 'Skipped existing track: %s' % full_path
+                return
 
         meta = self.get_metadata_reader()
 
@@ -136,11 +137,14 @@ class Indexer(object):
         track.artist = artist
         self.session.add(track)
 
+        if self.verbose:
+            print 'Added track: %s' % full_path
+
         self.count += 1
         if self.count % 10 == 0:
             self.session.commit()
-
-        return True
+            if self.verbose:
+                print 'Writing to database...'
 
     def get_metadata_reader(self):
         if not self._meta or self._meta.origpath != self.file_path:
