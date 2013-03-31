@@ -60,6 +60,22 @@ class MetadataManager(object):
         self._original_path = filepath
         self.reader = mutagen.File(filepath, easy=True)
 
+    # Static attributes
+
+    VALID_FILE_EXTENSIONS = [
+        'asf', 'wma',  # ASF
+        'flac',  # FLAC
+        'mp4', 'm4a', 'm4b', 'm4p',  # M4A
+        'ape',  # Monkey's Audio
+        'mp3',  # MP3
+        'mpc', 'mp+', 'mpp',  # Musepack
+        'spx',  # Ogg Speex
+        'ogg', 'oga',  # Ogg Vorbis / Theora
+        'tta',  # True Audio
+        'wv',  # WavPack
+        'ofr',  # OptimFROG
+    ]
+
     # Metadata properties
 
     @property
