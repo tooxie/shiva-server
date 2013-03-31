@@ -3,7 +3,8 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 
-from shiva.utils import slugify as do_slug, randstr, ID3Manager
+from slugify import slugify as do_slug
+from shiva.utils import randstr, ID3Manager
 
 db = SQLAlchemy()
 

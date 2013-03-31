@@ -3,8 +3,8 @@ import urllib2
 
 import requests
 import lxml.html
+from slugify import slugify
 
-from shiva.utils import slugify
 from shiva.lyrics import LyricScraper
 
 
