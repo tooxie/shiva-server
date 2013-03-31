@@ -1,4 +1,18 @@
 # -*- coding: utf-8 -*-
+"""Music indexer for the Shiva-Server API.
+Index your music collection and (optionally) retrieve album covers and artist
+pictures from Last.FM.
+
+Usage:
+    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata]
+
+Options:
+    -h, --help    Show this help message and exit
+    --lastfm      Retrieve artist and album covers from Last.FM API.
+    --nometadata  Don't read file's metadata when indexing.
+    -v --verbose  Show debugging messages about the progress.
+    -q --quiet    Suppress warnings.
+"""
 # K-Pg
 import logging
 from datetime import datetime
@@ -7,39 +21,26 @@ import sys
 
 from shiva import models as m
 from shiva.app import app, db
-from shiva.utils import ID3Manager
+from shiva.utils import MetadataManager
 
 q = db.session.query
 
-USAGE = """Usage: %s [-h] [--lastfm] [--nometadata]
-
-Music indexer for the Shiva-Server API.
-
-Index your music collection and (optionally) retrieve album covers and artist
-pictures from Last.FM.
-
-optional arguments:
-    -h, --help    Show this help message and exit
-    --lastfm      Retrieve artist and album covers from Last.FM API.
-    --nometadata  Don't read file's metadata when indexing.
-""" % sys.argv[0]
-
-if '--help' in sys.argv or '-h' in sys.argv:
-    print(USAGE)
-    sys.exit(0)
-
 
 class Indexer(object):
-    def __init__(self, config=None, use_lastfm=False, no_metadata=False):
+    def __init__(self, config=None, use_lastfm=False, no_metadata=False, verbose=False, quiet=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
+        self.verbose = verbose
+        self.quiet = quiet
 
         self.count = 0
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
-        self.id3r = None
+
+        self._meta = None
+
         self.artists = {}
         self.albums = {}
 
@@ -50,7 +51,7 @@ class Indexer(object):
             api_key = config['LASTFM_API_KEY']
             self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
 
-        if len(self.media_dirs) == 0:
+        if not len(self.media_dirs):
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
                   'know where to look for.')
 
@@ -92,14 +93,14 @@ class Indexer(object):
 
     def get_release_year(self, lastfm_album=None):
         if not self.use_lastfm or not lastfm_album:
-            return self.get_id3_reader().release_year
+            return self.get_metadata_reader().release_year
 
         _date = lastfm_album.get_release_date()
         if not _date:
-            if not self.get_id3_reader().release_year:
+            if not self.get_metadata_reader().release_year:
                 return None
 
-            return self.get_id3_reader().release_year
+            return self.get_metadata_reader().release_year
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
@@ -112,22 +113,22 @@ class Indexer(object):
 
         full_path = self.file_path.decode('utf-8')
 
-        print(self.file_path)
-
         track = m.Track(full_path)
         if self.no_metadata:
             self.session.add(track)
-
-            return True
+            if self.verbose:
+                print 'Added track without metadata: %s' % full_path
+            return
         else:
             if q(m.Track).filter_by(path=full_path).count():
-                return True
+                if self.verbose:
+                    print 'Skipped existing track: %s' % full_path
+                return
 
-        use_prev = None
-        id3r = self.get_id3_reader()
+        meta = self.get_metadata_reader()
 
-        artist = self.get_artist(id3r.artist)
-        album = self.get_album(id3r.album, artist)
+        artist = self.get_artist(meta.artist)
+        album = self.get_album(meta.album, artist)
 
         if artist is not None and artist not in album.artists:
             album.artists.append(artist)
@@ -136,73 +137,76 @@ class Indexer(object):
         track.artist = artist
         self.session.add(track)
 
-        return True
+        if self.verbose:
+            print 'Added track: %s' % full_path
 
-    def get_id3_reader(self):
-        if not self.id3r or not self.id3r.same_path(self.file_path):
-            self.id3r = ID3Manager(self.file_path)
+        self.count += 1
+        if self.count % 10 == 0:
+            self.session.commit()
+            if self.verbose:
+                print 'Writing to database...'
 
-        return self.id3r
+    def get_metadata_reader(self):
+        if not self._meta or self._meta.origpath != self.file_path:
+            self._meta = MetadataManager(self.file_path)
+        return self._meta
 
     def is_track(self):
-        """Tries to guess whether the file is a valid track or not.
-        """
-        if os.path.isdir(self.file_path):
+        """Try to guess whether the file is a valid track or not."""
+        if not os.path.isfile(self.file_path):
             return False
 
         if '.' not in self.file_path:
             return False
 
-        ext = self.file_path[self.file_path.rfind('.') + 1:]
-        if ext not in self.config.get('ACCEPTED_FORMATS', []):
-            return False
-
-        if not self.get_id3_reader().is_valid():
+        ext = self.file_path.rsplit('.', 1)[1]
+        if ext not in self.get_metadata_reader().VALID_FILE_EXTENSIONS:
+            if not self.quiet:
+                msg = 'Skipped file with unknown file extension: %s'
+                print msg % self.file_path
             return False
 
         return True
 
-    def walk(self, dir_name):
-        """Recursively walks through a directory looking for tracks.
-        """
+    def walk(self, target):
+        """Recursively walks through a directory looking for tracks."""
 
-        self.count += 1
-        if self.count % 10 == 0:
-            self.session.commit()
+        # If target is a file, try to save it as a track
+        if os.path.isfile(target):
+            self.file_path = target
+            if self.is_track():
+                self.save_track()
 
-        if os.path.isdir(dir_name):
-            for name in os.listdir(dir_name):
-                self.file_path = os.path.join(dir_name, name)
-                if os.path.isdir(self.file_path):
-                    self.walk(self.file_path)
-                else:
+        # Otherwise, recursively walk the directory looking for files
+        else:
+            for root, dirs, files in os.walk(target):
+                for name in files:
+                    self.file_path = os.path.join(root, name)
                     if self.is_track():
-                        try:
-                            self.save_track()
-                        except Exception, e:
-                            logging.warning("%s not imported - %s" % (
-                                self.file_path, e.message))
-
-        return True
+                        self.save_track()
 
     def run(self):
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
 
+
 if __name__ == '__main__':
-    use_lastfm = '--lastfm' in sys.argv
-    no_metadata = '--nometadata' in sys.argv
+    from docopt import docopt
+    arguments = docopt(__doc__)
+
+    use_lastfm = arguments['--lastfm']
+    no_metadata = arguments['--nometadata']
 
     if no_metadata:
         use_lastfm = False
 
     if use_lastfm and not app.config.get('LASTFM_API_KEY'):
-        print('ERROR: You need a Last.FM API key if you set the --lastfm '
+        sys.stderr.write('ERROR: You need a Last.FM API key if you set the --lastfm '
               'flag.\n')
         sys.exit(1)
 
-    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata)
+    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata, verbose=arguments['--verbose'], quiet=arguments['--quiet'])
     lola.run()
 
     # Petit performance hack: Every track will be added to the session but they
