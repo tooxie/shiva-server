@@ -405,6 +405,28 @@ class LyricsResource(Resource):
         return JSONResponse(200)
 
 
+class ConvertResource(Resource):
+    """
+    """
+
+    def get(self, track_id):
+        track = Track.query.get(track_id)
+        mimename = request.args.get('mimetype')
+        if not track:
+            abort(404)
+
+        converter = get_converter()(track.path)
+        mimetype = MimeType(request.args.get('mimetype'))
+
+        if mimetype:
+            if not converter.exists_for_mimetype(mimetype):
+                converter.convert_to(mimetype)
+
+        uri = converter.get_dest_uri(mimetype)
+
+        return JSONResponse(status=301, headers={'Location': uri})
+
+
 class ShowsResource(Resource):
     """
     """
