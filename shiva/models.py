@@ -10,7 +10,7 @@ db = SQLAlchemy()
 __all__ = ('db', 'Artist', 'Album', 'Track')
 
 
-def slugify(model, field_name):
+def slugify(text, instance):
     """
     Given the instance of a model and a field to slugify, generates a unique
     slug. If a standard one exists in the DB, or the generated slug is
@@ -19,21 +19,21 @@ def slugify(model, field_name):
 
     """
 
-    slug = do_slug(getattr(model, field_name, ''))
+    slug = do_slug(text)
     if not slug:
         slug = randstr(6)
+
     try:
         is_int = isinstance(int(slug), int)
     except ValueError:
         is_int = False
 
-    exists = bool(model.__class__.query.filter_by(slug=slug).count())
+    exists = bool(instance.__class__.query.filter_by(slug=slug).count())
 
     if is_int or exists:
-        extra = model.pk
-        if not extra:
-            extra = randstr(6)
-
+        # FIXME: In specific cases is finding itself as a duplicate.
+        # Investigate.
+        extra = instance.pk or randstr(6)
         slug += u'-%s' % extra
 
     return slug
@@ -56,7 +56,7 @@ class Artist(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Artist, self).__setattr__('slug', slugify(self, 'name'))
+            super(Artist, self).__setattr__('slug', slugify(value, self))
 
         super(Artist, self).__setattr__(attr, value)
 
@@ -89,7 +89,7 @@ class Album(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Album, self).__setattr__('slug', slugify(self, 'name'))
+            super(Album, self).__setattr__('slug', slugify(value, self))
 
         super(Album, self).__setattr__(attr, value)
 
@@ -133,7 +133,7 @@ class Track(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'title':
-            super(Track, self).__setattr__('slug', slugify(self, 'title'))
+            super(Track, self).__setattr__('slug', slugify(value, self))
 
         super(Track, self).__setattr__(attr, value)
 
