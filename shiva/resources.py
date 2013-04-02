@@ -2,11 +2,15 @@
 from datetime import datetime
 import logging
 import urllib2
-
-from flask import request, Response, redirect, current_app as app, g
-from flask.ext.restful import abort, fields, marshal, Resource
 from lxml import etree
 import requests
+
+from werkzeug.security import generate_password_hash
+from flask import request, Response, redirect, current_app as app, g
+from flask.ext.restful import abort, fields, marshal, Resource
+from flask_restful import reqparse
+
+
 
 from shiva import get_version, get_contributors
 from shiva.converter import get_converter
@@ -14,13 +18,25 @@ from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, TrackFiles)
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
-from shiva.models import Artist, Album, Track, Lyrics
+from shiva.models import Artist, Album, Track, Lyrics, User, UntrustedUser
+from shiva.utils import generate_id, slugify
+
+
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
 DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
+
+ACTIVATION_LINK = '{activation-link: http://localhost:9002/createUser/'
+
+
+def abort_if_not_exist(resource):
+    """
+    """
+    if not resource:
+        abort(404)
 
 
 class JSONResponse(Response):
@@ -631,3 +647,112 @@ class AboutResource(Resource):
         }
 
         return info
+
+
+class UserResource(Resource):
+    """
+    """
+
+    route_base = 'users'
+    resource_fields = {
+        'id': fields.Integer(attribute='pk'),
+        'name': fields.String,
+        'mail': fields.String,
+        'slug': fields.String,
+    }
+
+    def get(self, user_id=None, user_slug=None):
+        if not user_id and not user_slug:
+            return list(self.get_all())
+
+        if not user_id and user_slug:
+            user = self.get_by_slug(user_slug)
+        else:
+            user = self.get_one(user_id)
+
+        if full_tree():
+            return self.get_full_tree(user)
+
+        return marshal(user, self.resource_fields)
+
+    def get_all(self):
+        for user in paginate(User.query.order_by(User.name)):
+            yield marshal(user, self.resource_fields)
+
+    def get_one(self, user_id):
+        user = User.query.get(user_id)
+        abort_if_not_exist(user)
+        return user
+
+    def get_by_slug(self, user_slug):
+        user = User.query.filter_by(slug=user_slug).first()
+        abort_if_not_exist(user)
+        return user
+
+    def get_full_tree(self, user):
+        _user = marshal(user, self.resource_fields)
+        return _user
+
+    def delete(self, user_id=None):
+        if not user_id:
+            return JSONResponse(405)
+        user = User.query.get(user_id)
+        abort_if_not_exist(user)
+        g.db.session.delete(user)
+        g.db.session.commit()
+        return {}, 204
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=str)
+        parser.add_argument('mail', type=str)
+        parser.add_argument('password', type=str)
+        fields = parser.parse_args()
+        user = UntrustedUser.query.filter_by(name=fields["name"]).first()
+        if (user):
+            return '{ Error: User created but not activated. }', 409
+        user = UntrustedUser.query.filter_by(mail=fields["mail"]).first()
+        if (user):
+            return '{ Error: Mail in use. }', 409
+        user = User.query.filter_by(name=fields["name"]).first()
+        if (user):
+            return '{ Error: Username already exists. }', 409
+        user = User.query.filter_by(mail=fields["mail"]).first()
+        if (user):
+            return '{ Error: Mail in use. }', 409
+
+        codestr = generate_id(fields['name'])
+        hashed_password = generate_password_hash(fields['password'])
+        untrusted_user = UntrustedUser(name=fields["name"],
+                                       mail=fields["mail"],
+                                       password=hashed_password,
+                                       code=codestr)
+
+        g.db.session.add(untrusted_user)
+        g.db.session.commit()
+        #this code will be sent by email to activate/create user
+        return ACTIVATION_LINK + codestr+' }', 201
+
+
+class CreateUserResource(Resource):
+    """
+    """
+
+    route_base = 'createUser'
+    resource_fields = {
+        'id': fields.Integer(attribute='pk'),
+        'name': fields.String,
+        'mail': fields.String,
+    }
+
+    def get(self, code=None):
+        abort_if_not_exist(code)
+        untrusted_user = UntrustedUser.query.filter_by(code=code).first()
+        abort_if_not_exist(untrusted_user)
+        generated_slug = slugify(untrusted_user.name)
+        user = User(name=untrusted_user.name, mail=untrusted_user.mail,
+                    slug=generated_slug, password=untrusted_user.password)
+        g.db.session.delete(untrusted_user)
+        g.db.session.add(user)
+        g.db.session.commit()
+        return marshal(user, self.resource_fields)

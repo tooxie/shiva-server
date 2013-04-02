@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import binascii
 from random import random
 from hashlib import md5
 
 import translitcodec
 
 PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
+
+
+def generate_id(text):
+    return binascii.b2a_hex(os.urandom(7)) + text + \
+        binascii.b2a_hex(os.urandom(4))
 
 
 def slugify(text):

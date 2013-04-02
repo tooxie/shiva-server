@@ -47,6 +47,13 @@ api.add_resource(resources.ClientResource, '/clients', endpoint='client')
 # About
 api.add_resource(resources.AboutResource, '/about', endpoint='about')
 
+#Users
+api.add_resource(resources.UserResource, '/users',
+                 '/user/<int:user_id>', '/user/<user_slug>',
+                 endpoint='user')
+#Users
+api.add_resource(resources.CreateUserResource, '/createUser/<code>',
+                 endpoint='createUser')
 
 @app.before_request
 def before_request():
