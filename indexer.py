@@ -38,6 +38,8 @@ class Indexer(object):
         self.verbose = verbose
 
         self.count = 0
+        self.file_count = 0
+        self.track_count = 0
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -186,7 +188,9 @@ class Indexer(object):
                 if os.path.isdir(self.file_path):
                     self.walk(self.file_path)
                 else:
+                    self.file_count += 1
                     if self.is_track():
+                        self.track_count += 1
                         try:
                             self.save_track()
                         except Exception, e:
@@ -199,6 +203,8 @@ class Indexer(object):
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
+        if self.verbose:
+            print 'Examined', self.file_count, 'files,', self.track_count, 'tracks.'
 
 if __name__ == '__main__':
     use_lastfm = '--lastfm' in sys.argv
