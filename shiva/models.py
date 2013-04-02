@@ -180,3 +180,29 @@ class Lyrics(db.Model):
 
     def __repr__(self):
         return "<Lyrics ('%s')>" % self.track.title
+
+
+class User(db.Model):
+#TODO: fk to playlists,friends
+    __tablename__ = 'users'
+    pk = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), unique=True, nullable=False)
+    mail = db.Column(db.String(128), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+    slug = db.Column(db.String(128), nullable=False)
+
+    def __repr__(self):
+        return '<User: %s>' % self.name
+
+
+class UntrustedUser(db.Model):
+
+    __tablename__ = 'untrustedUsers'
+    pk = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    mail = db.Column(db.String(128), unique=True, nullable=False)
+    password = db.Column(db.String(128), unique=False, nullable=False)
+    code = db.Column(db.String(128), nullable=False)
+
+    def __repr__(self):
+        return '<UntrustedUser: %s>' % self.name
