@@ -11,7 +11,7 @@ from shiva.utils import ID3Manager
 
 q = db.session.query
 
-USAGE = """Usage: %s [-h] [--lastfm] [--nometadata]
+USAGE = """Usage: %s [-h] [--lastfm] [--nometadata] [-v] [--verbose]
 
 Music indexer for the Shiva-Server API.
 
@@ -22,6 +22,7 @@ optional arguments:
     -h, --help    Show this help message and exit
     --lastfm      Retrieve artist and album covers from Last.FM API.
     --nometadata  Don't read file's metadata when indexing.
+    -v, --verbose Show debugging messages about the progress.
 """ % sys.argv[0]
 
 if '--help' in sys.argv or '-h' in sys.argv:
@@ -30,12 +31,16 @@ if '--help' in sys.argv or '-h' in sys.argv:
 
 
 class Indexer(object):
-    def __init__(self, config=None, use_lastfm=False, no_metadata=False):
+    def __init__(self, config=None, use_lastfm=False, no_metadata=False,
+                 verbose=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
+        self.verbose = verbose
 
         self.count = 0
+        self.file_count = 0
+        self.track_count = 0
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -53,6 +58,10 @@ class Indexer(object):
         if len(self.media_dirs) == 0:
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
                   'know where to look for.')
+
+        if len(config.get('ACCEPTED_FORMATS', [])) == 0:
+            print("Remember to set the ACCEPTED_FORMATS option, "
+                  "otherwise I don't know what files are suitable.")
 
     def get_artist(self, name):
         if name in self.artists:
@@ -155,9 +164,13 @@ class Indexer(object):
 
         ext = self.file_path[self.file_path.rfind('.') + 1:]
         if ext not in self.config.get('ACCEPTED_FORMATS', []):
+            if self.verbose:
+                print(self.file_path + " is not in ACCEPTED_FORMATS")
             return False
 
         if not self.get_id3_reader().is_valid():
+            if self.verbose:
+                print(self.file_path + " fails id3 reader")
             return False
 
         return True
@@ -176,7 +189,9 @@ class Indexer(object):
                 if os.path.isdir(self.file_path):
                     self.walk(self.file_path)
                 else:
+                    self.file_count += 1
                     if self.is_track():
+                        self.track_count += 1
                         try:
                             self.save_track()
                         except Exception, e:
@@ -189,10 +204,14 @@ class Indexer(object):
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
+        if self.verbose:
+            print 'Examined {0} files, {1} tracks'.format(self.file_count,
+                                                          self.track_count)
 
 if __name__ == '__main__':
     use_lastfm = '--lastfm' in sys.argv
     no_metadata = '--nometadata' in sys.argv
+    verbose = '--verbose' in sys.argv or '-v' in sys.argv
 
     if no_metadata:
         use_lastfm = False
@@ -202,7 +221,8 @@ if __name__ == '__main__':
               'flag.\n')
         sys.exit(1)
 
-    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata)
+    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata,
+                   verbose=verbose)
     lola.run()
 
     # Petit performance hack: Every track will be added to the session but they
