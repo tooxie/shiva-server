@@ -31,7 +31,8 @@ if '--help' in sys.argv or '-h' in sys.argv:
 
 
 class Indexer(object):
-    def __init__(self, config=None, use_lastfm=False, no_metadata=False, verbose=False):
+    def __init__(self, config=None, use_lastfm=False, no_metadata=False,
+                 verbose=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
@@ -59,8 +60,8 @@ class Indexer(object):
                   'know where to look for.')
 
         if len(config.get('ACCEPTED_FORMATS', [])) == 0:
-            print("Remember to set the ACCEPTED_FORMATS option, otherwise I don't "
-                  'know what files are suitable.')
+            print("Remember to set the ACCEPTED_FORMATS option, "
+                  "otherwise I don't know what files are suitable.")
 
     def get_artist(self, name):
         if name in self.artists:
@@ -204,7 +205,8 @@ class Indexer(object):
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
         if self.verbose:
-            print 'Examined', self.file_count, 'files,', self.track_count, 'tracks.'
+            print 'Examined {0} files, {1} tracks'.format(self.file_count,
+                                                          self.track_count)
 
 if __name__ == '__main__':
     use_lastfm = '--lastfm' in sys.argv
@@ -219,7 +221,8 @@ if __name__ == '__main__':
               'flag.\n')
         sys.exit(1)
 
-    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata, verbose=verbose)
+    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata,
+                   verbose=verbose)
     lola.run()
 
     # Petit performance hack: Every track will be added to the session but they
