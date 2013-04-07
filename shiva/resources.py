@@ -22,7 +22,12 @@ logger = logging.getLogger(__name__)
 
 
 class Resource(restful.Resource):
-    method_decorators = [allow_origins]   # applies to all inherited resources
+    def __new__(cls, *args, **kwargs):
+        if app.config.get('CORS_ENABLED') is True:
+            # Applies to all inherited resources
+            cls.method_decorators = [allow_origins]
+
+        return super(Resource, cls).__new__(cls, *args, **kwargs)
 
 
 class JSONResponse(Response):
