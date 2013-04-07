@@ -22,9 +22,11 @@ def allow_origins(func=None, custom_origins=None):
             # Actual headers are added in `after_request`, unless it's an
             # OPTIONS request.
             if origins == '*':
-                g.cors = True
+                g.cors = '*'
+            elif origin in origins:
+                g.cors = origin
             else:
-                g.cors = origin in origins
+                g.cors = False
 
             if request.method == 'OPTIONS':
                 response = make_response('ok')

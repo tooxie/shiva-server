@@ -57,9 +57,7 @@ def before_request():
 @app.after_request
 def after_request(response):
     if getattr(g, 'cors', False):
-        response.headers['Access-Control-Allow-Origin'] = (
-            request.headers['Origin']
-        )
+        response.headers['Access-Control-Allow-Origin'] = g.cors
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
