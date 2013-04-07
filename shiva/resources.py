@@ -20,10 +20,6 @@ from shiva.models import Artist, Album, Track, Lyrics
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
-                       'Vinyl_Close_Up.jpg')
-DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
-
 
 class Resource(restful.Resource):
     method_decorators = [allow_origins]   # applies to all inherited resources
@@ -91,15 +87,16 @@ class ArtistResource(Resource):
     """
     """
 
-    resource_fields = {
-        'id': fields.Integer(attribute='pk'),
-        'name': fields.String,
-        'slug': fields.String,
-        'uri': InstanceURI('artist'),
-        'download_uri': DownloadURI('artist'),
-        'image': fields.String(default=DEFAULT_ARTIST_IMAGE),
-        'events_uri': fields.String(attribute='events'),
-    }
+    def get_resource_fields(self):
+        return {
+            'id': fields.Integer(attribute='pk'),
+            'name': fields.String,
+            'slug': fields.String,
+            'uri': InstanceURI('artist'),
+            'download_uri': DownloadURI('artist'),
+            'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
+            'events_uri': fields.String(attribute='events'),
+        }
 
     def get(self, artist_id=None, artist_slug=None):
         if not artist_id and not artist_slug:
@@ -113,11 +110,11 @@ class ArtistResource(Resource):
         if full_tree():
             return self.get_full_tree(artist)
 
-        return marshal(artist, self.resource_fields)
+        return marshal(artist, self.get_resource_fields())
 
     def get_all(self):
         for artist in paginate(Artist.query.order_by(Artist.name)):
-            yield marshal(artist, self.resource_fields)
+            yield marshal(artist, self.get_resource_fields())
 
     def get_one(self, artist_id):
         artist = Artist.query.get(artist_id)
@@ -136,7 +133,7 @@ class ArtistResource(Resource):
         return artist
 
     def get_full_tree(self, artist):
-        _artist = marshal(artist, self.resource_fields)
+        _artist = marshal(artist, self.get_resource_fields())
         _artist['albums'] = []
 
         albums = AlbumResource()
@@ -164,19 +161,20 @@ class AlbumResource(Resource):
     """
     """
 
-    resource_fields = {
-        'id': fields.Integer(attribute='pk'),
-        'name': fields.String,
-        'slug': fields.String,
-        'year': fields.Integer,
-        'uri': InstanceURI('album'),
-        'artists': ManyToManyField(Artist, {
+    def get_resource_fields(self):
+        return {
             'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('artist'),
-        }),
-        'download_uri': DownloadURI('album'),
-        'cover': fields.String(default=DEFAULT_ALBUM_COVER),
-    }
+            'name': fields.String,
+            'slug': fields.String,
+            'year': fields.Integer,
+            'uri': InstanceURI('album'),
+            'artists': ManyToManyField(Artist, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('artist'),
+            }),
+            'download_uri': DownloadURI('album'),
+            'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
+        }
 
     def get(self, album_id=None, album_slug=None):
         if not album_id and not album_slug:
@@ -190,7 +188,7 @@ class AlbumResource(Resource):
         if full_tree():
             return self.get_full_tree(album)
 
-        return marshal(album, self.resource_fields)
+        return marshal(album, self.get_resource_fields())
 
     def get_many(self):
         artist_pk = request.args.get('artist')
@@ -202,7 +200,7 @@ class AlbumResource(Resource):
 
         queryset = albums.order_by(Album.year, Album.name, Album.pk)
         for album in paginate(queryset):
-            yield marshal(album, self.resource_fields)
+            yield marshal(album, self.get_resource_fields())
 
     def get_one(self, album_id):
         album = Album.query.get(album_id)
@@ -221,7 +219,7 @@ class AlbumResource(Resource):
         return album
 
     def get_full_tree(self, album):
-        _album = marshal(album, self.resource_fields)
+        _album = marshal(album, self.get_resource_fields())
         _album['tracks'] = []
 
         tracks = TracksResource()
@@ -249,24 +247,25 @@ class TracksResource(Resource):
     """
     """
 
-    resource_fields = {
-        'id': fields.Integer(attribute='pk'),
-        'uri': InstanceURI('track'),
-        'files': TrackFiles,
-        'bitrate': fields.Integer,
-        'length': fields.Integer,
-        'title': fields.String,
-        'slug': fields.String,
-        'artist': ForeignKeyField(Artist, {
+    def get_resource_fields(self):
+        return {
             'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('artist'),
-        }),
-        'album': ForeignKeyField(Album, {
-            'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('album'),
-        }),
-        'number': fields.Integer,
-    }
+            'uri': InstanceURI('track'),
+            'files': TrackFiles,
+            'bitrate': fields.Integer,
+            'length': fields.Integer,
+            'title': fields.String,
+            'slug': fields.String,
+            'artist': ForeignKeyField(Artist, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('artist'),
+            }),
+            'album': ForeignKeyField(Album, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('album'),
+            }),
+            'number': fields.Integer,
+        }
 
     def get(self, track_id=None, track_slug=None):
         if not track_id and not track_slug:
@@ -280,7 +279,7 @@ class TracksResource(Resource):
         if full_tree():
             return self.get_full_tree(track, include_scraped=True)
 
-        return marshal(track, self.resource_fields)
+        return marshal(track, self.get_resource_fields())
 
     # TODO: Pagination
     def get_many(self):
@@ -296,7 +295,7 @@ class TracksResource(Resource):
 
         queryset = tracks.order_by(Track.album_pk, Track.number, Track.pk)
         for track in paginate(queryset):
-            yield marshal(track, self.resource_fields)
+            yield marshal(track, self.get_resource_fields())
 
     def get_one(self, track_id):
         track = Track.query.get(track_id)
@@ -326,7 +325,7 @@ class TracksResource(Resource):
 
         """
 
-        _track = marshal(track, self.resource_fields)
+        _track = marshal(track, self.get_resource_fields())
 
         if include_scraped:
             lyrics = LyricsResource()
@@ -355,16 +354,17 @@ class LyricsResource(Resource):
     """
     """
 
-    resource_fields = {
-        'id': fields.Integer(attribute='pk'),
-        'uri': InstanceURI('lyrics'),
-        'text': fields.String,
-        'source_uri': fields.String(attribute='source'),
-        'track': ForeignKeyField(Track, {
+    def get_resource_fields(self):
+        return {
             'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('track'),
-        }),
-    }
+            'uri': InstanceURI('lyrics'),
+            'text': fields.String,
+            'source_uri': fields.String(attribute='source'),
+            'track': ForeignKeyField(Track, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('track'),
+            }),
+        }
 
     def get(self, track_id=None, track_slug=None):
         if not track_id and not track_slug:
@@ -379,7 +379,7 @@ class LyricsResource(Resource):
 
     def get_for(self, track):
         if track.lyrics:
-            return marshal(track.lyrics, self.resource_fields)
+            return marshal(track.lyrics, self.get_resource_fields())
 
         try:
             lyrics = get_lyrics(track)
@@ -390,7 +390,7 @@ class LyricsResource(Resource):
         if not lyrics:
             abort(404)
 
-        return marshal(lyrics, self.resource_fields)
+        return marshal(lyrics, self.get_resource_fields())
 
     def post(self, track_id):
         text = request.form.get('text', None)
@@ -439,22 +439,23 @@ class ShowsResource(Resource):
     """
     """
 
-    resource_fields = {
-        'id': fields.String,
-        'artists': ManyToManyField(Artist, {
-            'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('artist'),
-        }),
-        'other_artists': fields.List(fields.Raw),
-        'datetime': fields.DateTime,
-        'title': fields.String,
-        'tickets_left': Boolean,
-        'venue': fields.Nested({
-            'latitude': fields.String,
-            'longitude': fields.String,
-            'name': fields.String,
-        }),
-    }
+    def get_resource_fields(self):
+        return {
+            'id': fields.String,
+            'artists': ManyToManyField(Artist, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('artist'),
+            }),
+            'other_artists': fields.List(fields.Raw),
+            'datetime': fields.DateTime,
+            'title': fields.String,
+            'tickets_left': Boolean,
+            'venue': fields.Nested({
+                'latitude': fields.String,
+                'longitude': fields.String,
+                'name': fields.String,
+            }),
+        }
 
     def get(self, artist_id=None, artist_slug=None):
         if not artist_id and not artist_slug:
@@ -506,7 +507,8 @@ class ShowsResource(Resource):
             return
 
         for event in response.json():
-            yield marshal(ShowModel(artist_name, event), self.resource_fields)
+            yield marshal(ShowModel(artist_name, event),
+                          self.get_resource_fields())
 
 
 class ShowModel(object):
