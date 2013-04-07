@@ -7,3 +7,4 @@ pyLast==0.5.11
 lxml==3.1beta1
 mutagen==1.21
 docopt==0.6.1
+python-dateutil==2.1

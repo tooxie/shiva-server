@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import datetime
 from random import random
 from hashlib import md5
 
 import translitcodec  # don't remove!
 import mutagen
+from dateutil import parser as date_parser
 
 PUNCT_RE = re.compile(r'[\t !"#$%&\'()*\-/<=>?@\[\\\]^_`{|},.]+')
 
@@ -103,7 +105,11 @@ class MetadataManager(object):
     @property
     def release_year(self):
         """The album release year."""
-        return self._getter('date')
+        DEFAULT_DATE = datetime.datetime(datetime.MINYEAR, 1, 1)
+        date = date_parser.parse(self._getter('date', ''), default=DEFAULT_DATE).date()
+        if date != DEFAULT_DATE:
+            return date.year
+        return ''
 
     @release_year.setter
     def release_year(self, value):
