@@ -1,7 +1,6 @@
 from functools import wraps
 from flask import g, request, make_response
 from flask import current_app as app
-import flask.ext.restful as restful
 
 
 def allow_origins(func=None, custom_origins=None):
@@ -18,10 +17,7 @@ def allow_origins(func=None, custom_origins=None):
             # `origins=app.config.get('ALLOWED_ORIGINS', [])` should really be
             # the default option in `def allow_origins` but that would use
             # `app` outside of the application context
-            if custom_origins == None:
-                origins = app.config.get('ALLOWED_ORIGINS', [])
-            else:
-                origins = custom_origins
+            origins = custom_origins or app.config.get('ALLOWED_ORIGINS', [])
 
             # Actual headers are added in `after_request`, unless it's an
             # OPTIONS request.
@@ -41,7 +37,3 @@ def allow_origins(func=None, custom_origins=None):
         return wrapped(func)
     else:
         return wrapped
-
-
-class Resource(restful.Resource):
-    method_decorators = [allow_origins]   # applies to all inherited resources

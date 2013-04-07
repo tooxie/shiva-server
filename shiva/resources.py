@@ -15,13 +15,19 @@ from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
-from shiva.helper import Resource
+from shiva.helper import allow_origins
+import flask.ext.restful as restful
+
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
 DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
+
+
+class Resource(restful.Resource):
+    method_decorators = [allow_origins]   # applies to all inherited resources
 
 
 class JSONResponse(Response):
