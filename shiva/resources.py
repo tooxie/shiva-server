@@ -3,8 +3,9 @@ from datetime import datetime
 import logging
 import urllib2
 
-from flask import request, Response, redirect, current_app as app, g
-from flask.ext.restful import abort, fields, marshal, Resource
+from flask import request, Response, current_app as app, g
+from flask.ext.restful import abort, fields, marshal
+import flask.ext.restful as restful
 from lxml import etree
 import requests
 
@@ -15,12 +16,17 @@ from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
+from shiva.helper import allow_origins
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
 DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
+
+
+class Resource(restful.Resource):
+    method_decorators = [allow_origins]   # applies to all inherited resources
 
 
 class JSONResponse(Response):

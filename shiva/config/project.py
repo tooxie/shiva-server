@@ -20,3 +20,7 @@ MIMETYPES = {
         },
     },
 }
+
+# `ALLOWED_ORIGINS` may be `"*"` to allow all origins, `[]` to disable CORS,
+# or multiple allowed domains formatted as a list of strings.
+ALLOWED_ORIGINS = '*'
