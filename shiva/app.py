@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, g
+from flask import Flask, g, request
 from flask.ext.restful import Api
 
 from shiva.models import db
@@ -7,6 +7,7 @@ from shiva import resources, views
 
 app = Flask(__name__)
 app.config.from_object('shiva.config')
+
 
 db.app = app
 db.init_app(app)
@@ -51,6 +52,16 @@ api.add_resource(resources.AboutResource, '/about', endpoint='about')
 @app.before_request
 def before_request():
     g.db = db
+
+
+@app.after_request
+def after_request(response):
+    if getattr(g, 'cors', False):
+        response.headers['Access-Control-Allow-Origin'] = (
+            request.headers['Origin']
+        )
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9002, debug=True)

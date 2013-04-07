@@ -3,8 +3,8 @@ from datetime import datetime
 import logging
 import urllib2
 
-from flask import request, Response, redirect, current_app as app, g
-from flask.ext.restful import abort, fields, marshal, Resource
+from flask import request, Response, current_app as app, g
+from flask.ext.restful import abort, fields, marshal
 from lxml import etree
 import requests
 
@@ -15,6 +15,7 @@ from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
+from shiva.helper import Resource
 
 logger = logging.getLogger(__name__)
 

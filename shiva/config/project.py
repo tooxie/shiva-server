@@ -20,3 +20,5 @@ MIMETYPES = {
         },
     },
 }
+
+ALLOWED_ORIGINS = '*'
