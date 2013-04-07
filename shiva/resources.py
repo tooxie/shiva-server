@@ -11,12 +11,12 @@ import requests
 
 from shiva import get_version, get_contributors
 from shiva.converter import get_converter
+from shiva.decorators import allow_origins
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, TrackFiles)
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
-from shiva.helper import allow_origins
 
 logger = logging.getLogger(__name__)
 
