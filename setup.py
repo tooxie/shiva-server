@@ -20,6 +20,7 @@ setup(
         'lxml==3.1beta1',
         'mutagen==1.21',
         'pyLast==0.5.11',
+        'python-dateutil==2.1',
         'python-slugify==0.0.3',
         'requests==1.0.4',
         'translitcodec==0.3',
