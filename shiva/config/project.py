@@ -26,6 +26,8 @@ DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
 
 # https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
 CORS_ENABLED = False
-# `CORS_ALLOWED_ORIGINS` may be `"*"` to allow all origins, `[]` to disable
-# CORS, or multiple allowed domains formatted as a list of strings.
+# CORS_ALLOWED_ORIGINS accepts the following values:
+# The string '*' to allow all origins
+# An specific domain: 'google.com'
+# A tuple of strings to allow multiple domains: ('google.com', 'napster.com')
 CORS_ALLOWED_ORIGINS = '*'
