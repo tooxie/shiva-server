@@ -195,18 +195,22 @@ if __name__ == '__main__':
     from docopt import docopt
     arguments = docopt(__doc__)
 
-    use_lastfm = arguments['--lastfm']
-    no_metadata = arguments['--nometadata']
+    kwargs = {
+        'use_lastfm': arguments['--lastfm'],
+        'no_metadata': arguments['--nometadata'],
+        'verbose': arguments['--verbose'],
+        'quiet': arguments['--quiet'],
+    }
 
-    if no_metadata:
-        use_lastfm = False
+    if kwargs['no_metadata']:
+        kwargs['use_lastfm'] = False
 
-    if use_lastfm and not app.config.get('LASTFM_API_KEY'):
+    if kwargs['use_lastfm'] and not app.config.get('LASTFM_API_KEY'):
         sys.stderr.write('ERROR: You need a Last.FM API key if you set the --lastfm '
               'flag.\n')
         sys.exit(1)
 
-    lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata, verbose=arguments['--verbose'], quiet=arguments['--quiet'])
+    lola = Indexer(app.config, **kwargs)
     lola.run()
 
     # Petit performance hack: Every track will be added to the session but they
