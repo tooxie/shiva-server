@@ -7,7 +7,7 @@ from shiva.utils import slugify as do_slug, randstr, MetadataManager
 
 db = SQLAlchemy()
 
-__all__ = ('db', 'Artist', 'Album', 'Track')
+__all__ = ('db', 'Artist', 'Album', 'Track', 'Lyrics')
 
 
 def slugify(model, field_name):
