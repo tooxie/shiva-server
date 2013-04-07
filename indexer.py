@@ -4,12 +4,13 @@ Index your music collection and (optionally) retrieve album covers and artist
 pictures from Last.FM.
 
 Usage:
-    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata]
+    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
 
 Options:
     -h, --help    Show this help message and exit
     --lastfm      Retrieve artist and album covers from Last.FM API.
     --nometadata  Don't read file's metadata when indexing.
+    --reindex     Remove all existing data from the database before indexing.
     -v --verbose  Show debugging messages about the progress.
     -q --quiet    Suppress warnings.
 """
@@ -30,7 +31,7 @@ q = db.session.query
 
 class Indexer(object):
     def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 verbose=False, quiet=False):
+                 reindex=False, verbose=False, quiet=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
@@ -57,6 +58,13 @@ class Indexer(object):
         if not len(self.media_dirs):
             print("Remember to set the MEDIA_DIRS option, otherwise I don't "
                   'know where to look for.')
+
+        if reindex:
+            models = [m.Artist, m.Album, m.Track, m.Lyrics]
+            for model in models:
+                print('Deleting all rows from %s model...' % model.__name__)
+                model.query.delete()
+            self.session.commit()
 
     def get_artist(self, name):
         if name in self.artists:
@@ -200,6 +208,7 @@ def main():
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
+        'reindex': arguments['--reindex'],
         'verbose': arguments['--verbose'],
         'quiet': arguments['--quiet'],
     }
