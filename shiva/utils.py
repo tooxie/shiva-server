@@ -6,7 +6,7 @@ from hashlib import md5
 from contextlib import contextmanager
 
 import mutagen
-from dateutil import parser as date_parser
+import dateutil.parser
 
 
 def randstr(length=None):
@@ -85,10 +85,11 @@ class MetadataManager(object):
     @property
     def release_year(self):
         """The album release year."""
-        DEFAULT_DATE = datetime.datetime(datetime.MINYEAR, 1, 1)
-        date = date_parser.parse(self._getter('date', ''), default=DEFAULT_DATE).date()
-        if date != DEFAULT_DATE:
-            return date.year
+        default_date = datetime.datetime(datetime.MINYEAR, 1, 1)
+        date = self._getter('date', '')
+        parsed_date = dateutil.parser.parse(date, default=default_date)
+        if parsed_date != default_date:
+            return parsed_date.year
         return None
 
     @release_year.setter
