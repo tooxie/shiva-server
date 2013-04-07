@@ -3,50 +3,21 @@ from datetime import datetime
 import logging
 import urllib2
 
-from flask import request, Response, current_app as app, g
+from flask import request, current_app as app, g
 from flask.ext.restful import abort, fields, marshal
-import flask.ext.restful as restful
 from lxml import etree
 import requests
 
 from shiva import get_version, get_contributors
 from shiva.converter import get_converter
-from shiva.decorators import allow_origins
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, TrackFiles)
+from shiva.http import Resource, JSONResponse
 from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
 
 logger = logging.getLogger(__name__)
-
-
-class Resource(restful.Resource):
-    def __new__(cls, *args, **kwargs):
-        if app.config.get('CORS_ENABLED') is True:
-            # Applies to all inherited resources
-            cls.method_decorators = [allow_origins]
-
-        return super(Resource, cls).__new__(cls, *args, **kwargs)
-
-
-class JSONResponse(Response):
-    """
-    A subclass of flask.Response that sets the Content-Type header by default
-    to "application/json".
-
-    """
-
-    def __init__(self, status=200, **kwargs):
-        params = {
-            'headers': [],
-            'mimetype': 'application/json',
-            'response': '',
-            'status': status,
-        }
-        params.update(kwargs)
-
-        super(JSONResponse, self).__init__(**params)
 
 
 def full_tree():
