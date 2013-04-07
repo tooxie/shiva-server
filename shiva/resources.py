@@ -18,7 +18,6 @@ from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
 from shiva.helper import allow_origins
 
-
 logger = logging.getLogger(__name__)
 
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'

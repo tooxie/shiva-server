@@ -8,7 +8,6 @@ from shiva import resources, views
 app = Flask(__name__)
 app.config.from_object('shiva.config')
 
-
 db.app = app
 db.init_app(app)
 
