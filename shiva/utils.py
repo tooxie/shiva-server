@@ -109,7 +109,7 @@ class MetadataManager(object):
         date = date_parser.parse(self._getter('date', ''), default=DEFAULT_DATE).date()
         if date != DEFAULT_DATE:
             return date.year
-        return ''
+        return None
 
     @release_year.setter
     def release_year(self, value):
