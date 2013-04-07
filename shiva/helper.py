@@ -5,9 +5,10 @@ from flask import current_app as app
 
 def allow_origins(func=None, custom_origins=None):
     """
-    Add headers for Cross-origin resource sharing based on `ALLOWED_ORIGINS`
-    in config, or parameters passed to the decorator. `ALLOWED_ORIGINS` can be
-    a list of allowed origins or `"*"` to allow all origins.
+    Add headers for Cross-origin resource sharing based on
+    `CORS_ALLOWED_ORIGINS` in config, or parameters passed to the decorator.
+    `CORS_ALLOWED_ORIGINS` can be a list of allowed origins or `"*"` to allow
+    all origins.
 
     """
 
@@ -16,10 +17,11 @@ def allow_origins(func=None, custom_origins=None):
         def decorated(*args, **kwargs):
             origin = request.headers.get('Origin')
 
-            # `origins=app.config.get('ALLOWED_ORIGINS', [])` should really be
-            # the default option in `def allow_origins` but that would use
-            # `app` outside of the application context
-            origins = custom_origins or app.config.get('ALLOWED_ORIGINS', [])
+            # `origins=app.config.get('CORS_ALLOWED_ORIGINS', [])` should
+            # really be the default option in `def allow_origins` but that
+            # would use `app` outside of the application context
+            origins = custom_origins or \
+                app.config.get('CORS_ALLOWED_ORIGINS', [])
 
             # Actual headers are added in `after_request`, unless it's an
             # OPTIONS request.
