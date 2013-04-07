@@ -5,6 +5,7 @@ import urllib2
 
 from flask import request, Response, current_app as app, g
 from flask.ext.restful import abort, fields, marshal
+import flask.ext.restful as restful
 from lxml import etree
 import requests
 
@@ -16,7 +17,6 @@ from shiva.lyrics import get_lyrics
 from shiva.mimetype import MimeType
 from shiva.models import Artist, Album, Track, Lyrics
 from shiva.helper import allow_origins
-import flask.ext.restful as restful
 
 
 logger = logging.getLogger(__name__)
