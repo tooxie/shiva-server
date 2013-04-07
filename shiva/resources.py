@@ -494,7 +494,7 @@ class ShowsResource(Resource):
         }
 
         _location = urllib2.quote('%s, %s' % location) if location else \
-                'use_geoip'
+            'use_geoip'
 
         bit_uri = '&'.join((bit_uri, '='.join(('location', _location))))
 
