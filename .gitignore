@@ -3,3 +3,10 @@
 *.pyc
 *~
 .*.sw*
+
+# virtualenv
+bin/
+include/
+lib/
+local/
+shiva.egg-info/

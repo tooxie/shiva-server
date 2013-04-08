@@ -32,26 +32,41 @@ http://www.last.fm/api/account/create
 This makes the whole indexing slower because issues a request on a per-album
 and per-artist basis, but does a lot of work automatically for you.
 
+You will need C headers for libxml. On Ubuntu::
+
+    sudo apt-get install libxml2-dev libxslt-dev
+
+On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the headers with::
+
+    brew install libxml2 libxslt
+
 
 Installation
 ============
 
-* Get the source:
+* Get the source::
 
-  .. code:: sh
+.. code:: sh
 
       $ git clone https://github.com/tooxie/shiva-server.git
       $ cd shiva-server
 
-* Install dependencies:
+* Create and activate your virtalenv (highly recommended)::
 
-  .. code:: sh
+.. code:: sh
 
-      $ pip install -r requirements.pip
+    $ virtualenv .
+    $ source bin/activate
 
-* Rename shiva/config/local.py.example to local.py:
+* Install::
 
-  .. code:: sh
+.. code:: sh
+
+    $ python setup.py develop
+
+* Rename shiva/config/local.py.example to local.py::
+
+.. code:: sh
 
       $ cp shiva/config/local.py.example shiva/config/local.py
 
@@ -59,54 +74,25 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Add shiva to the PYTHONPATH:
+* Create the database::
 
-  .. code:: sh
-
-      $ export PYTHONPATH=$PYTHONPATH:`pwd`
-
-* Create the database:
-
-  .. code:: sh
+.. code:: sh
 
       $ python -c "from shiva.app import db; db.create_all()"
 
-* Run the indexer:
+* Run the indexer::
 
-  .. code:: sh
+.. code:: sh
 
-      $ python indexer.py
+  $ shiva-indexer
 
-* Run the server:
+* Run the server::
 
-  .. code:: sh
+.. code:: sh
 
-      $ python shiva/app.py
+  $ shiva-server
 
-* Go to ``http://127.0.0.1:9002/<resource>`` (see `Resources`_).
-
-
-----------------
-Using virtualenv
-----------------
-
-Usually is a good idea to use virtualenv to keep each project isolated and
-avoid dependency conflicts. To do so you should follow the following steps
-after cloning the source and before installing the requirements:
-
-* Create the virtual environment:
-
-  .. code:: sh
-
-      $ virtualenv venv
-
-* Activate it:
-
-  .. code:: sh
-
-      $ source ./venv/bin/activate
-
-Then continue with the installation process as described previously.
+* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See `Resources`_)
 
 
 -----------------
@@ -639,7 +625,7 @@ directory, let's say ``mylyrics.py`` with this structure:
 
             return True
 
-And then add it to the scrapers list:
+And then add it to the scrapers list::
 
 .. code:: python
 
