@@ -73,8 +73,19 @@ class Indexer(object):
                   'know where to look for.')
 
         if reindex:
-            # TODO: This drops the entire DB. Ask for confirmation.
+            if not self.quiet:
+                print('Dropping database...')
+
+            confirmed = raw_input('This will destroy all the information. '
+                                  'Proceed? [y/N] ') in ('y', 'Y')
+            if not confirmed:
+                print('Aborting.')
+                sys.exit(1)
+
             db.drop_all()
+
+            if not self.quiet:
+                print('Recreating database...')
             db.create_all()
 
     def get_artist(self, name):
