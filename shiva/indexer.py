@@ -190,7 +190,8 @@ class Indexer(object):
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
 
-if __name__ == '__main__':
+
+def main():
     use_lastfm = '--lastfm' in sys.argv
     no_metadata = '--nometadata' in sys.argv
 
@@ -208,3 +209,7 @@ if __name__ == '__main__':
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
     lola.session.commit()
+
+
+if __name__ == '__main__':
+    main()
