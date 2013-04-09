@@ -4,6 +4,7 @@ import urllib
 from flask.ext.restful import fields, marshal
 
 from shiva.converter import get_converter
+from shiva.media import get_mimetypes
 
 
 class InstanceURI(fields.String):
@@ -22,19 +23,20 @@ class TrackFiles(fields.Raw):
     """
 
     def output(self, key, track):
-        converter = get_converter()(track.path)
+        ConverterClass = get_converter()
+        convert_uri = '/track/%s/convert?%s'
         paths = {}
 
-        for mimetype in converter.get_mimetypes():
-            if converter.exists_for_mimetype(mimetype):
-                paths[mimetype.name] = converter.get_dest_uri(mimetype)
+        for mimetype in get_mimetypes():
+            converter = ConverterClass(track.path, mimetype)
+            if converter.exists():
+                paths[str(mimetype)] = converter.get_dest_uri()
             else:
                 # HACK: Not very happy about this code because it includes a
                 # GET parameter. I think it shouldn't. But for now is good
                 # enough. FIXME.
-                get_params = urllib.urlencode({'mimetype': mimetype.name})
-                paths[mimetype.name] = '/track/%s/convert?%s' % (track.pk,
-                                                                 get_params)
+                get_params = urllib.urlencode({'mimetype': str(mimetype)})
+                paths[str(mimetype)] = convert_uri % (track.pk, get_params)
 
         return paths
 

@@ -4,7 +4,8 @@ import subprocess
 
 from flask import current_app as app
 
-from shiva.mimetype import MimeType
+from shiva.exceptions import InvalidMimeTypeError
+from shiva.media import MimeType
 
 def get_converter():
     ConverterClass = app.config.get('CONVERTER_CLASS', Converter)
@@ -20,9 +21,10 @@ class Converter(object):
 
     """
 
-    def __init__(self, path):
+    def __init__(self, path, mimetype):
         self.path = path
         self.mimetypes = self.get_mimetypes()
+        self.set_mimetype(mimetype)
 
     def get_mimetypes(self):
         """
@@ -31,9 +33,29 @@ class Converter(object):
 
         """
 
-        mimetypes = app.config.get('MIMETYPES', {}).get('audio', {})
-        for mimetype, data in mimetypes.iteritems():
-            yield MimeType(mimetype)
+        return app.config.get('MIMETYPES', [])
+
+    def set_mimetype(self, mimetype):
+        """
+        Sets the mimetype or raises an InvalidMimeTypeError exception if it's
+        not found in the settings.
+        """
+
+        mimetype_object = None
+        if issubclass(mimetype.__class__, MimeType):
+            mimetype_object = mimetype
+        else:
+            for _mime in self.mimetypes:
+                if hasattr(_mime, 'matches') and callable(_mime.matches):
+                    if _mime.matches(mimetype):
+                        mimetype_object = _mime
+
+        if mimetype_object:
+            self.fullpath = None
+            self.uri = None
+            self.mimetype = mimetype_object
+        else:
+            raise InvalidMimeTypeError(mimetype)
 
     def get_dest_directory(self, mime=None):
         """
@@ -47,49 +69,47 @@ class Converter(object):
 
         return os.path.dirname(self.path)
 
-    def get_dest_filename(self, mimetype):
+    def get_dest_filename(self):
         filename = os.path.basename(self.path)
+        filename = '.'.join(filename.split('.')[0:-1])
 
-        return '%s.%s' % (filename[:-4], mimetype.extension)
+        return '.'.join((filename, self.mimetype.extension))
 
-    def get_dest_fullpath(self, mimetype):
+    def get_dest_fullpath(self):
+        if self.fullpath:
+            return self.fullpath
+
         directory = self.get_dest_directory()
-        filename = self.get_dest_filename(mimetype)
+        filename = self.get_dest_filename()
+        self.fullpath = os.path.join(directory, filename)
 
-        return os.path.join(directory, filename)
+        return self.fullpath
 
-    def get_dest_uri(self, mimetype):
+    def get_dest_uri(self):
+        if self.uri:
+            return self.uri
+
         for mdir in app.config['MEDIA_DIRS']:
-            path = mdir.urlize(self.get_dest_fullpath(mimetype))
+            path = mdir.urlize(self.get_dest_fullpath())
             if path:
-                return path
+                self.uri = path
 
-    def get_paths(self):
-        for mimetype, mimeinfo in self.mimetypes.iteritems():
-            yield self.get_dest_fullpath(mimetype)
+        return self.uri
 
-    def convert_to(self, mimetype):
-        path = self.get_dest_fullpath(mimetype)
+    def convert(self):
+        path = self.get_dest_fullpath()
+        if self.exists():
+            return path
+
         # Don't do app.config.get('FFMPEG_PATH', 'ffmpeg'). That will cause an
         # error when FFMPEG_PATH is set to None or empty string.
         ffmpeg = app.config.get('FFMPEG_PATH') or 'ffmpeg'
         cmd = [ffmpeg, '-i', self.path, '-aq', '60', '-acodec',
-               mimetype.acodec, path]
+               self.mimetype.acodec, path]
 
         proc = subprocess.call(cmd)
 
         return path
 
-    def convert_all(self):
-        """
-        Converts to all the mimetypes defined in the config if files don't
-        exist already.
-
-        """
-
-        for mimetype, mimeinfo in self.mimetypes.iteritems():
-            if not self.exists_for_mimetype(mimeinfo):
-                self.convert_to(mimeinfo)
-
-    def exists_for_mimetype(self, mimetype):
-        return os.path.exists(self.get_dest_fullpath(mimetype))
+    def exists(self):
+        return os.path.exists(self.get_dest_fullpath())

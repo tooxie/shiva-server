@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from shiva.converter import Converter
+from shiva.media import MimeType
 
 DEBUG = True
 
@@ -7,19 +8,13 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///shiva.db'
 ACCEPTED_FORMATS = (
     'mp3',
 )
+MIMETYPES = (
+    MimeType(type='audio', subtype='mp3', extension='mp3',
+             acodec='libmp3lame'),
+    MimeType(type='audio', subtype='ogg', extension='ogg',
+             acodec='libvorbis'),
+)
 CONVERTER_CLASS = Converter
-MIMETYPES = {
-    'audio': {
-        'audio/mp3': {
-            'codec': 'libmp3lame',
-            'extension': 'mp3'
-        },
-        'audio/ogg': {
-            'acodec': 'libvorbis',
-            'extension': 'ogg'
-        },
-    },
-}
 DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
 DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'

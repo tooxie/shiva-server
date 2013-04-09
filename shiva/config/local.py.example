@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from shiva.media import MediaDir
+from shiva.media import MediaDir, MimeType
 
 SECRET_KEY = ''  # Set this to something secret.
 MEDIA_DIRS = (
@@ -8,6 +8,13 @@ MEDIA_DIRS = (
     # MediaDir('/home/fatmike/music/shiva'),
     # If in doubt, read the source.
 )
+# Add your own mimetypes here.
+# MIMETYPES = (
+#     MimeType(type='audio', subtype='mp3', extension='mp3',
+#              acodec='libmp3lame'),
+#     MimeType(type='audio', subtype='ogg', extension='ogg',
+#              acodec='libvorbis'),
+# )
 LASTFM_API_KEY = ''
 SCRAPERS = {
     'lyrics': (
@@ -18,17 +25,5 @@ SCRAPERS = {
 }
 METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
 BANDSINTOWN_APP_ID = 'SHIVA_APP_ID'
-MIMETYPES = {
-    'audio': {
-        'audio/mp3': {
-            'codec': 'libmp3lame',
-            'extension': 'mp3'
-        },
-        'audio/ogg': {
-            'codec': 'libvorbis',
-            'extension': 'ogg'
-        },
-    },
-}
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.

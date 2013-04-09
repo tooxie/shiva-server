@@ -9,11 +9,11 @@ import requests
 
 from shiva import get_version, get_contributors
 from shiva.converter import get_converter
+from shiva.exceptions import InvalidMimeTypeError
 from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
                           ManyToManyField, TrackFiles)
 from shiva.http import Resource, JSONResponse
 from shiva.lyrics import get_lyrics
-from shiva.mimetype import MimeType
 from shiva.mocks import ShowModel
 from shiva.models import Artist, Album, Track, Lyrics
 
@@ -395,18 +395,20 @@ class ConvertResource(Resource):
 
     def get(self, track_id):
         track = Track.query.get(track_id)
-        mimename = request.args.get('mimetype')
-        if not track:
+        mimetype = request.args.get('mimetype')
+        if not track or not mimetype:
             abort(404)
 
-        converter = get_converter()(track.path)
-        mimetype = MimeType(request.args.get('mimetype'))
+        ConverterClass = get_converter()
+        try:
+            converter = ConverterClass(track.path, mimetype=mimetype)
+        except InvalidMimeTypeError, e:
+            print(e)
+            abort(400)
 
-        if mimetype:
-            if not converter.exists_for_mimetype(mimetype):
-                converter.convert_to(mimetype)
-
-        uri = converter.get_dest_uri(mimetype)
+        converter.convert()
+        uri = converter.get_dest_uri() or \
+              DownloadURI('track').output(None, track)
 
         return JSONResponse(status=301, headers={'Location': uri})
 

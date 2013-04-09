@@ -175,3 +175,43 @@ class MediaDir(object):
                 return True
 
         return False
+
+
+class MimeType(object):
+    """Represents a valid mimetype. Holds information like the codecs to be
+    used when converting.
+
+    """
+
+    def __init__(self, type, subtype, extension, **kwargs):
+        self.type = type
+        self.subtype = subtype
+        self.extension = extension
+        self.acodec = kwargs.get('acodec')
+        self.vcodec = kwargs.get('vcodec')
+
+    def is_audio(self):
+        return self.type == 'audio'
+
+    def get_audio_codec(self):
+        return getattr(self, 'acodec')
+
+    def get_video_codec(self):
+        return getattr(self, 'vcodec')
+
+    def matches(self, mimetype):
+        return self.__repr__() == unicode(mimetype)
+
+    def __unicode__(self):
+        return u'%s/%s' % (self.type, self.subtype)
+
+    def __repr__(self):
+        return self.__unicode__()
+
+    def __str__(self):
+        return self.__unicode__()
+
+def get_mimetypes():
+    from flask import current_app as app
+
+    return app.config.get('MIMETYPES', [])
