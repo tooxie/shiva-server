@@ -4,7 +4,7 @@ import os
 from flask.ext.sqlalchemy import SQLAlchemy
 from slugify import slugify as do_slug
 
-from shiva.utils import slugify as do_slug, randstr, MetadataManager
+from shiva.utils import randstr, MetadataManager
 
 db = SQLAlchemy()
 

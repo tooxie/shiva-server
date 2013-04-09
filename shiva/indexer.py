@@ -16,6 +16,7 @@ Options:
 """
 # K-Pg
 from datetime import datetime
+from slugify import slugify
 import logging
 import os
 import sys
@@ -149,8 +150,8 @@ class Indexer(object):
 
         meta = self.get_metadata_reader()
 
-        artist = self.get_artist(meta.artist)
-        album = self.get_album(meta.album, artist)
+        artist = self.get_artist(slugify(meta.artist))
+        album = self.get_album(slugify(meta.album), artist)
 
         if artist is not None and artist not in album.artists:
             album.artists.append(artist)
