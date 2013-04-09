@@ -145,19 +145,22 @@ class Indexer(object):
         """
 
         full_path = self.file_path.decode('utf-8')
+        if not self.quiet:
+            sys.stdout.write(full_path)
 
         track = m.Track(full_path)
         self.set_metadata_reader(track)
         if self.no_metadata:
             self.session.add(track)
-            if self.verbose:
-                print('Added track without metadata: %s' % full_path)
-            return
+            sys.stdout.write('\t[ OK ]\n')
+
+            return True
         else:
             if q(m.Track).filter_by(path=full_path).count():
-                if self.verbose:
-                    print('Skipped existing track: %s' % full_path)
-                return
+                if not self.quiet:
+                    sys.stdout.write('\t[ SKIPPED ]\n')
+
+                return True
 
         meta = self.get_metadata_reader()
 
@@ -171,8 +174,8 @@ class Indexer(object):
         track.artist = artist
         self.session.add(track)
 
-        if self.verbose:
-            print('Added track: %s' % full_path)
+        if not self.quiet:
+            sys.stdout.write('\t[ OK ]\n')
 
     def get_metadata_reader(self):
         return self._meta
@@ -269,7 +272,7 @@ def main():
 
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
-    if self.verbose:
+    if lola.verbose:
         print('Writing to database...')
     lola.session.commit()
 
