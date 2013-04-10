@@ -847,7 +847,8 @@ You will notice that track objects contain a ``files`` attribute:
         }
     }
 
-In that attribute you will find a list of all the supported formats. Just
+In that attribute you will find a list of all the supported formats. That list
+is generated from the ``MIMETYPES`` setting (see `The MIMETYPES config`_). Just
 follow the link of the format you need and Shiva will convert it if necessary
 and serve it for you. As a client, that's all you care about.
 
@@ -894,25 +895,49 @@ that offend you.
 The other option is to write a completely new Converter class. If you do so,
 make sure to have at least the following 3 methods:
 
-* ``exists_for_mimetype(MimeType mimetype)``: Checks if a cached version of the
-  file exists.
-* ``convert_to(MimeType mimetype)``: Converts to a different format.
-* ``get_dest_uri(MimeType mimetype)``: Retrieves the URI to the converted file.
+* ``__init__(Track track, (str, MimeType) mimetype)``: Constructor accepting a
+  path to a file and a mimetype, which could be a string in the form of
+  'type/subtype', or a MimeType instance.
+* ``convert()``: Converts to a different format.
+* ``get_uri()``: Retrieves the URI to the converted file.
 
-The ``shiva.resources.ConverterResource`` class makes use of them.
+The ``shiva.resources.ConvertResource`` class makes use of them.
 
 
 ------------------
 The MimeType class
 ------------------
 
-All mimetypes are represented by a ``shiva.mimetype.MimeType`` class. The
-constructor receives the name of a mimetype, checks if it's valid, i.e. that
-it's in the ``MIMETYPES`` setting, and raises a InvalidMimeTypeError exception
-if it's not.
+All mimetypes are represented by a ``shiva.media.MimeType`` class. The
+constructor receives the following parameters:
 
-It also holds information about the codecs used for audio and video, and the
-file extension.
+* ``type``: Would be ``audio`` in ``audio/ogg``.
+* ``subtype``: Would be ``ogg`` in ``audio/ogg``.
+* ``extension``: The extension that converted files should have.
+* ``acodec`` and/or ``vcodec``: The codecs used by ``Converter.convert()``.
+  Find out the available codecs running:
+
+.. code:: sh
+
+    $ ffmpeg -codecs
+
+
+The MIMETYPES config
+--------------------
+
+You will see in your config file:
+
+.. code:: python
+
+    MIMETYPES = (
+        MimeType(type='audio', subtype='mp3', extension='mp3',
+                 acodec='libmp3lame'),
+        MimeType(type='audio', subtype='ogg', extension='ogg',
+                 acodec='libvorbis'),
+    )
+
+Keep in mind that an invalid MimeType in this config will raise an
+``InvalidMimeTypeError`` exception.
 
 
 Assumptions
