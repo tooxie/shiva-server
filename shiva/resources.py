@@ -2,6 +2,7 @@
 from datetime import datetime
 import logging
 import urllib2
+import traceback
 
 from flask import request, current_app as app, g
 from flask.ext.restful import abort, fields, marshal
@@ -359,8 +360,8 @@ class LyricsResource(Resource):
 
         try:
             lyrics = get_lyrics(track)
-        except Exception, e:
-            logging.debug(e)
+        except:
+            logging.debug(traceback.format_exc())
             lyrics = None
 
         if not lyrics:
