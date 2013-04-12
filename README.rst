@@ -32,7 +32,7 @@ http://www.last.fm/api/account/create
 This makes the whole indexing slower because issues a request on a per-album
 and per-artist basis, but does a lot of work automatically for you.
 
-You will need C headers for libxml. On Ubuntu::
+You will need C headers for libxml. On Debian (and derivatives)::
 
     sudo apt-get install libxml2-dev libxslt-dev
 
