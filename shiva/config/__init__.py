@@ -6,12 +6,14 @@ There are 3 types of settings.
 3) Debug. Applies for debugging. Forbidden for production use.
 """
 import logging
+import traceback
 
 from shiva.config.project import *
 try:
     # Rename the file local.py.example to local.py and edit it.
     from shiva.config.local import *
 except ImportError:
+    print(traceback.format_exc())
     logging.warning("Couldn't find local settings.")
 if DEBUG:
     try:
