@@ -203,6 +203,9 @@ def main():
               'flag.\n')
         sys.exit(1)
 
+    # Generate database
+    db.create_all()
+
     lola = Indexer(app.config, use_lastfm=use_lastfm, no_metadata=no_metadata)
     lola.run()
 

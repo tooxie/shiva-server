@@ -74,12 +74,6 @@ Installation
 
   + See `Scanning directories`_ for more info.
 
-* Create the database::
-
-.. code:: sh
-
-      $ python -c "from shiva.app import db; db.create_all()"
-
 * Run the indexer::
 
 .. code:: sh
