@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import subprocess
+import urllib
 
 from flask import current_app as app
 
 from shiva.exceptions import InvalidMimeTypeError
 from shiva.media import MimeType
+
 
 def get_converter():
     ConverterClass = app.config.get('CONVERTER_CLASS', Converter)
@@ -21,8 +23,10 @@ class Converter(object):
 
     """
 
-    def __init__(self, path, mimetype):
-        self.path = path
+    CONVERSION_URI = '/track/%s/convert?%s'
+
+    def __init__(self, track, mimetype):
+        self.track = track
         self.mimetypes = self.get_mimetypes()
         self.set_mimetype(mimetype)
 
@@ -67,10 +71,10 @@ class Converter(object):
 
         """
 
-        return os.path.dirname(self.path)
+        return os.path.dirname(self.track.path)
 
     def get_dest_filename(self):
-        filename = os.path.basename(self.path)
+        filename = os.path.basename(self.track.path)
         filename = '.'.join(filename.split('.')[0:-1])
 
         return '.'.join((filename, self.mimetype.extension))
@@ -85,31 +89,37 @@ class Converter(object):
 
         return self.fullpath
 
-    def get_dest_uri(self):
-        if self.uri:
-            return self.uri
+    def get_conversion_uri(self):
+        mimetype = urllib.urlencode({'mimetype': str(self.mimetype)})
 
-        for mdir in app.config['MEDIA_DIRS']:
-            path = mdir.urlize(self.get_dest_fullpath())
-            if path:
-                self.uri = path
+        return self.CONVERSION_URI % (self.track.pk, mimetype)
+
+    def get_uri(self):
+        if self.converted_file_exists():
+            self.uri = self.get_file_uri()
+        else:
+            self.uri = self.get_conversion_uri()
 
         return self.uri
 
+    def get_file_uri(self):
+        for mdir in app.config['MEDIA_DIRS']:
+            return mdir.urlize(self.get_dest_fullpath())
+
     def convert(self):
         path = self.get_dest_fullpath()
-        if self.exists():
+        if self.converted_file_exists():
             return path
 
         # Don't do app.config.get('FFMPEG_PATH', 'ffmpeg'). That will cause an
         # error when FFMPEG_PATH is set to None or empty string.
         ffmpeg = app.config.get('FFMPEG_PATH') or 'ffmpeg'
-        cmd = [ffmpeg, '-i', self.path, '-aq', '60', '-acodec',
+        cmd = [ffmpeg, '-i', self.track.path, '-aq', '60', '-acodec',
                self.mimetype.acodec, path]
 
         proc = subprocess.call(cmd)
 
         return path
 
-    def exists(self):
+    def converted_file_exists(self):
         return os.path.exists(self.get_dest_fullpath())

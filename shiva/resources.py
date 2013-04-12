@@ -401,14 +401,13 @@ class ConvertResource(Resource):
 
         ConverterClass = get_converter()
         try:
-            converter = ConverterClass(track.path, mimetype=mimetype)
+            converter = ConverterClass(track, mimetype=mimetype)
         except InvalidMimeTypeError, e:
             print(e)
             abort(400)
 
         converter.convert()
-        uri = converter.get_dest_uri() or \
-              DownloadURI('track').output(None, track)
+        uri = converter.get_uri() or DownloadURI('track').output(None, track)
 
         return JSONResponse(status=301, headers={'Location': uri})
 
