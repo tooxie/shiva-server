@@ -619,7 +619,7 @@ directory, let's say ``mylyrics.py`` with this structure:
 
             return True
 
-And then add it to the scrapers list::
+And then add it to the scrapers list:
 
 .. code:: python
 
