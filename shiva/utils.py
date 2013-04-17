@@ -2,6 +2,7 @@
 import os
 from random import random
 from hashlib import md5
+from contextlib import contextmanager
 
 
 def randstr(length=None):
@@ -28,6 +29,16 @@ def _import(class_path):
     mod = __import__(mod_name, None, None, cls_name)
 
     return getattr(mod, cls_name)
+
+
+@contextmanager
+def ignored(*exceptions):
+    """Context manager that ignores all of the specified exceptions. This will
+    be in the standard library starting with Python 3.4."""
+    try:
+        yield
+    except exceptions:
+        pass
 
 
 class ID3Manager(object):
