@@ -159,6 +159,7 @@ class Track(db.Model):
         """Return a MetadataManager object."""
         if not getattr(self, '_meta', None):
             self._meta = MetadataManager(self.get_path())
+
         return self._meta
 
     def __repr__(self):
