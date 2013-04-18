@@ -16,8 +16,11 @@ __version__ = '0.1'
 __author__ = u'Alvaro Mouriño'
 __contibutors__ = [
     u'Bojan Mihelac <bmihelac@mihelac.org>',
+    u'Danilo Bargen <gezuru@gmail.com>',
+    u'Felix Hummel <felix@felixhummel.de>',
     u'Iago Lastra <iago.lastra@gmail.com>',
     u'Jochen Kupperschmidt <jochen.kupperschmidt@fortytools.com>',
+    u'Sean Lang <slang800@gmail.com>',
     u'Seth Woodworth <seth@sethish.com>',
     u'Tobias Raeder <tobias.raeder@gmail.com>',
     u'Wieland Hoffmann <themineo+github@gmail.com>',
