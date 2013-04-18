@@ -60,11 +60,9 @@ class Indexer(object):
                   'know where to look for.')
 
         if reindex:
-            models = [m.Artist, m.Album, m.Track, m.Lyrics]
-            for model in models:
-                print('Deleting all rows from %s model...' % model.__name__)
-                model.query.delete()
-            self.session.commit()
+            # TODO: This drops the entire DB. Ask for confirmation.
+            db.drop_all()
+            db.create_all()
 
     def get_artist(self, name):
         if name in self.artists:
