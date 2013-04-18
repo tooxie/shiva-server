@@ -15,8 +15,8 @@ Options:
     -q --quiet    Suppress warnings.
 """
 # K-Pg
-import logging
 from datetime import datetime
+import logging
 import os
 import sys
 
@@ -37,8 +37,6 @@ class Indexer(object):
         self.no_metadata = no_metadata
         self.verbose = verbose
         self.quiet = quiet
-
-        self.track_count = 0
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -147,13 +145,7 @@ class Indexer(object):
         self.session.add(track)
 
         if self.verbose:
-            print 'Added track: %s' % full_path
-
-        self.track_count += 1
-        if self.track_count % 10 == 0:
-            self.session.commit()
-            if self.verbose:
-                print 'Writing to database...'
+            print('Added track: %s' % full_path)
 
     def get_metadata_reader(self):
         if not self._meta or self._meta.origpath != self.file_path:
