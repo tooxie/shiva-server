@@ -24,7 +24,6 @@ from docopt import docopt
 
 from shiva import models as m
 from shiva.app import app, db
-from shiva.utils import MetadataManager
 
 q = db.session.query
 
@@ -121,6 +120,7 @@ class Indexer(object):
         full_path = self.file_path.decode('utf-8')
 
         track = m.Track(full_path)
+        self.set_metadata_reader(track)
         if self.no_metadata:
             self.session.add(track)
             if self.verbose:
@@ -148,9 +148,10 @@ class Indexer(object):
             print('Added track: %s' % full_path)
 
     def get_metadata_reader(self):
-        if not self._meta or self._meta.origpath != self.file_path:
-            self._meta = MetadataManager(self.file_path)
         return self._meta
+
+    def set_metadata_reader(self, track):
+        self._meta = track.get_metadata_reader()
 
     def is_track(self):
         """Try to guess whether the file is a valid track or not."""
