@@ -9,6 +9,7 @@ import logging
 import traceback
 
 from shiva.config.project import *
+from shiva.utils import ignored
 try:
     # Rename the file local.py.example to local.py and edit it.
     from shiva.config.local import *
@@ -16,7 +17,5 @@ except ImportError:
     print(traceback.format_exc())
     logging.warning("Couldn't find local settings.")
 if DEBUG:
-    try:
+    with ignored(ImportError):
         from shiva.config.debug import *
-    except ImportError:
-        pass
