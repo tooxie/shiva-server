@@ -163,7 +163,7 @@ class Indexer(object):
             return False
 
         ext = self.file_path.rsplit('.', 1)[1]
-        if ext not in self.get_metadata_reader().VALID_FILE_EXTENSIONS:
+        if ext not in app.config.get('VALID_FILE_EXTENSIONS', []):
             if not self.quiet:
                 msg = 'Skipped file with unknown file extension: %s'
                 print msg % self.file_path
