@@ -187,13 +187,34 @@ class Indexer(object):
                     if self.is_track():
                         self.save_track()
 
+    # SELECT pk, slug, COUNT(*) FROM tracks GROUP BY slug HAVING COUNT(*) > 1;
+    def make_slugs_unique(self):
+        from sqlalchemy import func
+
+        query = q(m.Track).group_by(m.Track.slug).\
+            having(func.count(m.Track.slug) > 1)
+
+        # FIXME: Tengo el mismo problema con artistas y albumes, van a haber
+        # slugs repetidos pero en esos casos en vez de hacerlos únicos hay que
+        # unificarlos en uno solo y actualizar todos los tracks que apunten a
+        # ese. Lo mismo con los artistas.
+        for _track in query:
+            slug = _track.slug
+            for track in q(m.Track).filter_by(slug=slug):
+                track.slug += '-%s' % track.pk
+                self.session.add(track)
+
+        self.session.commit()
+
     def run(self):
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
 
+        self.make_slugs_unique()
 
-def main():
+
+if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     kwargs = {
