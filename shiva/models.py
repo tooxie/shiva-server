@@ -129,8 +129,8 @@ class Track(db.Model):
         if isinstance(path, file):
             _path = path.name
 
-        self.set_path(_path)
         self._meta = None
+        self.set_path(_path)
 
     def __setattr__(self, attr, value):
         if attr == 'title':
