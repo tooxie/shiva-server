@@ -1,7 +1,0 @@
-Flask
-SQLAlchemy
-Flask-SQLAlchemy
-Flask-Admin
-Flask-OAuth
-Flask-OpenID
-Flask-WTF
