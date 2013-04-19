@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Shiva',
-    version='0.1.0',
+    version='0.2',
     description='A RESTful API to your music collection',
     author=u'Alvaro Mouriño',
     author_email='alvaro@mourino.net',
