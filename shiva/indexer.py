@@ -31,20 +31,6 @@ q = db.session.query
 
 class Indexer(object):
 
-    VALID_FILE_EXTENSIONS = (
-        'asf', 'wma',  # ASF
-        'flac',  # FLAC
-        'mp4', 'm4a', 'm4b', 'm4p',  # M4A
-        'ape',  # Monkey's Audio
-        'mp3',  # MP3
-        'mpc', 'mp+', 'mpp',  # Musepack
-        'spx',  # Ogg Speex
-        'ogg', 'oga',  # Ogg Vorbis / Theora
-        'tta',  # True Audio
-        'wv',  # WavPack
-        'ofr',  # OptimFROG
-    )
-
     def __init__(self, config=None, use_lastfm=False, no_metadata=False,
                  reindex=False, verbose=False, quiet=False):
         self.config = config
@@ -192,7 +178,7 @@ class Indexer(object):
             return False
 
         ext = self.file_path.rsplit('.', 1)[1]
-        if ext not in self.VALID_FILE_EXTENSIONS:
+        if ext not in self.get_metadata_reader().VALID_FILE_EXTENSIONS:
             if self.verbose:
                 msg = 'Skipped file with unknown file extension: %s'
                 print(msg % self.file_path)
