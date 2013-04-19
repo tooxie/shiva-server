@@ -97,6 +97,7 @@ The indexer receives the following command line arguments.
 
 * ``--lastfm``
 * ``--nometadata``
+* ``--reindex``
 
 If you set the ``--lastfm`` flag Shiva will retrieve artist and album images
 from Last.FM, but for this to work you need to get an API key (see
@@ -108,6 +109,9 @@ saved.
 
 If both flags are set, ``--nometadata`` will take precedence and ``--lastfm``
 will be ignored.
+
+With ``--reindex`` the whole database will be dropped and recreated. Be
+careful, all existing information will be deleted.
 
 
 --------------------
@@ -823,9 +827,9 @@ You will have to issue another request to obtain the details of the instance.
 Format conversion
 =================
 
-Even though Shiva's indexer only supports MP3 files, it is possible to convert
-those files to serve them in different formats. For this you are going to need
-``ffmpeg`` installed in your system.
+No matter in which format files were indexed, it is possible to convert tracks
+to serve them in different formats. For this you are going to need ``ffmpeg``
+installed in your system.
 
 If you have ``fmpeg`` compiled but not installed, you can give Shiva the path
 to the binary in a setting, in this format:
@@ -987,9 +991,6 @@ For the sake of simplicity many assumptions were made that will eventually be
 worked on and improved/removed.
 
 * Only music files. No videos.
-
-  + Actually, only MP3 files.
-
 * No users.
 
   + Therefore, no customization.
