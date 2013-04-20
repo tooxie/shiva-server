@@ -141,7 +141,7 @@ directory and serve those files through a different server.
 
 .. code:: python
 
-    MediaDir(root='/srv/http', dirs=('/music', '/songs),
+    MediaDir(root='/srv/http', dirs=('/music', '/songs'),
              url='http://localhost:8080/')
 
 Given that configuration Shiva will scan the directories ``/srv/http/music``
