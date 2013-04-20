@@ -211,10 +211,6 @@ class Indexer(object):
         query = q(m.Track).group_by(m.Track.slug).\
             having(func.count(m.Track.slug) > 1)
 
-        # FIXME: Tengo el mismo problema con artistas y albumes, van a haber
-        # slugs repetidos pero en esos casos en vez de hacerlos únicos hay que
-        # unificarlos en uno solo y actualizar todos los tracks que apunten a
-        # ese. Lo mismo con los artistas.
         for _track in query:
             slug = _track.slug
             for track in q(m.Track).filter_by(slug=slug):
