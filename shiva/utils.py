@@ -4,6 +4,7 @@ import datetime
 from random import random
 from hashlib import md5
 from contextlib import contextmanager
+import traceback
 
 import mutagen
 import dateutil.parser
@@ -36,13 +37,14 @@ def _import(class_path):
 
 
 @contextmanager
-def ignored(*exceptions):
+def ignored(*exceptions, print_traceback=False):
     """Context manager that ignores all of the specified exceptions. This will
     be in the standard library starting with Python 3.4."""
     try:
         yield
     except exceptions:
-        pass
+        if print_traceback:
+            print(traceback.format_exc())
 
 
 class MetadataManager(object):
