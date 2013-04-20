@@ -281,8 +281,8 @@ class Indexer(object):
             slug = _track.slug
             for track in q(m.Track).filter_by(slug=slug):
                 track.slug += '-%s' % track.pk
-                self.session.add(track)
 
+        self.session.add_all(query)
         self.session.commit()
 
     def run(self):
