@@ -95,7 +95,8 @@ class Indexer(object):
         else:
             cover = None
             if self.use_lastfm:
-                cover = self.lastfm.get_artist(name).get_cover_image()
+                with ignored(Exception, print_traceback=True):
+                    cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
             self.session.add(artist)
             self.artists[name] = artist
