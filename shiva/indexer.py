@@ -22,6 +22,7 @@ import os
 import sys
 
 from docopt import docopt
+from sqlalchemy import func
 
 from shiva import models as m
 from shiva.app import app, db
@@ -206,7 +207,11 @@ class Indexer(object):
 
     # SELECT pk, slug, COUNT(*) FROM tracks GROUP BY slug HAVING COUNT(*) > 1;
     def make_slugs_unique(self):
-        from sqlalchemy import func
+        """
+        Retrieves all repeated slugs and appends the instance's primary key to
+        it.
+
+        """
 
         query = q(m.Track).group_by(m.Track.slug).\
             having(func.count(m.Track.slug) > 1)
