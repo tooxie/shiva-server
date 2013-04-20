@@ -23,6 +23,7 @@ import traceback
 
 from docopt import docopt
 from sqlalchemy import func
+from sqlalchemy.exc import OperationalError
 
 from shiva import models as m
 from shiva.app import app, db
@@ -53,8 +54,10 @@ class Indexer(object):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
+        self.reindex = reindex
         self.verbose = verbose
         self.quiet = quiet
+        self.empty_db = reindex
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -92,6 +95,13 @@ class Indexer(object):
             if not self.quiet:
                 print('Recreating database...')
             db.create_all()
+
+        # This is useful to know if the DB is empty, and avoid some checks
+        if not self.reindex:
+            try:
+                m.Artist.query.limit(1).all()
+            except OperationalError:
+                self.empty_db = True
 
     def get_artist(self, name):
         name = name.strip() if type(name) in (str, unicode) else None
@@ -180,18 +190,19 @@ class Indexer(object):
             return False
 
         self.set_metadata_reader(track)
+        if not self.empty_db:
+            if q(m.Track).filter_by(path=full_path).count():
+                if not self.quiet:
+                    print('[ SKIPPED ] %s' % full_path)
+
+                return True
+
         if self.no_metadata:
             self.session.add(track)
             if not self.quiet:
                 print('[ OK ] %s' % full_path)
 
             return True
-        else:
-            if q(m.Track).filter_by(path=full_path).count():
-                if not self.quiet:
-                    print('[ SKIPPED ] %s' % full_path)
-
-                return True
 
         meta = self.get_metadata_reader()
 
