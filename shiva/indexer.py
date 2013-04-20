@@ -189,7 +189,6 @@ class Indexer(object):
             # actual music file, or it's corrupted. Ignore it.
             return False
 
-        self.set_metadata_reader(track)
         if not self.empty_db:
             if q(m.Track).filter_by(path=full_path).count():
                 if not self.quiet:
@@ -204,7 +203,7 @@ class Indexer(object):
 
             return True
 
-        meta = self.get_metadata_reader()
+        meta = self.set_metadata_reader(track)
 
         artist = self.get_artist(meta.artist)
         album = self.get_album(meta.album, artist)
@@ -225,6 +224,8 @@ class Indexer(object):
 
     def set_metadata_reader(self, track):
         self._meta = track.get_metadata_reader()
+
+        return self._meta
 
     def is_track(self):
         """Try to guess whether the file is a valid track or not."""
