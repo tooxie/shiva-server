@@ -19,12 +19,14 @@ from datetime import datetime
 import logging
 import os
 import sys
+import traceback
 
 from docopt import docopt
 from sqlalchemy import func
 
 from shiva import models as m
 from shiva.app import app, db
+from shiva.exceptions import MetadataManagerReadError
 from shiva.utils import ignored, slugify
 
 q = db.session.query
@@ -155,8 +157,25 @@ class Indexer(object):
 
         """
 
-        full_path = self.file_path.decode('utf-8')
-        track = m.Track(full_path)
+        try:
+            full_path = self.file_path.decode('utf-8')
+        except UnicodeDecodeError:
+            print('[ SKIPPED ] %s (Unrecognized encoding)' % self.file_path)
+            print(traceback.format_exc())
+
+            # If file name is in an strange encoding ignore it.
+            return False
+
+        try:
+            track = m.Track(full_path)
+        except MetadataManagerReadError:
+            print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
+            print(traceback.format_exc())
+
+            # If the metadata manager can't read the file, it's probably not an
+            # actual music file, or it's corrupted. Ignore it.
+            return False
+
         self.set_metadata_reader(track)
         if self.no_metadata:
             self.session.add(track)
