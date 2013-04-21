@@ -16,7 +16,9 @@ def randstr(length=None):
     if length < 1:
         return ''
 
-    digest = md5(str(random())).hexdigest()
+    digest = ''
+    while len(digest) < length:
+        digest += md5(str(random())).hexdigest()
 
     if length:
         return digest[:length]
