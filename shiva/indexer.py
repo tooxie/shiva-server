@@ -197,7 +197,7 @@ class Indexer(object):
         if '.' not in self.file_path:
             return False
 
-        ext = self.file_path.rsplit('.', 1)[1]
+        ext = self.file_path.rsplit('.', 1)[1].lower()
         if ext not in self.VALID_FILE_EXTENSIONS:
             if self.verbose:
                 print('[ SKIPPED ] %s (Unrecognized extension)' %
