@@ -4,12 +4,27 @@ import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from slugify import slugify as do_slug
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.sql.expression import func
 
 from shiva.utils import randstr, MetadataManager
 
 db = SQLAlchemy()
 
 __all__ = ('db', 'Artist', 'Album', 'Track', 'Lyrics')
+
+
+def random_row(model):
+    """Retrieves a random row for the given model."""
+
+    try:
+        # PostgreSQL, SQLite
+        instance = model.query.order_by(func.random()).limit(1).first()
+    except OperationalError:
+        # MySQL
+        instance = model.query.order_by(func.rand()).limit(1).first()
+
+    return instance
 
 
 def slugify(text, instance):
@@ -63,6 +78,10 @@ class Artist(db.Model):
 
         super(Artist, self).__init__(*args, **kwargs)
 
+    @classmethod
+    def random(cls):
+        return random_row(cls)
+
     def __setattr__(self, attr, value):
         if attr == 'name':
             super(Artist, self).__setattr__('slug', slugify(value, self))
@@ -102,6 +121,10 @@ class Album(db.Model):
             kwargs['date_added'] = datetime.today()
 
         super(Album, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def random(cls):
+        return random_row(cls)
 
     def __setattr__(self, attr, value):
         if attr == 'name':
@@ -153,6 +176,10 @@ class Track(db.Model):
             kwargs['date_added'] = datetime.today()
 
         super(Track, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def random(cls):
+        return random_row(cls)
 
     def __setattr__(self, attr, value):
         if attr == 'title':

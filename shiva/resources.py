@@ -490,39 +490,29 @@ class ShowsResource(Resource):
 
 
 class RandomResource(Resource):
-    """
-    Retrieves a random instance of a specified resource.
-    """
+    """Retrieves a random instance of a specified resource."""
 
     def get(self, resource_name):
         get_resource = getattr(self, 'get_%s' % resource_name)
 
         if get_resource and callable(get_resource):
-            return get_resource()
+            resource_fields = {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI(resource_name),
+            }
+
+            return marshal(get_resource(), resource_fields)
 
         abort(404)
 
-    def get_random_for(self, model, resource_name):
-        from random import random
-
-        top = model.query.count()
-        model_id = int(random() * top)
-        instance = model.query.get(model_id)
-        resource_fields = {
-            'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI(resource_name),
-        }
-
-        return marshal(instance, resource_fields)
-
     def get_track(self):
-        return self.get_random_for(Track, 'track')
+        return Track.random()
 
     def get_album(self):
-        return self.get_random_for(Album, 'album')
+        return Album.random()
 
     def get_artist(self):
-        return self.get_random_for(Artist, 'artist')
+        return Artist.random()
 
 
 class ClientResource(Resource):
