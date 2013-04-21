@@ -91,8 +91,9 @@ class Indexer(object):
             db.create_all()
 
     def get_artist(self, name):
-        if name in self.artists:
-            return self.artists[name]
+        _name = slugify(name)
+        if _name in self.artists:
+            return self.artists[_name]
         else:
             cover = None
             if self.use_lastfm:
@@ -100,13 +101,14 @@ class Indexer(object):
                     cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
             self.session.add(artist)
-            self.artists[name] = artist
+            self.artists[_name] = artist
 
         return artist
 
     def get_album(self, name, artist):
-        if name in self.albums:
-            return self.albums[name]
+        _name = slugify(name)
+        if _name in self.albums:
+            return self.albums[_name]
         else:
             release_year = self.get_release_year()
             cover = None
@@ -123,7 +125,7 @@ class Indexer(object):
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
-            self.albums[name] = album
+            self.albums[_name] = album
 
         return album
 
@@ -165,8 +167,8 @@ class Indexer(object):
 
         meta = self.get_metadata_reader()
 
-        artist = self.get_artist(slugify(meta.artist))
-        album = self.get_album(slugify(meta.album), artist)
+        artist = self.get_artist(meta.artist)
+        album = self.get_album(meta.album, artist)
 
         if artist is not None and artist not in album.artists:
             album.artists.append(artist)
