@@ -148,20 +148,18 @@ class Indexer(object):
         """
 
         full_path = self.file_path.decode('utf-8')
-        if not self.quiet:
-            sys.stdout.write(full_path)
-
         track = m.Track(full_path)
         self.set_metadata_reader(track)
         if self.no_metadata:
             self.session.add(track)
-            sys.stdout.write('\t[ OK ]\n')
+            if not self.quiet:
+                print('[ OK ] %s' % full_path)
 
             return True
         else:
             if q(m.Track).filter_by(path=full_path).count():
                 if not self.quiet:
-                    sys.stdout.write('\t[ SKIPPED ]\n')
+                    print('[ SKIPPED ] %s' % full_path)
 
                 return True
 
@@ -178,7 +176,7 @@ class Indexer(object):
         self.session.add(track)
 
         if not self.quiet:
-            sys.stdout.write('\t[ OK ]\n')
+            print('[ OK ] %s' % full_path)
 
     def get_metadata_reader(self):
         return self._meta
