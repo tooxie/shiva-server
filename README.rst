@@ -36,9 +36,19 @@ You will need C headers for libxml. On Debian (and derivatives)::
 
     sudo apt-get install libxml2-dev libxslt-dev
 
-On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the headers with::
+On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the
+headers with::
 
     brew install libxml2 libxslt
+
+By default Shiva uses a SQLite database, to install it in Debian-based systems
+run::
+
+    sudo apt-get install sqlite
+
+On Mac OS X it should come pre-installed. If it's not::
+
+    brew install sqlite
 
 
 Installation
