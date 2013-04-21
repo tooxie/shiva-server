@@ -99,6 +99,8 @@ class Indexer(object):
         else:
             cover = None
             if self.use_lastfm:
+                if self.verbose:
+                    print('Retrieving "%s" info from Last.FM' % name)
                 with ignored(Exception, print_traceback=True):
                     cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
@@ -115,6 +117,8 @@ class Indexer(object):
             release_year = self.get_release_year()
             cover = None
             if self.use_lastfm:
+                if self.verbose:
+                    print('Retrieving album "%s" from Last.FM' % name)
                 with ignored(Exception, print_traceback=True):
                     _artist = self.lastfm.get_artist(artist.name)
                     _album = self.lastfm.get_album(_artist, name)
