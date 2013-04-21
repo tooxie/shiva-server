@@ -34,6 +34,9 @@ def slugify(text):
 
     """
 
+    if not text:
+        return ''
+
     slug = do_slug(text)
     if not slug:
         slug = randstr(length=6)

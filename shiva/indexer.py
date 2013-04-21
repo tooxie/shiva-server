@@ -16,7 +16,6 @@ Options:
 """
 # K-Pg
 from datetime import datetime
-from slugify import slugify
 import logging
 import os
 import sys
@@ -26,7 +25,7 @@ from sqlalchemy import func
 
 from shiva import models as m
 from shiva.app import app, db
-from shiva.utils import ignored
+from shiva.utils import ignored, slugify
 
 q = db.session.query
 
@@ -111,6 +110,9 @@ class Indexer(object):
 
     def get_album(self, name, artist):
         _name = slugify(name)
+        if not _name:
+            return None
+
         if _name in self.albums:
             return self.albums[_name]
         else:
@@ -173,8 +175,9 @@ class Indexer(object):
         artist = self.get_artist(meta.artist)
         album = self.get_album(meta.album, artist)
 
-        if artist is not None and artist not in album.artists:
-            album.artists.append(artist)
+        if artist is not None and album is not None:
+            if artist not in album.artists:
+                album.artists.append(artist)
 
         track.album = album
         track.artist = artist
