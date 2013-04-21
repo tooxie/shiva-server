@@ -111,7 +111,9 @@ If both flags are set, ``--nometadata`` will take precedence and ``--lastfm``
 will be ignored.
 
 With ``--reindex`` the whole database will be dropped and recreated. Be
-careful, all existing information will be deleted.
+careful, all existing information **will be deleted**. If you just want to
+update your music collection, run the indexer again **without** the
+``--reindex`` option.
 
 
 --------------------
