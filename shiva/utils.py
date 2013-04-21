@@ -37,13 +37,13 @@ def _import(class_path):
 
 
 @contextmanager
-def ignored(*exceptions, print_traceback=False):
+def ignored(*exceptions, **kwargs):
     """Context manager that ignores all of the specified exceptions. This will
     be in the standard library starting with Python 3.4."""
     try:
         yield
     except exceptions:
-        if print_traceback:
+        if kwargs.get('print_traceback'):
             print(traceback.format_exc())
 
 
