@@ -37,14 +37,11 @@ api.add_resource(resources.LyricsResource, '/track/<int:track_id>/lyrics',
 api.add_resource(resources.ConvertResource, '/track/<int:track_id>/convert',
                  '/track/<track_slug>/convert', endpoint='convert')
 
-# Random
+# Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>',
                  endpoint='random')
-
-# Clients
+api.add_resource(resources.WhatsNewResource, '/whatsnew', endpoint='whatsnew')
 api.add_resource(resources.ClientResource, '/clients', endpoint='client')
-
-# About
 api.add_resource(resources.AboutResource, '/about', endpoint='about')
 
 

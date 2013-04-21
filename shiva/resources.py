@@ -515,6 +515,45 @@ class RandomResource(Resource):
         return Artist.random()
 
 
+class WhatsNewResource(Resource):
+    """
+    Resource consisting of artists, albums and tracks that were indexed after a
+    given date.
+
+    """
+
+    def get(self):
+        news = {'artists': [], 'albums': [], 'tracks': []}
+        try:
+            self.since = datetime.strptime(request.args.get('since'), '%Y%m%d')
+        except:
+            print(traceback.format_exc())
+            return news
+
+        news = {
+            'artists': self.get_new_for(Artist, 'artist'),
+            'albums': self.get_new_for(Album, 'album'),
+            'tracks': self.get_new_for(Track, 'track'),
+        }
+
+        return news
+
+    def get_new_for(self, model, resource_name):
+        """
+        Fetches all the instances with ``date_added`` older than
+        ``self.since``.
+
+        """
+
+        query = model.query.filter(model.date_added > self.since)
+        resource_fields = {
+            'id': fields.Integer(attribute='pk'),
+            'uri': InstanceURI(resource_name),
+        }
+
+        return [marshal(row, resource_fields) for row in query.all()]
+
+
 class ClientResource(Resource):
     def get(self):
         clients = [
