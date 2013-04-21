@@ -113,15 +113,12 @@ class Indexer(object):
             release_year = self.get_release_year()
             cover = None
             if self.use_lastfm:
-                try:
+                with ignored(Exception, print_traceback=True):
                     _artist = self.lastfm.get_artist(artist.name)
                     _album = self.lastfm.get_album(_artist, name)
                     release_year = self.get_release_year(_album)
                     pylast_cover = self.pylast.COVER_EXTRA_LARGE
                     cover = _album.get_cover_image(size=pylast_cover)
-                except self.pylast.WSError, error:
-                    #TODO: proper log error
-                    print(error)
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
@@ -197,8 +194,8 @@ class Indexer(object):
         ext = self.file_path.rsplit('.', 1)[1]
         if ext not in self.VALID_FILE_EXTENSIONS:
             if self.verbose:
-                msg = 'Skipped file with unknown file extension: %s'
-                print(msg % self.file_path)
+                print('[ SKIPPED ] %s (Unrecognized extension)' %
+                      self.file_path)
 
             return False
 
