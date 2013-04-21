@@ -245,8 +245,6 @@ class Indexer(object):
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir)
 
-        self.make_slugs_unique()
-
 
 def main():
     arguments = docopt(__doc__)
@@ -278,6 +276,10 @@ def main():
     if lola.verbose:
         print('Writing to database...')
     lola.session.commit()
+
+    if lola.verbose:
+        print('Checking for duplicated tracks...')
+    lola.make_slugs_unique()
 
 
 if __name__ == '__main__':
