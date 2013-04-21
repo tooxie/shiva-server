@@ -3,11 +3,10 @@ from datetime import datetime
 import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
-from slugify import slugify as do_slug
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import func
 
-from shiva.utils import randstr, MetadataManager
+from shiva.utils import slugify, MetadataManager
 
 db = SQLAlchemy()
 
@@ -25,35 +24,6 @@ def random_row(model):
         instance = model.query.order_by(func.rand()).limit(1).first()
 
     return instance
-
-
-def slugify(text, instance):
-    """
-    Given the instance of a model and a field to slugify, generates a unique
-    slug. If a standard one exists in the DB, or the generated slug is
-    numeric-only, a hyphen and the object's ID is appended to it to generate a
-    unique and alphanumeric one.
-
-    """
-
-    slug = do_slug(text)
-    if not slug:
-        slug = randstr(6)
-
-    try:
-        is_int = isinstance(int(slug), int)
-    except ValueError:
-        is_int = False
-
-    exists = bool(instance.__class__.query.filter_by(slug=slug).count())
-
-    if is_int or exists:
-        # FIXME: In specific cases is finding itself as a duplicate.
-        # Investigate.
-        extra = instance.pk or randstr(6)
-        slug += u'-%s' % extra
-
-    return slug
 
 
 class Artist(db.Model):
@@ -84,7 +54,7 @@ class Artist(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Artist, self).__setattr__('slug', slugify(value, self))
+            super(Artist, self).__setattr__('slug', slugify(value))
 
         super(Artist, self).__setattr__(attr, value)
 
@@ -128,7 +98,7 @@ class Album(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'name':
-            super(Album, self).__setattr__('slug', slugify(value, self))
+            super(Album, self).__setattr__('slug', slugify(value))
 
         super(Album, self).__setattr__(attr, value)
 
@@ -183,7 +153,7 @@ class Track(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'title':
-            super(Track, self).__setattr__('slug', slugify(value, self))
+            super(Track, self).__setattr__('slug', slugify(value))
 
         super(Track, self).__setattr__(attr, value)
 

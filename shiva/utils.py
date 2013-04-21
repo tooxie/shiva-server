@@ -6,8 +6,9 @@ import datetime
 import os
 import traceback
 
-import mutagen
+from slugify import slugify as do_slug
 import dateutil.parser
+import mutagen
 
 
 def randstr(length=None):
@@ -24,6 +25,28 @@ def randstr(length=None):
         return digest[:length]
 
     return digest
+
+
+def slugify(text):
+    """
+    Generates an alphanumeric slug. If the resulting slug is numeric-only a
+    hyphen and a random string is appended to it.
+
+    """
+
+    slug = do_slug(text)
+    if not slug:
+        slug = randstr(length=6)
+
+    try:
+        is_int = isinstance(int(slug), int)
+    except ValueError:
+        is_int = False
+
+    if is_int:
+        slug += u'-%s' % randstr(6)
+
+    return slug
 
 
 def _import(class_path):
