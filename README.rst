@@ -157,6 +157,18 @@ is **NOT** recommended, but is useful for developing.
 
 For more information, check the source of `shiva/media.py`.
 
+Restricting extensions
+----------------------
+
+If you want to limit the extensions of the files to index, just add the
+following config to your ``local.py`` file:
+
+.. code:: python
+
+    ALLOWED_FILE_EXTENSIONS = ('mp3', 'ogg')
+
+That way only 'mp3' and 'ogg' files will be indexed.
+
 
 Clients
 =======

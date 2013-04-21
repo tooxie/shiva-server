@@ -57,6 +57,8 @@ class Indexer(object):
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
+        self.allowed_extensions = app.config.get('ALLOWED_FILE_EXTENSIONS',
+                                                 self.VALID_FILE_EXTENSIONS)
 
         self._meta = None
 
@@ -196,6 +198,11 @@ class Indexer(object):
             if self.verbose:
                 print('[ SKIPPED ] %s (Unrecognized extension)' %
                       self.file_path)
+
+            return False
+        elif ext not in self.allowed_extensions:
+            if self.verbose:
+                print('[ SKIPPED ] %s (Ignored extension)' % self.file_path)
 
             return False
 
