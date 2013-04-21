@@ -26,6 +26,7 @@ from sqlalchemy import func
 
 from shiva import models as m
 from shiva.app import app, db
+from shiva.utils import ignored
 
 q = db.session.query
 
