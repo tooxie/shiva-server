@@ -89,9 +89,14 @@ class MetadataManager(object):
         """The album release year."""
         default_date = datetime.datetime(datetime.MINYEAR, 1, 1)
         date = self._getter('date', '')
-        parsed_date = dateutil.parser.parse(date, default=default_date)
+        try:
+            parsed_date = dateutil.parser.parse(date, default=default_date)
+        except ValueError:
+            return None
+
         if parsed_date != default_date:
             return parsed_date.year
+
         return None
 
     @release_year.setter
@@ -101,7 +106,13 @@ class MetadataManager(object):
     @property
     def track_number(self):
         """The track number."""
-        return self._getter('tracknumber')
+
+        try:
+            _number = int(self._getter('tracknumber'))
+        except (TypeError, ValueError):
+            _number = None
+
+        return _number
 
     @track_number.setter
     def track_number(self, value):
