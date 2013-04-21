@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -52,8 +53,15 @@ class Artist(db.Model):
     slug = db.Column(db.String(128), unique=True, nullable=False)
     image = db.Column(db.String(256))
     events = db.Column(db.String(256))
+    date_added = db.Column(db.Date(), nullable=False)
 
     tracks = db.relationship('Track', backref='artist', lazy='dynamic')
+
+    def __init__(self, *args, **kwargs):
+        if 'date_added' not in kwargs:
+            kwargs['date_added'] = datetime.today()
+
+        super(Artist, self).__init__(*args, **kwargs)
 
     def __setattr__(self, attr, value):
         if attr == 'name':
@@ -82,11 +90,18 @@ class Album(db.Model):
     slug = db.Column(db.String(128), unique=True, nullable=False)
     year = db.Column(db.Integer)
     cover = db.Column(db.String(256))
+    date_added = db.Column(db.Date(), nullable=False)
 
     tracks = db.relationship('Track', backref='album', lazy='dynamic')
 
     artists = db.relationship('Artist', secondary=artists,
                               backref=db.backref('albums', lazy='dynamic'))
+
+    def __init__(self, *args, **kwargs):
+        if 'date_added' not in kwargs:
+            kwargs['date_added'] = datetime.today()
+
+        super(Album, self).__init__(*args, **kwargs)
 
     def __setattr__(self, attr, value):
         if attr == 'name':
@@ -109,10 +124,12 @@ class Track(db.Model):
     slug = db.Column(db.String(128))
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
-    # TODO could be float if number weren't converted to an int in metadata manager
+    # TODO could be float if number weren't converted to an int in metadata
+    # manager
     length = db.Column(db.Integer)
     # TODO number should probably be renamed to track or track_number
     number = db.Column(db.Integer)
+    date_added = db.Column(db.Date(), nullable=False)
 
     lyrics = db.relationship('Lyrics', backref='track', uselist=False)
 
@@ -120,7 +137,7 @@ class Track(db.Model):
     artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'),
                           nullable=True)
 
-    def __init__(self, path):
+    def __init__(self, path, *args, **kwargs):
         if not isinstance(path, (basestring, file)):
             raise ValueError('Invalid parameter for Track. Path or File '
                              'expected, got %s' % type(path))
@@ -131,6 +148,11 @@ class Track(db.Model):
 
         self._meta = None
         self.set_path(_path)
+
+        if 'date_added' not in kwargs:
+            kwargs['date_added'] = datetime.today()
+
+        super(Track, self).__init__(*args, **kwargs)
 
     def __setattr__(self, attr, value):
         if attr == 'title':
