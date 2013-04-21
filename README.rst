@@ -197,6 +197,13 @@ You have the following resources available:
 * ``/track/<int:track_id>``
 * ``/track/<int:track_id>/lyrics``
 
+And some meta resources:
+
+* ``/random/<str:resource_name>``
+* ``/whatsnew``
+* ``/clients``
+* ``/about``
+
 
 ----------------
 Artists Resource
@@ -954,6 +961,41 @@ You will see in your config file:
 
 Keep in mind that an invalid MimeType in this config will raise an
 ``InvalidMimeTypeError`` exception.
+
+
+What's new?
+===========
+
+There's a special resource that lets you query the database to retrieve all the
+resources older than a given date, at the same time:
+
+.. code:: html
+
+    /whatsnew?since=YYYYMMDD
+
+This will return an object with the following format:
+
+.. code:: javascript
+
+    {
+        "artists": [],
+        "albums": [
+            {
+                "id": 10,
+                "uri": "/album/10"
+            }
+        ],
+        "tracks": [
+            {
+                "id": 121,
+                "uri": "/track/121"
+            },
+            {
+                "id": 122,
+                "uri": "/track/122"
+            }
+        ],
+    }
 
 
 Cross Origin Resource Sharing
