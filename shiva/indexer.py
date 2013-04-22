@@ -94,7 +94,7 @@ class Indexer(object):
             db.create_all()
 
     def get_artist(self, name):
-        name = name.strip()
+        name = name.strip() if type(name) in (str, unicode) else None
         if not name:
             return None
 
@@ -114,7 +114,7 @@ class Indexer(object):
         return artist
 
     def get_album(self, name, artist):
-        name = name.strip()
+        name = name.strip() if type(name) in (str, unicode) else None
         if not name:
             return None
 
