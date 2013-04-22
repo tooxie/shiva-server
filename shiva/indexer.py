@@ -27,7 +27,7 @@ from sqlalchemy import func
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
-from shiva.utils import ignored, slugify
+from shiva.utils import ignored
 
 q = db.session.query
 
@@ -94,9 +94,12 @@ class Indexer(object):
             db.create_all()
 
     def get_artist(self, name):
-        _name = slugify(name)
-        if _name in self.artists:
-            return self.artists[_name]
+        name = name.strip()
+        if not name:
+            return None
+
+        if name in self.artists:
+            return self.artists[name]
         else:
             cover = None
             if self.use_lastfm:
@@ -106,17 +109,17 @@ class Indexer(object):
                     cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
             self.session.add(artist)
-            self.artists[_name] = artist
+            self.artists[name] = artist
 
         return artist
 
     def get_album(self, name, artist):
-        _name = slugify(name)
-        if not _name:
+        name = name.strip()
+        if not name:
             return None
 
-        if _name in self.albums:
-            return self.albums[_name]
+        if name in self.albums:
+            return self.albums[name]
         else:
             release_year = self.get_release_year()
             cover = None
@@ -133,7 +136,7 @@ class Indexer(object):
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
-            self.albums[_name] = album
+            self.albums[name] = album
 
         return album
 
