@@ -22,7 +22,7 @@ class MediaDir(object):
     MediaDir('/home/fatmike/music')
     """
 
-    def __init__(self, root='/', dirs=tuple(), url=None):
+    def __init__(self, root='/', dirs=tuple(), exclude=tuple(), url=None):
         """If you provide just 1 argument it will be assumed as a path to
     serve. Like:
 
@@ -44,22 +44,28 @@ class MediaDir(object):
     MediaDir(root='/srv/http', dirs=('/music', '/songs'))
         """
 
-        if type(root) in (str, unicode):
-            # MediaDir('/path/to/dir')
-            if not dirs and not url:
-                dirs = (root,)
-                root = '/'
-
-            # MediaDir('/path/to/dir', dirs='sub/path')
-            if type(dirs) != tuple:
-                raise TypeError("The 'dirs' attribute has to be a tuple.")
-
-            # MediaDir(root='/', url='http://localhost')
-            if root == '/' and not dirs and url:
-                raise TypeError('Please define at least one directory ' +
-                                "different from '/'.")
-        else:
+        if type(root) not in (str, unicode):
             raise TypeError("The 'root' attribute has to be a string.")
+
+        # MediaDir('/path/to/dir')
+        if not dirs and not url:
+            dirs = (root,)
+            root = '/'
+
+        # MediaDir('/path/to/dir', dirs='sub/path')
+        if type(dirs) != tuple:
+            raise TypeError("The 'dirs' attribute has to be a tuple.")
+
+        if type(exclude) not in (tuple, str, unicode):
+            raise TypeError("The 'exclude' attribute has to be tuple or " +
+                            'string.')
+        if type(exclude) in (str, unicode):
+            exclude = (exclude,)
+
+        # MediaDir(root='/', url='http://localhost')
+        if root == '/' and not dirs and url:
+            raise TypeError('Please define at least one directory different ' +
+                            "from '/'.")
 
         if url and type(url) not in (str, unicode):
             raise TypeError('URL has to be a string.')
@@ -78,8 +84,18 @@ class MediaDir(object):
         if type(url) in (str, unicode) and not url.endswith('/'):
             url += '/'
 
+        for d in dirs:
+            if d.startswith('/'):
+                raise TypeError("The 'dirs' tuple can't contain an absolute " +
+                                'path')
+            if root.startswith(d):
+                raise TypeError("The 'dirs' tuple must be relative to " +
+                                "'%s'." % root)
+
         self.root = root
         self.dirs = dirs
+        self.exclude = exclude
+        self.excluded_dirs = None
         self.url = url
 
     def root_slashes(self, path):
@@ -124,12 +140,32 @@ class MediaDir(object):
 
         return dirs
 
+    def get_excluded_dirs(self):
+        if type(self.excluded_dirs) is list:
+            return self.excluded_dirs
+
+        self.excluded_dirs = []
+
+        if not len(self.exclude):
+            return self.excluded_dirs
+
+        media_dirs = self.dirs if len(self.dirs) else (self.root,)
+        for media_dir in media_dirs:
+            for _excluded in self.exclude:
+                if _excluded.startswith('/'):
+                    self.excluded_dirs.append(_excluded)
+                else:
+                    _path = os.path.join(self.root, media_dir, _excluded)
+                    self.excluded_dirs.append(_path)
+
+        return self.excluded_dirs
+
     def _is_valid_path(self, path):
         """Validates that the given path exists.
         """
 
         if not os.path.exists(path):
-            print("[WARNING] Path '%s' does not exist. Ignoring." % path)
+            print("[ WARNING ] Path '%s' does not exist. Ignoring." % path)
             return False
 
         return True
@@ -140,13 +176,9 @@ class MediaDir(object):
 
         """
 
-        dirs = []
-
         for path in self.get_dirs():
             if self._is_valid_path(path):
-                dirs.append(path)
-
-        return dirs
+                yield path
 
     # TODO: Simplify this method and document it better.
     def urlize(self, path):
