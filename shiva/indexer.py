@@ -238,22 +238,19 @@ class Indexer(object):
 
         return True
 
-    def walk(self, target):
+    def walk(self, target, exclude=tuple()):
         """Recursively walks through a directory looking for tracks."""
 
-        # If target is a file, try to save it as a track
-        if os.path.isfile(target):
-            self.file_path = target
-            if self.is_track():
-                self.save_track()
-
-        # Otherwise, recursively walk the directory looking for files
-        else:
-            for root, dirs, files in os.walk(target):
+        if os.path.isdir(target):
+            for root, dirs, files in os.walk(target, exclude):
                 for name in files:
                     self.file_path = os.path.join(root, name)
-                    if self.is_track():
-                        self.save_track()
+                    if root in exclude:
+                        if self.verbose:
+                            print('[ EXCLUDED ] %s' % self.file_path)
+                    else:
+                        if self.is_track():
+                            self.save_track()
 
     # SELECT pk, slug, COUNT(*) FROM tracks GROUP BY slug HAVING COUNT(*) > 1;
     def make_slugs_unique(self):
@@ -277,7 +274,7 @@ class Indexer(object):
     def run(self):
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
-                self.walk(mdir)
+                self.walk(mdir, exclude=mobject.get_excluded_dirs())
 
 
 def main():
