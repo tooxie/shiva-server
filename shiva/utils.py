@@ -10,6 +10,8 @@ from slugify import slugify as do_slug
 import dateutil.parser
 import mutagen
 
+from shiva.exceptions import MetadataManagerReadError
+
 
 def randstr(length=None):
     """ Generates a random string of the given length. """
