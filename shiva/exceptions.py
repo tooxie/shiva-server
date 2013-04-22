@@ -1,6 +1,7 @@
-# FIXME: This is a hack to treat HeaderNotFoundError as a generic read error of
-# the metadata manager. It is disgusting. Fix.
-from mutagen.mp3 import HeaderNotFoundError as MetadataManagerReadError
+# -*- coding: utf-8 -*-
+class MetadataManagerReadError(Exception):
+    pass
+
 
 class InvalidMimeTypeError(Exception):
     def __init__(self, mimetype):

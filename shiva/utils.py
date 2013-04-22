@@ -88,7 +88,10 @@ class MetadataManager(object):
 
     def __init__(self, filepath):
         self._original_path = filepath
-        self.reader = mutagen.File(filepath, easy=True)
+        try:
+            self.reader = mutagen.File(filepath, easy=True)
+        except Exception, e:
+            raise MetadataManagerReadError(e.message)
 
     @property
     def title(self):
