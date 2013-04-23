@@ -115,7 +115,7 @@ class Indexer(object):
 
     def get_album(self, name, artist):
         name = name.strip() if type(name) in (str, unicode) else None
-        if not name:
+        if not name or not artist:
             return None
 
         if name in self.albums:
