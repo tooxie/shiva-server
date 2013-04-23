@@ -31,13 +31,6 @@ class TrackFiles(fields.Raw):
         return paths
 
 
-class DownloadURI(InstanceURI):
-    def output(self, key, obj):
-        uri = super(DownloadURI, self).output(key, obj)
-
-        return '%s/download.mp3' % uri
-
-
 class ManyToManyField(fields.Raw):
     def __init__(self, foreign_obj, nested):
         self.foreign_obj = foreign_obj

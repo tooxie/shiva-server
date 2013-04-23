@@ -22,7 +22,8 @@ class MediaDir(object):
     MediaDir('/home/fatmike/music')
     """
 
-    def __init__(self, root='/', dirs=tuple(), exclude=tuple(), url=None):
+    def __init__(self, root='/', dirs=tuple(), exclude=tuple(),
+                 url='http://127.0.0.1:8001'):
         """If you provide just 1 argument it will be assumed as a path to
     serve. Like:
 

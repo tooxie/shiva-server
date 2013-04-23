@@ -3,17 +3,13 @@ from flask import Flask, g, request
 from flask.ext.restful import Api
 
 from shiva.models import db
-from shiva import resources, views
+from shiva import resources
 
 app = Flask(__name__)
 app.config.from_object('shiva.config')
 
 db.app = app
 db.init_app(app)
-
-# URIs
-app.add_url_rule('/track/<int:track_id>/download.<ext>', 'download',
-                 views.download)
 
 # RESTful API
 api = Api(app)

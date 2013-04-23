@@ -90,7 +90,13 @@ Installation
 
   $ shiva-indexer
 
-* Run the server::
+* Run the file server::
+
+.. code:: sh
+
+  $ shiva-fileserver
+
+* Run the server in a different console::
 
 .. code:: sh
 
@@ -161,8 +167,9 @@ Given that configuration Shiva will scan the directories ``/srv/http/music``
 and ``/srv/http/songs`` for media files, but they will be served through
 ``http://localhost:8080/music/`` and ``http://localhost:8080/songs/``.
 
-If just a dir is provided Shiva will serve it through the same instance. This
-is **NOT** recommended, but is useful for developing.
+If just a dir is provided you will also need to run the file server, as
+mentioned in the installation guide. This is a simple file server, for testing
+purposes only. Do **NOT** use in a live environment.
 
 .. code:: python
 

@@ -11,7 +11,7 @@ import requests
 from shiva import get_version, get_contributors
 from shiva.converter import get_converter
 from shiva.exceptions import InvalidMimeTypeError
-from shiva.fields import (Boolean, DownloadURI, ForeignKeyField, InstanceURI,
+from shiva.fields import (Boolean, ForeignKeyField, InstanceURI,
                           ManyToManyField, TrackFiles)
 from shiva.http import Resource, JSONResponse
 from shiva.lyrics import get_lyrics
@@ -70,7 +70,6 @@ class ArtistResource(Resource):
             'name': fields.String,
             'slug': fields.String,
             'uri': InstanceURI('artist'),
-            'download_uri': DownloadURI('artist'),
             'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
             'events_uri': fields.String(attribute='events'),
         }
@@ -149,7 +148,6 @@ class AlbumResource(Resource):
                 'id': fields.Integer(attribute='pk'),
                 'uri': InstanceURI('artist'),
             }),
-            'download_uri': DownloadURI('album'),
             'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
         }
 
@@ -408,7 +406,7 @@ class ConvertResource(Resource):
             abort(400)
 
         converter.convert()
-        uri = converter.get_uri() or DownloadURI('track').output(None, track)
+        uri = converter.get_uri()
 
         return JSONResponse(status=301, headers={'Location': uri})
 
