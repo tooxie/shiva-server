@@ -35,7 +35,7 @@ class Artist(db.Model):
     pk = db.Column(db.Integer, primary_key=True)
     # TODO: Update the files' Metadata when changing this info.
     name = db.Column(db.String(128), nullable=False)
-    slug = db.Column(db.String(128), unique=True, nullable=False)
+    slug = db.Column(db.String(128), nullable=False)
     image = db.Column(db.String(256))
     events = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
@@ -76,7 +76,7 @@ class Album(db.Model):
 
     pk = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    slug = db.Column(db.String(128), unique=True, nullable=False)
+    slug = db.Column(db.String(128), nullable=False)
     year = db.Column(db.Integer)
     cover = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
