@@ -16,6 +16,7 @@ Options:
 """
 # K-Pg
 from datetime import datetime
+from time import time
 import logging
 import os
 import sys
@@ -304,7 +305,9 @@ class Indexer(object):
         self.session.commit()
 
     def print_stats(self):
+        elapsed_time = self.final_time - self.initial_time
         print('')
+        print('Run in %d seconds.' % elapsed_time)
         print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
             self.track_count,
             self.skipped_tracks,
@@ -313,9 +316,13 @@ class Indexer(object):
         print('')
 
     def run(self):
+        self.initial_time = time()
+
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir, exclude=mobject.get_excluded_dirs())
+
+        self.final_time = time()
 
 
 def main():
