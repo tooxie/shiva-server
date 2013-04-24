@@ -65,6 +65,8 @@ class Indexer(object):
                                                  self.VALID_FILE_EXTENSIONS)
 
         self._meta = None
+        self.track_count = 0
+        self.skipped_tracks = 0
 
         self.artists = {}
         self.albums = {}
@@ -198,6 +200,7 @@ class Indexer(object):
             if q(m.Track).filter_by(path=full_path).count():
                 self.skipped_tracks += 1
                 if not self.quiet:
+                    self.skipped_tracks += 1
                     print('[ SKIPPED ] %s' % full_path)
 
                 return True
@@ -270,6 +273,7 @@ class Indexer(object):
                         print('[ EXCLUDED ] %s' % self.file_path)
                 else:
                     if self.is_track():
+                        self.track_count += 1
                         self.save_track()
 
     def _make_unique(self, model):
@@ -298,6 +302,15 @@ class Indexer(object):
         self.session.add_all(query)
 
         self.session.commit()
+
+    def print_stats(self):
+        print('')
+        print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
+            self.track_count,
+            self.skipped_tracks,
+            (self.track_count - self.skipped_tracks),
+        ))
+        print('')
 
     def run(self):
         for mobject in self.media_dirs:
@@ -329,6 +342,8 @@ def main():
 
     lola = Indexer(app.config, **kwargs)
     lola.run()
+
+    lola.print_stats()
 
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
