@@ -31,18 +31,13 @@ class MediaDir(object):
 
     However, you can't just provide the dirs argument, you have to define
     several MediaDirs.
-    You can also provide just the dirs argument and they will be served too
-    through the same server as Shiva.
-
-    MediaDir(dirs=('/srv/http/music', '/opt/music'))  # WRONG
-
-    # Right:
-    MediaDir('/srv/http/music')
-    MediaDir('/opt/music')
 
     If the dirs share the same root you can define them both at once:
 
     MediaDir(root='/srv/http', dirs=('/music', '/songs'))
+
+    If you don't provide a ``url`` parameter, 'http://127.0.0.1:8001' will be
+    assumed.
         """
 
         if type(root) not in (str, unicode):

@@ -238,7 +238,6 @@ Example response for the request ``GET /artist/3``:
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
         "uri": "/artist/3",
         "slug": "eterna-inocencia",
-        "download_uri": "/artist/3/download",
         "id": 3
     }
 
@@ -246,7 +245,6 @@ Example response for the request ``GET /artist/3``:
 Fields
 ------
 
-* ``download_uri``: The URI to download this artist's tracks. *(NOT IMPLEMENTED)*
 * ``id``: The object's ID.
 * ``image``: Link to a photo. (Provided by last.fm)
 * ``name``: The artist's name.
@@ -354,7 +352,6 @@ Example response for the request ``GET /album/9``:
                 "uri": "/artist/5"
             }
         ],
-        "download_uri": "/album/9/download",
         "name": "NOFX & Rancid - BYO Split Series (Vol. III)",
         "year": 2002,
         "uri": "/album/9",
@@ -369,7 +366,6 @@ Fields
 
 * ``artists``: A list of the artists involved in that record.
 * ``cover``: A link to an image of the album's cover. (Provided by last.fm)
-* ``download_uri``: The URI to download this album. (NOT IMPLEMENTED)
 * ``id``: The object's ID.
 * ``name``: The album's name.
 * ``slug``: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`_
@@ -396,7 +392,6 @@ Example response for the request ``GET /albums/?artist=7``:
                     "uri": "/artist/7"
                 }
             ],
-            "download_uri": "/album/12/download",
             "name": "Anesthesia",
             "year": 1995,
             "uri": "/album/12",
@@ -411,7 +406,6 @@ Example response for the request ``GET /albums/?artist=7``:
                     "uri": "/artist/7"
                 }
             ],
-            "download_uri": "/album/27/download",
             "name": "Kum Kum",
             "year": 1996,
             "uri": "/album/27",
@@ -704,7 +698,6 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        "download_uri": "/artist/2/download",
         "uri": "/artist/2",
         "events_uri": null,
         "id": 2,
@@ -717,7 +710,6 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                         "uri": "/artist/2"
                     }
                 ],
-                "download_uri": "/album/2/download",
                 "name": "Tomalo Con Calma EP",
                 "year": 2002,
                 "uri": "/album/2",
@@ -732,7 +724,7 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                         },
                         "length": 161,
                         "files": {
-                            "audio/mp3": "http://localhost:5000/track/27/download",
+                            "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/tomalo-con-calma.mp3",
                             "audio/ogg": "/track/27/convert?mimetype=audio%2Fogg"
                         }
                         "number": 0,
@@ -753,7 +745,7 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                         },
                         "length": 262,
                         "files": {
-                            "audio/mp3": "http://localhost:5000/track/28/download",
+                            "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/estoy-herido-en-mi-interior.mp3",
                             "audio/ogg": "/track/28/convert?mimetype=audio%2Fogg"
                         }
                         "number": 0,
@@ -817,7 +809,6 @@ Example response for the request ``GET /artist/eterna-inocencia``:
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
         "uri": "/artist/3",
         "slug": "eterna-inocencia",
-        "download_uri": "/artist/3/download",
         "id": 3
     }
 
