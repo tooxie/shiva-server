@@ -139,8 +139,13 @@ class Track(db.Model):
         if isinstance(path, file):
             _path = path.name
 
+        no_metadata = False
+        if 'no_metadata' in kwargs:
+            no_metadata = kwargs.get('no_metadata', False)
+            del(kwargs['no_metadata'])
+
         self._meta = None
-        self.set_path(_path)
+        self.set_path(_path, no_metadata=no_metadata)
 
         if 'date_added' not in kwargs:
             kwargs['date_added'] = datetime.today()
@@ -163,9 +168,12 @@ class Track(db.Model):
 
         return None
 
-    def set_path(self, path):
+    def set_path(self, path, no_metadata=False):
         if path != self.get_path():
             self.path = path
+            if no_metadata:
+                return None
+
             if os.path.exists(self.get_path()):
                 meta = self.get_metadata_reader()
                 self.file_size = meta.filesize

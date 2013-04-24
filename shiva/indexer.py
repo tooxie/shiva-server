@@ -180,7 +180,7 @@ class Indexer(object):
             return False
 
         try:
-            track = m.Track(full_path)
+            track = m.Track(full_path, no_metadata=self.no_metadata)
         except MetadataManagerReadError:
             print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
             print(traceback.format_exc())

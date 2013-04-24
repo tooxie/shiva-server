@@ -120,8 +120,8 @@ from Last.FM, but for this to work you need to get an API key (see
 `Prerequisites`_) and include it in your ``local.py`` config file.
 
 The ``--nometadata`` option saves dummy tracks with only path information,
-ignoring the file's metadata. This means that album and artists will not be
-saved.
+ignoring the file's metadata. This means that albums and artists will not be
+saved, but indexing will be as fast as it gets.
 
 If both flags are set, ``--nometadata`` will take precedence and ``--lastfm``
 will be ignored.
@@ -130,6 +130,10 @@ With ``--reindex`` the whole database will be dropped and recreated. Be
 careful, all existing information **will be deleted**. If you just want to
 update your music collection, run the indexer again **without** the
 ``--reindex`` option.
+
+The indexer is optimized for performance; hard drive hits, like file reading or
+DB queries, are done as few as possible. As a consequence, memory usage is
+quite heavy. Keep that in mind when indexing large collections.
 
 
 Restricting extensions
