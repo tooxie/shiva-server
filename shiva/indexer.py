@@ -266,23 +266,31 @@ class Indexer(object):
                     if self.is_track():
                         self.save_track()
 
+    def _make_unique(self, model):
+        """
+        Retrieves all repeated slugs for a given model and appends the
+        instance's primary key to it.
+
+        """
+
+        slugs = q(model).group_by(model.slug).\
+            having(func.count(model.slug) > 1)
+
+        for row in slugs:
+            slug = row.slug
+            for instance in q(model).filter_by(slug=row.slug):
+                instance.slug += '-%s' % instance.pk
+
+        return slugs
+
     # SELECT pk, slug, COUNT(*) FROM tracks GROUP BY slug HAVING COUNT(*) > 1;
     def make_slugs_unique(self):
-        """
-        Retrieves all repeated slugs and appends the instance's primary key to
-        it.
-
-        """
-
-        query = q(m.Track).group_by(m.Track.slug).\
-            having(func.count(m.Track.slug) > 1)
-
-        for _track in query:
-            slug = _track.slug
-            for track in q(m.Track).filter_by(slug=slug):
-                track.slug += '-%s' % track.pk
-
+        query = self._make_unique(m.Artist)
         self.session.add_all(query)
+
+        query = self._make_unique(m.Track)
+        self.session.add_all(query)
+
         self.session.commit()
 
     def run(self):
