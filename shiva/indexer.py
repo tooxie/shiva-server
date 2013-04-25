@@ -173,8 +173,11 @@ class Indexer(object):
         try:
             full_path = self.file_path.decode('utf-8')
         except UnicodeDecodeError:
-            print('[ SKIPPED ] %s (Unrecognized encoding)' % self.file_path)
-            print(traceback.format_exc())
+            self.skipped_tracks += 1
+            if not self.quiet:
+                print('[ SKIPPED ] %s (Unrecognized encoding)' %
+                    self.file_path)
+                print(traceback.format_exc())
 
             # If file name is in an strange encoding ignore it.
             return False
@@ -182,8 +185,10 @@ class Indexer(object):
         try:
             track = m.Track(full_path, no_metadata=self.no_metadata)
         except MetadataManagerReadError:
-            print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
-            print(traceback.format_exc())
+            self.skipped_tracks += 1
+            if not self.quiet:
+                print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
+                print(traceback.format_exc())
 
             # If the metadata manager can't read the file, it's probably not an
             # actual music file, or it's corrupted. Ignore it.
@@ -191,6 +196,7 @@ class Indexer(object):
 
         if not self.empty_db:
             if q(m.Track).filter_by(path=full_path).count():
+                self.skipped_tracks += 1
                 if not self.quiet:
                     print('[ SKIPPED ] %s' % full_path)
 
