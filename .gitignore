@@ -4,9 +4,6 @@
 *~
 .*.sw*
 
-# virtualenv
-bin/
-include/
-lib/
-local/
+.virtualenv
 Shiva.egg-info/
+
