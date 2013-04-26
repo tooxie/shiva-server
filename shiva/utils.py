@@ -168,7 +168,8 @@ class MetadataManager(object):
     @property
     def bitrate(self):
         """The audio bitrate."""
-        return self.reader.info.bitrate
+        if hasattr(self.reader.info, 'bitrate'):
+            return self.reader.info.bitrate
 
     @property
     def sample_rate(self):
