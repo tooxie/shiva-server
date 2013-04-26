@@ -65,8 +65,8 @@ Installation
 
 .. code:: sh
 
-    $ virtualenv .
-    $ source bin/activate
+    $ virtualenv .virtualenv
+    $ source .virtualenv/bin/activate
 
 * Install::
 
