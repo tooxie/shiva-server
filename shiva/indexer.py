@@ -166,6 +166,25 @@ class Indexer(object):
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
+    def add_to_session(self, track):
+        self.session.add(track)
+
+        if not self.quiet:
+            print('[ OK ] %s' % track.path)
+
+        return True
+
+    def skip(self, reason=None, print_traceback=None):
+        self.skipped_tracks += 1
+
+        if not self.quiet:
+            _reason = ' (%s)' % reason if reason else ''
+            print('[ SKIPPED ] %s%s' % (self.file_path, _reason))
+            if print_traceback:
+                print(traceback.format_exc())
+
+        return True
+
     def save_track(self):
         """
         Takes a path to a track, reads its metadata and stores everything in
@@ -176,11 +195,7 @@ class Indexer(object):
         try:
             full_path = self.file_path.decode('utf-8')
         except UnicodeDecodeError:
-            self.skipped_tracks += 1
-            if not self.quiet:
-                print('[ SKIPPED ] %s (Unrecognized encoding)' %
-                    self.file_path)
-                print(traceback.format_exc())
+            self.skip('Unrecognized encoding', print_traceback=True)
 
             # If file name is in an strange encoding ignore it.
             return False
@@ -188,10 +203,7 @@ class Indexer(object):
         try:
             track = m.Track(full_path, no_metadata=self.no_metadata)
         except MetadataManagerReadError:
-            self.skipped_tracks += 1
-            if not self.quiet:
-                print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
-                print(traceback.format_exc())
+            self.skip('Corrupted file', print_traceback=True)
 
             # If the metadata manager can't read the file, it's probably not an
             # actual music file, or it's corrupted. Ignore it.
@@ -199,17 +211,12 @@ class Indexer(object):
 
         if not self.empty_db:
             if q(m.Track).filter_by(path=full_path).count():
-                self.skipped_tracks += 1
-                if not self.quiet:
-                    self.skipped_tracks += 1
-                    print('[ SKIPPED ] %s' % full_path)
+                self.skip()
 
                 return True
 
         if self.no_metadata:
-            self.session.add(track)
-            if not self.quiet:
-                print('[ OK ] %s' % full_path)
+            self.add_to_session(track)
 
             return True
 
@@ -224,10 +231,7 @@ class Indexer(object):
 
         track.album = album
         track.artist = artist
-        self.session.add(track)
-
-        if not self.quiet:
-            print('[ OK ] %s' % full_path)
+        self.add_to_session(track)
 
     def get_metadata_reader(self):
         return self._meta
