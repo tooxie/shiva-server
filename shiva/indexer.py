@@ -68,6 +68,9 @@ class Indexer(object):
         self._meta = None
         self.track_count = 0
         self.skipped_tracks = 0
+        self.count_by_extension = {}
+        for extension in self.allowed_extensions:
+            self.count_by_extension[extension] = 0
 
         self.artists = {}
         self.albums = {}
@@ -168,6 +171,8 @@ class Indexer(object):
 
     def add_to_session(self, track):
         self.session.add(track)
+        ext = self.get_extension()
+        self.count_by_extension[ext] += 1
 
         if not self.quiet:
             print('[ OK ] %s' % track.path)
@@ -241,6 +246,12 @@ class Indexer(object):
 
         return self._meta
 
+    def get_extension(self):
+        if not self._ext:
+            self._ext = self.file_path.rsplit('.', 1)[1].lower()
+
+        return self._ext
+
     def is_track(self):
         """Try to guess whether the file is a valid track or not."""
         if not os.path.isfile(self.file_path):
@@ -249,7 +260,7 @@ class Indexer(object):
         if '.' not in self.file_path:
             return False
 
-        ext = self.file_path.rsplit('.', 1)[1].lower()
+        ext = self.get_extension()
         if ext not in self.VALID_FILE_EXTENSIONS:
             if self.verbose:
                 print('[ SKIPPED ] %s (Unrecognized extension)' %
@@ -317,6 +328,8 @@ class Indexer(object):
             self.skipped_tracks,
             (self.track_count - self.skipped_tracks),
         ))
+        for extension, count in self.count_by_extension.iteritems():
+            print('%s: %d tracks' % (extension, count))
         print('')
 
     def run(self):
