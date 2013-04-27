@@ -16,6 +16,7 @@ Options:
 """
 # K-Pg
 from datetime import datetime
+from time import time
 import logging
 import os
 import sys
@@ -65,6 +66,11 @@ class Indexer(object):
                                                  self.VALID_FILE_EXTENSIONS)
 
         self._meta = None
+        self.track_count = 0
+        self.skipped_tracks = 0
+        self.count_by_extension = {}
+        for extension in self.allowed_extensions:
+            self.count_by_extension[extension] = 0
 
         self.artists = {}
         self.albums = {}
@@ -163,6 +169,27 @@ class Indexer(object):
 
         return datetime.strptime(_date, '%d %b %Y, %H:%M').year
 
+    def add_to_session(self, track):
+        self.session.add(track)
+        ext = self.get_extension()
+        self.count_by_extension[ext] += 1
+
+        if not self.quiet:
+            print('[ OK ] %s' % track.path)
+
+        return True
+
+    def skip(self, reason=None, print_traceback=None):
+        self.skipped_tracks += 1
+
+        if not self.quiet:
+            _reason = ' (%s)' % reason if reason else ''
+            print('[ SKIPPED ] %s%s' % (self.file_path, _reason))
+            if print_traceback:
+                print(traceback.format_exc())
+
+        return True
+
     def save_track(self):
         """
         Takes a path to a track, reads its metadata and stores everything in
@@ -173,11 +200,7 @@ class Indexer(object):
         try:
             full_path = self.file_path.decode('utf-8')
         except UnicodeDecodeError:
-            self.skipped_tracks += 1
-            if not self.quiet:
-                print('[ SKIPPED ] %s (Unrecognized encoding)' %
-                    self.file_path)
-                print(traceback.format_exc())
+            self.skip('Unrecognized encoding', print_traceback=True)
 
             # If file name is in an strange encoding ignore it.
             return False
@@ -185,10 +208,7 @@ class Indexer(object):
         try:
             track = m.Track(full_path, no_metadata=self.no_metadata)
         except MetadataManagerReadError:
-            self.skipped_tracks += 1
-            if not self.quiet:
-                print('[ SKIPPED ] %s (Corrupted file)' % self.file_path)
-                print(traceback.format_exc())
+            self.skip('Corrupted file', print_traceback=True)
 
             # If the metadata manager can't read the file, it's probably not an
             # actual music file, or it's corrupted. Ignore it.
@@ -196,16 +216,12 @@ class Indexer(object):
 
         if not self.empty_db:
             if q(m.Track).filter_by(path=full_path).count():
-                self.skipped_tracks += 1
-                if not self.quiet:
-                    print('[ SKIPPED ] %s' % full_path)
+                self.skip()
 
                 return True
 
         if self.no_metadata:
-            self.session.add(track)
-            if not self.quiet:
-                print('[ OK ] %s' % full_path)
+            self.add_to_session(track)
 
             return True
 
@@ -220,10 +236,7 @@ class Indexer(object):
 
         track.album = album
         track.artist = artist
-        self.session.add(track)
-
-        if not self.quiet:
-            print('[ OK ] %s' % full_path)
+        self.add_to_session(track)
 
     def get_metadata_reader(self):
         return self._meta
@@ -233,6 +246,12 @@ class Indexer(object):
 
         return self._meta
 
+    def get_extension(self):
+        if not self._ext:
+            self._ext = self.file_path.rsplit('.', 1)[1].lower()
+
+        return self._ext
+
     def is_track(self):
         """Try to guess whether the file is a valid track or not."""
         if not os.path.isfile(self.file_path):
@@ -241,7 +260,7 @@ class Indexer(object):
         if '.' not in self.file_path:
             return False
 
-        ext = self.file_path.rsplit('.', 1)[1].lower()
+        ext = self.get_extension()
         if ext not in self.VALID_FILE_EXTENSIONS:
             if self.verbose:
                 print('[ SKIPPED ] %s (Unrecognized extension)' %
@@ -270,6 +289,7 @@ class Indexer(object):
                         print('[ EXCLUDED ] %s' % self.file_path)
                 else:
                     if self.is_track():
+                        self.track_count += 1
                         self.save_track()
 
     def _make_unique(self, model):
@@ -299,10 +319,29 @@ class Indexer(object):
 
         self.session.commit()
 
+    def print_stats(self):
+        elapsed_time = self.final_time - self.initial_time
+        print('')
+        print('Run in %d seconds. Avg %.3fs/track' % (
+            elapsed_time,
+            (elapsed_time / self.track_count)))
+        print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
+            self.track_count,
+            self.skipped_tracks,
+            (self.track_count - self.skipped_tracks),
+        ))
+        for extension, count in self.count_by_extension.iteritems():
+            print('%s: %d tracks' % (extension, count))
+        print('')
+
     def run(self):
+        self.initial_time = time()
+
         for mobject in self.media_dirs:
             for mdir in mobject.get_valid_dirs():
                 self.walk(mdir, exclude=mobject.get_excluded_dirs())
+
+        self.final_time = time()
 
 
 def main():
@@ -329,6 +368,8 @@ def main():
 
     lola = Indexer(app.config, **kwargs)
     lola.run()
+
+    lola.print_stats()
 
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
