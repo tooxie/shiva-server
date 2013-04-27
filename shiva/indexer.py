@@ -323,7 +323,9 @@ class Indexer(object):
     def print_stats(self):
         elapsed_time = self.final_time - self.initial_time
         print('')
-        print('Run in %d seconds.' % elapsed_time)
+        print('Run in %d seconds. Avg %.3fs/track' % (
+            elapsed_time,
+            (elapsed_time / self.track_count)))
         print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
             self.track_count,
             self.skipped_tracks,
