@@ -248,10 +248,7 @@ class Indexer(object):
         return self._meta
 
     def get_extension(self):
-        if not self._ext:
-            self._ext = self.file_path.rsplit('.', 1)[1].lower()
-
-        return self._ext
+        return self.file_path.rsplit('.', 1)[1].lower()
 
     def is_track(self):
         """Try to guess whether the file is a valid track or not."""
@@ -323,7 +320,7 @@ class Indexer(object):
     def print_stats(self):
         elapsed_time = self.final_time - self.initial_time
         print('')
-        print('Run in %d seconds. Avg %.3fs/track' % (
+        print('Run in %d seconds. Avg %.3fs/track.' % (
             elapsed_time,
             (elapsed_time / self.track_count)))
         print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
