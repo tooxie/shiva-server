@@ -1053,6 +1053,18 @@ against it. If they match, a header is added:
     Access-Control-Allow-Origin: http://napster.com
 
 
+Bug Reports
+===========
+
+Please report bugs, recommend enhancements or ask questions in our
+`issue tracker <https://github.com/tooxie/shiva-server/issues>`_. Before
+reporting bugs please make sure of the following:
+
+* The bug was not previously reported.
+* You have the latest version installed.
+* The bug is not actually a feature.
+
+
 Assumptions
 ===========
 
