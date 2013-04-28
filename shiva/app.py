@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from flask import Flask, g, request
 from flask.ext.restful import Api
 
@@ -56,7 +58,12 @@ def after_request(response):
 
 
 def main():
-    app.run(host='0.0.0.0', port=9002, debug=True)
+    try:
+        port = int(sys.argv[1])
+    except:
+        port = 9002
+
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 
 if __name__ == '__main__':
