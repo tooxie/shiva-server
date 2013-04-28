@@ -1084,23 +1084,26 @@ worked on and improved/removed.
 Wish list
 =========
 
-* Index your music and videos.
+This is a (possible incomplete) list of ideas that may be eventually
+implemented. With time we will see which of them make sense (or not) and work
+on them (or not). We may add things that are not documented here as well.
 
-  + Which formats? Ogg Vorbis? FLAC? WAV?
-
+* Index also images and videos.
 * Batch-edit ID3 tags.
-* Download your songs in batch.
+* Download your tracks in batch.
 * Users.
 
   + Favourite artists.
   + Playlists.
+  + Play count.
 
 * Share your music with your friends.
 * Share your music with your friends' servers.
 * Listen to your friends' music.
 * They can also upload their music.
 * Stream audio and video. (Radio mode)
-* Set up a radio and collaboratively pick the music.
+* Set up a radio and collaboratively pick the music. (Would this belong to
+  Shiva or to another service consuming Shiva's API?)
 * Tabs.
 
 
