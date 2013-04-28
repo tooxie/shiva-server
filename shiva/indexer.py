@@ -17,11 +17,6 @@ Options:
 # K-Pg
 from datetime import datetime
 
-import logging
-import logging.config
-logging.config.fileConfig('logging.conf')
-log = logging.getLogger('shiva')
-
 from time import time
 import os
 import sys
@@ -34,7 +29,7 @@ from sqlalchemy.exc import OperationalError
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
-from shiva.utils import ignored
+from shiva.utils import ignored, log
 
 q = db.session.query
 

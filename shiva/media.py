@@ -2,6 +2,7 @@
 import os
 import urllib2
 
+from shiva.utils import log
 
 class MediaDir(object):
     """This object allows for media configuration. By instantiating a MediaDir
@@ -161,7 +162,7 @@ class MediaDir(object):
         """
 
         if not os.path.exists(path):
-            print("[ WARNING ] Path '%s' does not exist. Ignoring." % path)
+            log.warn("Path '%s' does not exist. Ignoring." % path)
             return False
 
         return True
