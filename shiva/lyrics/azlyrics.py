@@ -4,6 +4,7 @@ import urllib2
 import requests
 
 from shiva.lyrics import LyricScraper
+from shiva.utils import log
 
 
 class AZLyrics(LyricScraper):
@@ -35,7 +36,7 @@ class AZLyrics(LyricScraper):
         if not self.check():
             return False
 
-        print('[FOUND] %s' % self.source)
+        log.info('[FOUND] %s' % self.source)
         lyrics = self.lyric_re.findall(self.html)[0]
         lyrics = re.sub(r'<br[ /]?>', '\r', lyrics)
         lyrics = re.sub(r'<.*?>', '', lyrics)
@@ -46,7 +47,7 @@ class AZLyrics(LyricScraper):
 
     def search(self):
         query = urllib2.quote('%s %s' % (self.artist, self.title))
-        print('[SEARCH] %s' % (self.search_url % query))
+        log.info('[SEARCH] %s' % (self.search_url % query))
         response = requests.get(self.search_url % query)
         results = self.lyric_url_re.findall(response.text)
 
