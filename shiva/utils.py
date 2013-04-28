@@ -3,6 +3,8 @@ from contextlib import contextmanager
 from hashlib import md5
 from random import random
 import datetime
+import logging
+import logging.config
 import os
 import traceback
 
@@ -11,6 +13,9 @@ import dateutil.parser
 import mutagen
 
 from shiva.exceptions import MetadataManagerReadError
+
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger('shiva')
 
 
 def randstr(length=None):
