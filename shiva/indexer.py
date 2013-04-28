@@ -16,8 +16,13 @@ Options:
 """
 # K-Pg
 from datetime import datetime
-from time import time
+
 import logging
+import logging.config
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger('shiva')
+
+from time import time
 import os
 import sys
 import traceback
@@ -51,13 +56,11 @@ class Indexer(object):
     )
 
     def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 reindex=False, verbose=False, quiet=False):
+                 reindex=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
         self.reindex = reindex
-        self.verbose = verbose
-        self.quiet = quiet
         self.empty_db = reindex
 
         self.session = db.session
@@ -84,23 +87,21 @@ class Indexer(object):
             self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
 
         if not len(self.media_dirs):
-            print("Remember to set the MEDIA_DIRS option, otherwise I don't "
-                  'know where to look for.')
+            log.error("Remember to set the MEDIA_DIRS option, otherwise I"
+                         " don't know where to look for.")
 
         if reindex:
-            if not self.quiet:
-                print('Dropping database...')
+            log.info('Dropping database...')
 
             confirmed = raw_input('This will destroy all the information. '
                                   'Proceed? [y/N] ') in ('y', 'Y')
             if not confirmed:
-                print('Aborting.')
+                log.error('Aborting.')
                 sys.exit(1)
 
             db.drop_all()
 
-            if not self.quiet:
-                print('Recreating database...')
+            log.info('Recreating database...')
             db.create_all()
 
         # This is useful to know if the DB is empty, and avoid some checks
@@ -120,8 +121,7 @@ class Indexer(object):
         else:
             cover = None
             if self.use_lastfm:
-                if self.verbose:
-                    print('[ Last.FM ] Retrieving "%s" info' % name)
+                log.debug('[ Last.FM ] Retrieving "%s" info' % name)
                 with ignored(Exception, print_traceback=True):
                     cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
@@ -141,9 +141,8 @@ class Indexer(object):
             release_year = self.get_release_year()
             cover = None
             if self.use_lastfm:
-                if self.verbose:
-                    print('[ Last.FM ] Retrieving album "%s" by "%s"' % (
-                        name, artist.name))
+                log.debug('[ Last.FM ] Retrieving album "%s" by "%s"' % (
+                          name, artist.name))
                 with ignored(Exception, print_traceback=True):
                     _artist = self.lastfm.get_artist(artist.name)
                     _album = self.lastfm.get_album(_artist, name)
@@ -175,19 +174,18 @@ class Indexer(object):
         ext = self.get_extension()
         self.count_by_extension[ext] += 1
 
-        if not self.quiet:
-            print('[ OK ] %s' % track.path)
+        log.info('[ OK ] %s' % track.path)
 
         return True
 
     def skip(self, reason=None, print_traceback=None):
         self.skipped_tracks += 1
 
-        if not self.quiet:
+        if log.getEffectiveLevel() <= logging.INFO:
             _reason = ' (%s)' % reason if reason else ''
-            print('[ SKIPPED ] %s%s' % (self.file_path, _reason))
+            log.info('[ SKIPPED ] %s%s' % (self.file_path, _reason))
             if print_traceback:
-                print(traceback.format_exc())
+                log.info(traceback.format_exc())
 
         return True
 
@@ -260,14 +258,12 @@ class Indexer(object):
 
         ext = self.get_extension()
         if ext not in self.VALID_FILE_EXTENSIONS:
-            if self.verbose:
-                print('[ SKIPPED ] %s (Unrecognized extension)' %
+            log.debug('[ SKIPPED ] %s (Unrecognized extension)' %
                       self.file_path)
 
             return False
         elif ext not in self.allowed_extensions:
-            if self.verbose:
-                print('[ SKIPPED ] %s (Ignored extension)' % self.file_path)
+            log.debug('[ SKIPPED ] %s (Ignored extension)' % self.file_path)
 
             return False
 
@@ -283,8 +279,7 @@ class Indexer(object):
             for name in files:
                 self.file_path = os.path.join(root, name)
                 if root in exclude:
-                    if self.verbose:
-                        print('[ EXCLUDED ] %s' % self.file_path)
+                    log.debug('[ EXCLUDED ] %s' % self.file_path)
                 else:
                     if self.is_track():
                         self.track_count += 1
@@ -319,18 +314,18 @@ class Indexer(object):
 
     def print_stats(self):
         elapsed_time = self.final_time - self.initial_time
-        print('')
-        print('Run in %d seconds. Avg %.3fs/track.' % (
+        log.info('')
+        log.info('Run in %d seconds. Avg %.3fs/track.' % (
             elapsed_time,
             (elapsed_time / self.track_count)))
-        print('Found %d tracks. Skipped: %d. Indexed: %d.' % (
+        log.info('Found %d tracks. Skipped: %d. Indexed: %d.' % (
             self.track_count,
             self.skipped_tracks,
             (self.track_count - self.skipped_tracks),
         ))
         for extension, count in self.count_by_extension.iteritems():
-            print('%s: %d tracks' % (extension, count))
-        print('')
+            log.info('%s: %d tracks' % (extension, count))
+        log.info('')
 
     def run(self):
         self.initial_time = time()
@@ -345,12 +340,18 @@ class Indexer(object):
 def main():
     arguments = docopt(__doc__)
 
+    if arguments['--quiet']:
+        log.setLevel(logging.ERROR)
+    else:
+        if arguments['--verbose']:
+            log.setLevel(logging.DEBUG)
+        else:
+            log.setLevel(logging.INFO)
+
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
-        'reindex': arguments['--reindex'],
-        'verbose': arguments['--verbose'],
-        'quiet': arguments['--quiet'],
+        'reindex': arguments['--reindex']
     }
 
     if kwargs['no_metadata']:
@@ -371,12 +372,10 @@ def main():
 
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
-    if lola.verbose:
-        print('Writing to database...')
+    log.debug('Writing to database...')
     lola.session.commit()
 
-    if lola.verbose:
-        print('Checking for duplicated tracks...')
+    log.debug('Checking for duplicated tracks...')
     lola.make_slugs_unique()
 
 
