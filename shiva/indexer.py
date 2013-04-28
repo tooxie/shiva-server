@@ -29,7 +29,7 @@ from sqlalchemy.exc import OperationalError
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
-from shiva.utils import ignored, log
+from shiva.utils import ignored, log, logging
 
 q = db.session.query
 
