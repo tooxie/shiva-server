@@ -1071,16 +1071,14 @@ Assumptions
 For the sake of simplicity many assumptions were made that will eventually be
 worked on and improved/removed.
 
-* Only music files. No videos.
+* Only music files. No videos. No images.
 * No users.
 
   + Therefore, no customization.
-  + And no privacy (You can still use
-    `htpasswd <https://httpd.apache.org/docs/2.2/programs/htpasswd.html>`_,
-    though.)
+  + And no privacy.
 
 * No uploading of files.
-* No update of ID3 info when DB info changes.
+* No update of files' metadata when DB info changes.
 
 
 Known issues
