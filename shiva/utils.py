@@ -5,6 +5,7 @@ from random import random
 import datetime
 import os
 import traceback
+import pytz
 
 from slugify import slugify as do_slug
 import dateutil.parser
@@ -120,7 +121,9 @@ class MetadataManager(object):
     @property
     def release_year(self):
         """The album release year."""
-        default_date = datetime.datetime(datetime.MINYEAR, 1, 1)
+        utc = pytz.UTC
+        default_date = datetime.datetime(datetime.MINYEAR, 1, 1, utc)
+        default_date = utc.localize(default_date)
         date = self._getter('date', '')
         try:
             parsed_date = dateutil.parser.parse(date, default=default_date)
