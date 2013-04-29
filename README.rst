@@ -195,6 +195,10 @@ one.
 
 Java implementation of the Shiva protocol. Runs on android.
 
+* `Shakti <https://github.com/gonz/shakti>`_
+
+A web based client built with AngularJS.
+
 
 ------------------
 Wish you were here

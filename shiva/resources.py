@@ -569,6 +569,13 @@ class ClientResource(Resource):
                     u'instant:solutions <office@instant-it.at>'
                 ],
             },
+            {
+                'name': 'Shakti',
+                'uri': 'https://github.com/gonz/shakti',
+                'authors': [
+                    u'Gonzalo Saavedra <gonzalosaavedra@gmail.com>',
+                ],
+            },
         ]
 
         return clients
