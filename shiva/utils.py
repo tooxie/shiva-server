@@ -128,6 +128,7 @@ class MetadataManager(object):
         except ValueError:
             return None
 
+        parsed_date = parsed_date.replace(tzinfo=None)
         if parsed_date != default_date:
             return parsed_date.year
 
