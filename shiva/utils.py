@@ -126,12 +126,14 @@ class MetadataManager(object):
     def release_year(self):
         """The album release year."""
         default_date = datetime.datetime(datetime.MINYEAR, 1, 1)
+        default_date = default_date.replace(tzinfo=None)
         date = self._getter('date', '')
         try:
             parsed_date = dateutil.parser.parse(date, default=default_date)
         except ValueError:
             return None
 
+        parsed_date = parsed_date.replace(tzinfo=None)
         if parsed_date != default_date:
             return parsed_date.year
 
