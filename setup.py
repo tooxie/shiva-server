@@ -5,11 +5,22 @@ from setuptools import setup, find_packages
 
 setup(
     name='Shiva',
-    version='0.3',
+    version='0.4',
     description='A RESTful API to your music collection',
     author=u'Alvaro Mouriño',
     author_email='alvaro@mourino.net',
     url='https://github.com/tooxie/shiva-server',
+    download_url='https://codeload.github.com/tooxie/shiva-server/zip/master',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2 :: Only',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Server',
+        'Topic :: Multimedia :: Sound/Audio',
+        'Topic :: Multimedia',
+    ],
     package_dir={'': '.'},
     packages=find_packages('.'),
     install_requires=[
@@ -23,7 +34,6 @@ setup(
         'python-dateutil==2.1',
         'python-slugify==0.0.3',
         'requests==1.0.4',
-        'translitcodec==0.3',
     ],
     entry_points={
         'console_scripts': [
