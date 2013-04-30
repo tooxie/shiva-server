@@ -34,7 +34,6 @@ setup(
         'python-dateutil==2.1',
         'python-slugify==0.0.3',
         'requests==1.0.4',
-        'translitcodec==0.3',
     ],
     entry_points={
         'console_scripts': [
