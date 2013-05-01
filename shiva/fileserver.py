@@ -5,12 +5,13 @@ import sys
 
 from flask import abort, Flask, Response
 
-from shiva.config import local
-
 app = Flask(__name__)
+app.config.from_object('shiva.config')
+if os.environ.get('SHIVA_CONFIG'):
+    app.config.from_envvar('SHIVA_CONFIG')
 
 def get_absolute_path(relative_path):
-    for mdir in local.MEDIA_DIRS:
+    for mdir in app.config.get('MEDIA_DIRS', []):
         full_path = os.path.join(mdir.root, relative_path)
 
         for excluded in mdir.get_excluded_dirs():
