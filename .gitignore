@@ -1,9 +1,4 @@
-*.bak
 *.db
 *.pyc
-*~
-.*.sw*
-
 .virtualenv
-Shiva.egg-info/
-
+shiva.egg-info/
