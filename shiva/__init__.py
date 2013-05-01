@@ -12,7 +12,7 @@ industry’s obsession with control.
 Read more on: https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to-your-music-collection/
 """
 
-__version__ = '0.1'
+__version__ = '0.4'
 __author__ = u'Alvaro Mouriño'
 __contibutors__ = [
     u'Bojan Mihelac <bmihelac@mihelac.org>',
