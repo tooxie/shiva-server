@@ -3,6 +3,7 @@
 *.pyc
 *~
 .*.sw*
+.idea
 
 .virtualenv
 Shiva.egg-info/

@@ -11,6 +11,10 @@ import dateutil.parser
 import mutagen
 
 from shiva.exceptions import MetadataManagerReadError
+import logging
+import logging.config
+logging.config.fileConfig('logging.conf')
+log = logging.getLogger('shiva')
 
 
 def randstr(length=None):

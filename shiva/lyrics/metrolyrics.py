@@ -7,6 +7,7 @@ import requests
 from flask import current_app as app
 
 from shiva.lyrics import LyricScraper
+from shiva.utils import log
 
 
 class MetroLyrics(LyricScraper):
@@ -35,7 +36,7 @@ class MetroLyrics(LyricScraper):
         if not self.check():
             return False
 
-        print('[FOUND] %s' % self.source)
+        log.info('[FOUND] %s' % self.source)
         div = html.get_element_by_id('lyrics-body')
         lyrics = re.sub(r'\n\[ From: .*? \]', '', div.text_content())
 
@@ -48,7 +49,7 @@ class MetroLyrics(LyricScraper):
                   'song': self.title,
                   'X-API-KEY': app.config['METROLYRICS_API_KEY']}
         _url = '?'.join((self.search_url, urllib.urlencode(params)))
-        print('[SEARCH] %s' % _url)
+        log.info('[SEARCH] %s' % _url)
         response = requests.get(_url)
         if response.status_code == 200:
             self.source = response.json()['items'][0]['url']

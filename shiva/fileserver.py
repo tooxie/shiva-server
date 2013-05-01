@@ -6,7 +6,7 @@ import sys
 from flask import abort, Flask, Response
 
 from shiva.config import local
-
+from shiva.utils import log
 app = Flask(__name__)
 
 def get_absolute_path(relative_path):
@@ -39,7 +39,7 @@ def main():
     except:
         port = 8001
 
-    print("""
+    log.warn("""
     +------------------------------------------------------------+
     | This is a *development* server, for testing purposes only. |
     | Do NOT use in a live environment.                          |
