@@ -102,7 +102,24 @@ Installation
 
   $ shiva-server
 
-* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See `Resources`_)
+* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See
+  `Resources`_)
+
+
+Installation using pip
+======================
+
+You can install Shiva through ``pip``, running the following command:
+
+.. code:: sh
+
+    $ pip install shiva
+
+That will automatically download and install Shiva and all its dependencies.
+
+**Note:** This will install the latest release, which may contain bugs and lack
+some features. It is highly recommended that you install the latest development
+version, following the manual installation guide above.
 
 
 -----------------
