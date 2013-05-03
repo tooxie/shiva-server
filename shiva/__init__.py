@@ -37,7 +37,7 @@ Read more on https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to
 Copyright © 2013 Alvaro Mouriño
 """
 
-__version__ = '0.4'
+__version__ = '0.5'
 __author__ = u'Alvaro Mouriño'
 __author_email__ = 'alvaro@mourino.net'
 __copyright__ = '2013 Alvaro Mouriño'

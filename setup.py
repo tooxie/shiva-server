@@ -6,7 +6,7 @@ import shiva
 
 setup(
     name='shiva',
-    version='0.4',
+    version='0.5',
     description='A RESTful API to your music collection',
     long_description=shiva.__doc__,
     author=u'Alvaro Mouriño',
