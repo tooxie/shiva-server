@@ -80,6 +80,8 @@ Installation
 
       $ cp shiva/config/local.py.example shiva/config/local.py
 
+See `Configuring`_ for more info.
+
 * Edit it and configure the directories to scan for music.
 
   + See `Scanning directories`_ for more info.
@@ -102,12 +104,65 @@ Installation
 
   $ shiva-server
 
-* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See `Resources`_)
+* Point your browser to a Resource, like: http://127.0.0.1:9002/artists (See
+  `Resources`_)
 
 
------------------
-Indexer arguments
------------------
+Installation using pip
+======================
+
+You can install Shiva through ``pip``, running the following command:
+
+.. code:: sh
+
+    $ pip install shiva
+
+That will automatically download and install Shiva and all its dependencies.
+
+**Note:** This will install the latest release, which may contain bugs and lack
+some features. It is highly recommended that you install the latest development
+version, following the manual installation guide above.
+
+
+-----------
+Configuring
+-----------
+
+Shiva looks for config files in the following places:
+
+* ``config/local.py`` relative to the directory where Shiva is installed.
+* If an environment variable ``$SHIVA_CONFIG`` is set, then is assumed to be
+  pointing to a config file.
+* ``$XDG_CONFIG_HOME/shiva/config.py`` which defauls to
+  ``$HOME/.config/shiva/config.py``.
+
+If all 3 files exist, then all 3 will be read and overriden in that same order,
+so ``$XDG_CONFIG_HOME/shiva/config.py`` will take precedence over
+``config/local.py``.
+
+
+DEBUG
+-----
+
+It's possible to load settings specific for debugging. If you have the
+following in any of your config files:
+
+.. code:: python
+
+    DEBUG = True
+
+Then Shiva will also try to load this configuration files:
+
+* ``config/debug.py`` relative to the directory where Shiva is installed.
+* ``$XDG_CONFIG_HOME/shiva/debug.py`` which defauls to
+  ``$HOME/.config/shiva/debug.py``.
+
+In this case ``$XDG_CONFIG_HOME/shiva/debug.py`` will also have precedence over
+``config/debug.py``.
+
+
+Indexing
+========
 
 The indexer receives the following command line arguments.
 
@@ -136,6 +191,7 @@ DB queries, are done as few as possible. As a consequence, memory usage is
 quite heavy. Keep that in mind when indexing large collections.
 
 
+----------------------
 Restricting extensions
 ----------------------
 
