@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 import sys
-import os
 
 from flask import Flask, g, request
 from flask.ext.restful import Api
 
-from shiva import config
 from shiva import resources
+from shiva.config import Configurator
 from shiva.models import db
 
 app = Flask(__name__)
-app.config.from_object('shiva.config')
-if os.environ.get('SHIVA_CONFIG'):
-    app.config.from_envvar('SHIVA_CONFIG')
-
-if not hasattr(config, 'local') and not os.environ.get('SHIVA_CONFIG'):
-    print('\n *** No configuration file found.\n')
-
+app.config.from_object(Configurator())
 db.app = app
 db.init_app(app)
 
