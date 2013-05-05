@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'bcrypt==1.0.2',
         'docopt==0.6.1',
+        'dropbox==1.4',
         'Flask-Restful==0.2.3',
         'Flask-SQLAlchemy==0.16',
         'Flask==0.10',
