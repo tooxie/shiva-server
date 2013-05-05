@@ -30,3 +30,13 @@ METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
 BANDSINTOWN_APP_ID = 'SHIVA_APP_ID'
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.
+
+from shiva.backends.dropbox import DropboxBackend
+
+BACKENDS = (
+    DropboxBackend,
+)
+
+DROPBOX_APP_KEY = ''
+DROPBOX_APP_SECRET = ''
+DROPBOX_ACCESS_TYPE = ''  # 'dropbox' or 'app_folder'
