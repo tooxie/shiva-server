@@ -80,7 +80,11 @@ class Configurator(object):
 
     def from_local(self):
         with ignored(ImportError):
-            self.shiva_local = self._config.from_object('shiva.config.local')
+            self._config.from_object('shiva.config.local')
+
+            return True
+
+        return False
 
     def load_debug(self):
         if not self._config.get('DEBUG'):
