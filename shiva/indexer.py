@@ -307,6 +307,11 @@ class Indexer(object):
         self.session.commit()
 
     def print_stats(self):
+        if self.track_count == 0:
+            log.info('\nNo track indexed.\n')
+
+            return True
+
         elapsed_time = self.final_time - self.initial_time
         log.info('\nRun in %d seconds. Avg %.3fs/track.' % (
                  elapsed_time,
