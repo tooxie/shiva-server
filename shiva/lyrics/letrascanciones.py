@@ -6,7 +6,9 @@ import lxml.html
 from slugify import slugify
 
 from shiva.lyrics import LyricScraper
-from shiva.utils import log
+from shiva.utils import get_logger
+
+log = get_logger()
 
 
 class MP3Lyrics(LyricScraper):

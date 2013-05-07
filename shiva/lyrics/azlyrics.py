@@ -4,7 +4,9 @@ import urllib2
 import requests
 
 from shiva.lyrics import LyricScraper
-from shiva.utils import log
+from shiva.utils import get_logger
+
+log = get_logger()
 
 
 class AZLyrics(LyricScraper):

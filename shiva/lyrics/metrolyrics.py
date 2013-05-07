@@ -7,7 +7,9 @@ import requests
 from flask import current_app as app
 
 from shiva.lyrics import LyricScraper
-from shiva.utils import log
+from shiva.utils import get_logger
+
+log = get_logger()
 
 
 class MetroLyrics(LyricScraper):

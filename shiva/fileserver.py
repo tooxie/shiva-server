@@ -5,11 +5,13 @@ import sys
 
 from flask import abort, Flask, Response
 
-from shiva.utils import log
 from shiva.config import Configurator
+from shiva.utils import get_logger
 
 app = Flask(__name__)
 app.config.from_object(Configurator())
+
+log = get_logger()
 
 def get_absolute_path(relative_path):
     for mdir in app.config.get('MEDIA_DIRS', []):

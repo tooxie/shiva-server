@@ -16,7 +16,9 @@ from shiva.http import Resource, JSONResponse
 from shiva.lyrics import get_lyrics
 from shiva.mocks import ShowModel
 from shiva.models import Artist, Album, Track, Lyrics
-from shiva.utils import log
+from shiva.utils import get_logger
+
+log = get_logger()
 
 
 def full_tree():

@@ -2,7 +2,9 @@
 import os
 import urllib2
 
-from shiva.utils import log
+from shiva.utils import get_logger
+
+log = get_logger()
 
 
 class MediaDir(object):

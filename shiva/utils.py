@@ -12,10 +12,19 @@ from slugify import slugify as do_slug
 import dateutil.parser
 import mutagen
 
+import shiva
 from shiva.exceptions import MetadataManagerReadError
 
-logging.config.fileConfig('logging.conf')
-log = logging.getLogger('shiva')
+
+def get_shiva_path():
+    return os.path.dirname(os.path.abspath(shiva.__file__))
+
+
+def get_logger():
+    logging_conf = os.path.join(get_shiva_path(), 'logging.conf')
+    logging.config.fileConfig(logging_conf)
+
+    return logging.getLogger('shiva')
 
 
 def randstr(length=None):
