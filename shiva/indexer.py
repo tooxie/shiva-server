@@ -17,6 +17,7 @@ Options:
 # K-Pg
 from datetime import datetime
 from time import time
+import logging
 import os
 import sys
 import traceback
@@ -28,9 +29,10 @@ from sqlalchemy.exc import OperationalError
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
-from shiva.utils import ignored, log, logging
+from shiva.utils import ignored, get_logger
 
 q = db.session.query
+log = get_logger()
 
 
 class Indexer(object):
