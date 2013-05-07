@@ -323,7 +323,8 @@ class Indexer(object):
                  self.skipped_tracks,
                  (self.track_count - self.skipped_tracks)))
         for extension, count in self.count_by_extension.iteritems():
-            log.info('%s: %d tracks\n' % (extension, count))
+            if count:
+                log.info('%s: %d tracks' % (extension, count))
 
     def run(self):
         self.initial_time = time()
