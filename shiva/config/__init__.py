@@ -112,3 +112,8 @@ class Configurator(object):
             for key in dir(obj):
                 if key.isupper():
                     setattr(self, key, getattr(obj, key))
+
+            if hasattr(obj, 'iterkeys') and callable(getattr(obj, 'iterkeys')):
+                for key in obj.iterkeys():
+                    if key.isupper():
+                        setattr(self, key, obj[key])
