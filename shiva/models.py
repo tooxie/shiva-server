@@ -200,7 +200,7 @@ class LyricsCache(db.Model):
     __tablename__ = 'lyricscache'
 
     pk = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text, nullable=False)
+    text = db.Column(db.Text)
     source = db.Column(db.String(256))
 
     track_pk = db.Column(db.Integer, db.ForeignKey('tracks.pk'),
