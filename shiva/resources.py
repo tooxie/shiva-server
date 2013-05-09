@@ -15,7 +15,7 @@ from shiva.fields import (Boolean, ForeignKeyField, InstanceURI,
 from shiva.http import Resource, JSONResponse
 from shiva.lyrics import get_lyrics
 from shiva.mocks import ShowModel
-from shiva.models import Artist, Album, Track, Lyrics
+from shiva.models import Artist, Album, Track, LyricsCache
 from shiva.utils import get_logger
 
 log = get_logger()
@@ -373,7 +373,7 @@ class LyricsResource(Resource):
             return JSONResponse(400)
 
         track = Track.query.get(track_id)
-        lyric = Lyrics(track=track, text=text)
+        lyric = LyricsCache(track=track, text=text)
 
         g.db.session.add(lyric)
         g.db.commit()
