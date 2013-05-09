@@ -5,14 +5,17 @@ pictures from Last.FM.
 
 Usage:
     shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
+                  [--verbose-sql]
 
 Options:
-    -h, --help    Show this help message and exit
-    --lastfm      Retrieve artist and album covers from Last.FM API.
-    --nometadata  Don't read file's metadata when indexing.
-    --reindex     Remove all existing data from the database before indexing.
-    -v --verbose  Show debugging messages about the progress.
-    -q --quiet    Suppress warnings.
+    -h, --help     Show this help message and exit
+    --lastfm       Retrieve artist and album covers from Last.FM API.
+    --nometadata   Don't read file's metadata when indexing.
+    --reindex      Remove all existing data from the database before indexing.
+    --verbose-sql  Print every SQL statement. Be careful, it's a little too
+                   verbose.
+    -v --verbose   Show debugging messages about the progress.
+    -q --quiet     Suppress warnings.
 """
 # K-Pg
 from datetime import datetime
@@ -345,6 +348,9 @@ def main():
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
+
+    if arguments['--verbose-sql']:
+        app.config['SQLALCHEMY_ECHO'] = True
 
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
