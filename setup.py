@@ -1,26 +1,35 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 from setuptools import setup, find_packages
+
+import shiva
 
 setup(
     name='shiva',
-    version='0.4',
+    version='0.5',
     description='A RESTful API to your music collection',
+    long_description=shiva.__doc__,
     author=u'Alvaro Mouriño',
     author_email='alvaro@mourino.net',
     url='https://github.com/tooxie/shiva-server',
     download_url='https://codeload.github.com/tooxie/shiva-server/zip/master',
     classifiers=[
         'Development Status :: 3 - Alpha',
+        'Environment :: Web Environment',
+        'Framework :: Flask',
+        'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
         'Programming Language :: Python :: 2 :: Only',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python',
+        'Topic :: Communications :: File Sharing',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Server',
         'Topic :: Multimedia :: Sound/Audio',
         'Topic :: Multimedia',
     ],
+    license='MIT',
+    platforms=['OS-independent', 'Any'],
     package_dir={'': '.'},
     packages=find_packages('.'),
     install_requires=[

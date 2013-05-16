@@ -1,2 +1,4 @@
 include LICENSE
-recursive-include shiva *.py *.example
+exclude shiva/config/local.py
+recursive-include shiva *.py
+recursive-include shiva *.example
