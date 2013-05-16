@@ -658,7 +658,6 @@ Example response for the request ``GET /track/256/lyrics``:
             "id": 256,
             "uri": "/track/256"
         },
-        "text": "When i came to this world mother told me\r what was right and what was wrong\r while dad explained me that\r religion, country and flag were things i must respect\r \r So, i decided\r to be political correct\r and a good child\r but then, I realized\r that nothing has changed since then...\r \r my family never told me\r why 30.000 people died in the '70's?\r where was the god\r that they promised me\r he was gonna take me to paradise?\r \r and why those children cry\r behind those war planes\r and those war guns\r oh, please father,\r i don't wanna be part of this...",
         "source_uri": "http://lyrics.com/eterna-inocencia/my-family/",
         "id": 6,
         "uri": "/lyrics/6"
@@ -670,7 +669,6 @@ Fields
 
 * ``id``: The object's ID.
 * ``source_uri``: The URI where the lyrics were fetched from.
-* ``text``: The lyric's text.
 * ``track``: The track for which the lyrics are.
 * ``uri``: The URI of this resource's instance.
 
@@ -732,9 +730,11 @@ And then add it to the scrapers list:
     }
 
 Remember that the ``fetch()`` method has to return ``True`` in case the lyrics
-were found or ``False`` otherwise. It must also store the lyrics in
-``self.lyrics`` and the URL where they fetched from in ``self.source``. That's
-where Shiva looks for the information.
+were found or ``False`` otherwise. It must also store the URL where they were
+fetched from in ``self.source``. That's where Shiva looks for the information.
+
+Shiva will **not** store the actual lyrics, only the URI where the lyric was
+found.
 
 For more details check the source of the other scrapers.
 
