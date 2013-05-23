@@ -23,7 +23,12 @@ that inspire this software:
 Prerequisites
 =============
 
-You need ``ffmpeg`` installed in your system.
+You are going to need:
+
+* ffmpeg
+* libxml C headers
+* python headers
+* sqlite (optional)
 
 If you want Shiva to automatically fetch artists' images from Last.FM while
 indexing you are going to need an API key. You can get one at
@@ -32,21 +37,18 @@ http://www.last.fm/api/account/create
 This makes the whole indexing slower because issues a request on a per-album
 and per-artist basis, but does a lot of work automatically for you.
 
-You will need C headers for libxml. On Debian (and derivatives)::
+By default Shiva uses a SQLite database, but this can be overriden.
 
-    sudo apt-get install libxml2-dev libxslt-dev
+To install all the dependencies on Debian (and derivatives)::
+
+    sudo apt-get install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
 
 On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the
-headers with::
+libxml headers with::
 
     brew install libxml2 libxslt
 
-By default Shiva uses a SQLite database, to install it in Debian-based systems
-run::
-
-    sudo apt-get install sqlite
-
-On Mac OS X it should come pre-installed. If it's not::
+On Mac OS X sqlite should come pre-installed. If it's not::
 
     brew install sqlite
 
