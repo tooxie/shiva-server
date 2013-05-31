@@ -53,8 +53,8 @@ def allow_origins(func=None, custom_origins=None):
                     'Access-Control-Allow-Origin': origin,
                     'Access-Control-Allow-Headers': 'Content-Type',
                 }
-                response = make_response('ok')
-                response.headers.update(headers)
+                response = make_response('')
+                response.headers.extend(headers)
 
                 return response
 
