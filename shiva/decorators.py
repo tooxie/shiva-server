@@ -39,24 +39,13 @@ def allow_origins(func=None, custom_origins=None):
             origin = request.headers.get('Origin')
 
             # `app.config.get('CORS_ALLOWED_ORIGINS', [])` should really be the
-            # default option in `def allow_origins` for # `custom_origins` but
+            # default option in `def allow_origins` for `custom_origins` but
             # that would use `app` outside of the application context
             allowed_origins = custom_origins or \
                 app.config.get('CORS_ALLOWED_ORIGINS', [])
 
-            # Actual headers are added in `after_request`, unless it's an
-            # OPTIONS request.
+            # Actual headers are added in `after_request`
             g.cors = _get_origin(allowed_origins, origin)
-
-            if request.method == 'OPTIONS':
-                headers = {
-                    'Access-Control-Allow-Origin': origin,
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                }
-                response = make_response('')
-                response.headers.extend(headers)
-
-                return response
 
             return func(*args, **kwargs)
 
