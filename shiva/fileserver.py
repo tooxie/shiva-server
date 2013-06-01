@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import mimetypes
 import os
-import sys
 import re
+import sys
 
 from flask import abort, Flask, Response, request, send_file
 
@@ -14,6 +14,13 @@ app.config.from_object(Configurator())
 
 log = get_logger()
 RANGE_RE = re.compile(r'(\d+)-(\d*)')
+
+
+@app.after_request
+def after_request(response):
+    response.headers['Accept-Ranges'] = 'bytes'
+
+    return response
 
 
 def get_absolute_path(relative_path):
@@ -67,13 +74,13 @@ def serve(relative_path):
         f.seek(start_byte)
         content = f.read(length)
 
-    response = Response(content,
-                        206,
-                        mimetype=mimetypes.guess_type(absolute_path)[0],
+    status_code = 206  # Partial Content
+    mimetype = mimetypes.guess_type(absolute_path)[0]
+    response = Response(content, status_code, mimetype=mimetype,
                         direct_passthrough=True)
+
     response.headers.add('Content-Range', 'bytes %d-%d/%d' % (
         start_byte, start_byte + length - 1, size))
-    response.headers.add('Accept-Ranges', 'bytes')
 
     return response
 
