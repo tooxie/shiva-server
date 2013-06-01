@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.config.from_object(Configurator())
 
 log = get_logger()
+RANGE_RE = re.compile(r'(\d+)-(\d*)')
 
 
 def get_absolute_path(relative_path):
@@ -29,6 +30,22 @@ def get_absolute_path(relative_path):
     return None
 
 
+def get_range_bytes(range_header):
+    """
+    Returns a tuple of the form (start_byte, end_byte) with the information
+    provided by range_header.
+
+    """
+
+    _range = RANGE_RE.search(range_header).groups()
+    try:
+        start_byte, end_byte = [int(bit) for bit in _range]
+    except:
+        start_byte = 0
+        end_byte = None
+
+    return (start_byte, end_byte)
+
 @app.route('/<path:relative_path>')
 def serve(relative_path):
     absolute_path = get_absolute_path(relative_path)
@@ -40,20 +57,8 @@ def serve(relative_path):
         return send_file(absolute_path)
 
     size = os.path.getsize(absolute_path)
-    start_byte = 0
-    end_byte = None
-
-    m = re.search('(\d+)-(\d*)', range_header)
-    g = m.groups()
-
-    if g[0]:
-        start_byte = int(g[0])
-    if g[1]:
-        end_byte = int(g[1])
-
-    length = size - start_byte
-    if end_byte is not None:
-        length = end_byte - start_byte
+    start_byte, end_byte = get_range_bytes(range_header)
+    length = (end_byte or size) - start_byte
 
     content = None
     with open(absolute_path, 'rb') as f:
