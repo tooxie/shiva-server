@@ -10,7 +10,7 @@ from shiva.utils import slugify, MetadataManager
 
 db = SQLAlchemy()
 
-__all__ = ('db', 'Artist', 'Album', 'Track', 'Lyrics')
+__all__ = ('db', 'Artist', 'Album', 'Track', 'LyricsCache')
 
 
 def random_row(model):
@@ -124,7 +124,7 @@ class Track(db.Model):
     number = db.Column(db.Integer)
     date_added = db.Column(db.Date(), nullable=False)
 
-    lyrics = db.relationship('Lyrics', backref='track', uselist=False)
+    lyrics = db.relationship('LyricsCache', backref='track', uselist=False)
 
     album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'), nullable=True)
     artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'),
@@ -193,18 +193,18 @@ class Track(db.Model):
         return "<Track ('%s')>" % self.title
 
 
-class Lyrics(db.Model):
+class LyricsCache(db.Model):
     """
     """
 
-    __tablename__ = 'lyrics'
+    __tablename__ = 'lyricscache'
 
     pk = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text, nullable=False)
+    text = db.Column(db.Text)
     source = db.Column(db.String(256))
 
     track_pk = db.Column(db.Integer, db.ForeignKey('tracks.pk'),
                          nullable=False)
 
     def __repr__(self):
-        return "<Lyrics ('%s')>" % self.track.title
+        return "<LyricsCache ('%s')>" % self.track.title
