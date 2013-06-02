@@ -974,6 +974,47 @@ follow the "audio/ogg" URI blindly, and you will get your file. The first time
 will take a little longer, though.
 
 
+--------------
+Absolute paths
+--------------
+
+If you need absolute paths for your ``/convert`` URIs, just set the
+``SERVER_URI`` setting in your local config, it will be prepended to all the
+URIs:
+
+.. code:: python
+
+    SERVER_URI = 'http://127.0.0.1:9002'
+
+Example output:
+
+.. code:: javascript
+
+    {
+        "files": {
+            "audio/mp3": "http://127.0.0.1:8001/flip-keep_rockin/flip-10-away_from_the_sun.mp3",
+            "audio/ogg": "http://127.0.0.1:9002/track/1/convert?mimetype=audio%2Fogg"
+        },
+        "album": {
+            "id": 1,
+            "uri": "http://127.0.0.1:9002/album/1"
+        },
+        "length": 168,
+        "number": 10,
+        "title": "Away From The Sun",
+        "slug": "away-from-the-sun",
+        "artist": {
+            "id": 1,
+            "uri": "http://127.0.0.1:9002/artist/1"
+        },
+        "bitrate": 192000,
+        "id": 1,
+        "uri": "http://127.0.0.1:9002/track/1"
+    }
+
+Remember to leave out trailing slashes.
+
+
 --------------------
 Your converter sucks
 --------------------

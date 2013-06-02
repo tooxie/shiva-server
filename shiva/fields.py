@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from flask import current_app as app
 from flask.ext.restful import fields, marshal
 
 from shiva.converter import get_converter
@@ -7,10 +8,11 @@ from shiva.media import get_mimetypes
 
 class InstanceURI(fields.String):
     def __init__(self, base_uri):
-        self.base_uri = base_uri
+        server_uri = app.config.get('SERVER_URI') or ''
+        self.base_uri = '/'.join((server_uri, base_uri))
 
     def output(self, key, obj):
-        return '/%s/%i' % (self.base_uri, obj.pk)
+        return '/'.join((self.base_uri, str(obj.pk)))
 
 
 class TrackFiles(fields.Raw):
