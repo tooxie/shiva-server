@@ -91,8 +91,9 @@ class Converter(object):
 
     def get_conversion_uri(self):
         mimetype = urllib.urlencode({'mimetype': str(self.mimetype)})
+        uri = self.CONVERSION_URI % (self.track.pk, mimetype)
 
-        return self.CONVERSION_URI % (self.track.pk, mimetype)
+        return ''.join((app.config.get('SERVER_URI') or '', uri))
 
     def get_uri(self):
         if self.converted_file_exists():
