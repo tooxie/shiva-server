@@ -48,6 +48,8 @@ __contibutors__ = [
     u'Felix Hummel <felix@felixhummel.de>',
     u'Iago Lastra <iago.lastra@gmail.com>',
     u'Jochen Kupperschmidt <jochen.kupperschmidt@fortytools.com>',
+    u'Kevin Poorman <kjp@brightleafsoftware.com>',
+    u'Manuel Díez <manutenfruits@gmail.com>',
     u'Sean Lang <slang800@gmail.com>',
     u'Seth Woodworth <seth@sethish.com>',
     u'Tobias Raeder <tobias.raeder@gmail.com>',
