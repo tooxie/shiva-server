@@ -1,6 +1,6 @@
 from flask import g, current_app as app
 
-from shiva.models import Lyrics
+from shiva.models import LyricsCache
 from shiva.utils import _import
 
 
@@ -20,7 +20,7 @@ class LyricScraper(object):
 def get_lyrics(track):
     try:
         scrapers = app.config['SCRAPERS']['lyrics']
-    except IndexError, e:
+    except IndexError:
         return None
 
     for scraper_cls in scrapers:
@@ -29,8 +29,7 @@ def get_lyrics(track):
             scraper = Scraper(track.artist.name.encode('utf-8'),
                               track.title.encode('utf-8'))
             if scraper.fetch():
-                lyrics = Lyrics(text=scraper.lyrics, source=scraper.source,
-                                track=track)
+                lyrics = LyricsCache(source=scraper.source, track=track)
                 g.db.session.add(lyrics)
                 g.db.session.commit()
 
