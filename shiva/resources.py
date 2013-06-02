@@ -51,9 +51,6 @@ def paginate(queryset):
 
     total = queryset.count()
 
-    if total < page_size:
-        return queryset
-
     limit = page_size
     offset = page_size * (page_number - 1)
 
