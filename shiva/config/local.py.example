@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from shiva.media import MediaDir, MimeType
 
+SERVER_URI = ''
 SECRET_KEY = ''  # Set this to something secret.
 MEDIA_DIRS = (
     # Examples.
