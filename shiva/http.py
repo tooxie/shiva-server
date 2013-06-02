@@ -14,7 +14,7 @@ class Resource(restful.Resource):
 
     # Without this the shiva.decorator.allow_origins method won't get called
     # when issuing an OPTIONS request.
-    def options(self):
+    def options(self, *args, **kwargs):
         return JSONResponse()
 
 
