@@ -52,7 +52,8 @@ def before_request():
 def after_request(response):
     if getattr(g, 'cors', False):
         response.headers['Access-Control-Allow-Origin'] = g.cors
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        response.headers['Access-Control-Allow-Headers'] = \
+            'Accept, Content-Type, Origin, X-Requested-With'
 
     return response
 
