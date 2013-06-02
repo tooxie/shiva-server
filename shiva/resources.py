@@ -197,7 +197,7 @@ class AlbumResource(Resource):
         _album = marshal(album, self.get_resource_fields())
         _album['tracks'] = []
 
-        tracks = TracksResource()
+        tracks = TrackResource()
 
         for track in album.tracks.order_by('number', 'title'):
             _album['tracks'].append(tracks.get_full_tree(track))
@@ -218,7 +218,7 @@ class AlbumResource(Resource):
         return {}
 
 
-class TracksResource(Resource):
+class TrackResource(Resource):
     """
     """
 
