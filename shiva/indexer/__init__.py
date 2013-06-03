@@ -21,6 +21,7 @@ Options:
 """
 # K-Pg
 from datetime import datetime
+from multiprocessing.pool import Pool
 from time import time
 import logging
 import itertools
@@ -39,6 +40,22 @@ from shiva.utils import ignored, get_logger
 
 q = db.session.query
 log = get_logger()
+
+
+skipped_tracks = 0
+
+
+def skip(path, reason=None, print_traceback=None):
+    global skipped_tracks
+    skipped_tracks += 1
+
+    if log.getEffectiveLevel() <= logging.INFO:
+        _reason = ' (%s)' % reason if reason else ''
+        log.info('[ SKIPPED ] %s%s' % (path, _reason))
+        if print_traceback:
+            log.info(traceback.format_exc())
+
+    return True
 
 
 class MediaFile(object):
@@ -83,6 +100,121 @@ class MediaFile(object):
 
         return True
 
+
+def add_to_session(track):
+    db.session.add(track)
+    log.info('[ OK ] %s' % track.path)
+
+
+artists = {}
+
+
+def get_lastfm():
+    import pylast
+    api_key = app.config['LASTFM_API_KEY']
+    return pylast.LastFMNetwork(api_key=api_key)
+
+
+def get_artist(name, use_lastfm=False):
+    # TODO use_lastfm
+    global artists
+    name = name.strip() if type(name) in (str, unicode) else None
+    if not name:
+        return None
+
+    if name in artists:
+        return artists[name]
+    else:
+        cover = None
+        if use_lastfm:
+            log.debug('[ Last.FM ] Retrieving "%s" info' % name)
+            with ignored(Exception, print_traceback=True):
+                lastfm = get_lastfm()
+                cover = lastfm.get_artist(name).get_cover_image()
+        artist = m.Artist(name=name, image=cover)
+        db.session.add(artist)
+        artists[name] = artist
+
+    return artist
+
+
+def get_release_year(track, lastfm_album=None):
+    if not lastfm_album:
+        return track.get_metadata_reader().release_year
+
+    _date = lastfm_album.get_release_date()
+    if not _date:
+        if not track.get_metadata_reader().release_year:
+            return None
+
+        return track.get_metadata_reader().release_year
+
+    return datetime.strptime(_date, '%d %b %Y, %H:%M').year
+
+
+albums = {}
+
+
+def get_album(track, artist, use_lastfm=False):
+    global albums
+    name = track.album.strip() if type(track.album) in (str,
+                                                        unicode) else None
+    if not name or not artist:
+        return None
+
+    if name in albums:
+        return albums[name]
+    else:
+        release_year = get_release_year()
+        cover = None
+
+        album = m.Album(name=name, year=release_year, cover=cover)
+        db.session.add(album)
+        albums[name] = album
+
+    return album
+
+def save_track(media_file, empty_db=False, no_metadata=False):
+    try:
+        full_path = media_file.path.decode('utf-8')
+    except UnicodeDecodeError:
+        skip('Unrecognized encoding', print_traceback=True)
+
+        # If file name is in an strange encoding ignore it.
+        return False
+
+    try:
+        track = m.Track(full_path, no_metadata=no_metadata)
+    except MetadataManagerReadError:
+        skip('Corrupted file', print_traceback=True)
+
+        # If the metadata manager can't read the file, it's probably not an
+        # actual music file, or it's corrupted. Ignore it.
+        return False
+
+    if not empty_db:
+        if q(m.Track).filter_by(path=full_path).count():
+            skip(full_path)
+
+            return True
+
+    if no_metadata:
+        add_to_session(track)
+
+        return True
+
+    meta = track.get_metadata_reader()
+
+    artist = get_artist(meta.artist)
+    album = get_album(track, artist)
+
+    if artist is not None and album is not None:
+        if artist not in album.artists:
+            album.artists.append(artist)
+
+    track.album = album
+    track.artist = artist
+    add_to_session(track)
 
 class Indexer(object):
 
@@ -376,8 +508,8 @@ class Indexer(object):
         flat_paths = itertools.chain.from_iterable(list_of_path_lists)
         media_files = [MediaFile(path) for path in flat_paths]
         valid_media_files = [x for x in media_files if x.is_track()]
-        for f in valid_media_files:
-            self.save_track(f.path)
+        pool = Pool(processes=4)
+        pool.map(save_track, valid_media_files)
         self.track_count = len(valid_media_files)
         self.final_time = time()
 
