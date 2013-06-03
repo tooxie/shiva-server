@@ -210,7 +210,7 @@ class Indexer(object):
 
     def add_to_session(self, track):
         self.session.add(track)
-        ext = self.get_extension()
+        ext = track.get_extension()
         self.count_by_extension[ext] += 1
 
         log.info('[ OK ] %s' % track.path)
@@ -228,7 +228,7 @@ class Indexer(object):
 
         return True
 
-    def save_track(self):
+    def save_track(self, path):
         """
         Takes a path to a track, reads its metadata and stores everything in
         the database.
@@ -236,7 +236,7 @@ class Indexer(object):
         """
 
         try:
-            full_path = self.file_path.decode('utf-8')
+            full_path = path.decode('utf-8')
         except UnicodeDecodeError:
             self.skip('Unrecognized encoding', print_traceback=True)
 
@@ -377,9 +377,7 @@ class Indexer(object):
         media_files = [MediaFile(path) for path in flat_paths]
         valid_media_files = [x for x in media_files if x.is_track()]
         for f in valid_media_files:
-            # TODO clean up this hack. Indexer should not have a file_path
-            self.file_path = f.path
-            self.save_track()
+            self.save_track(f.path)
         self.track_count = len(valid_media_files)
         self.final_time = time()
 

@@ -192,6 +192,8 @@ class Track(db.Model):
     def __repr__(self):
         return "<Track ('%s')>" % self.title
 
+    def get_extension(self):
+        return self.path.rsplit('.', 1)[1].lower()
 
 class LyricsCache(db.Model):
     """
