@@ -208,11 +208,22 @@ class MediaDir(object):
 
         return False
 
+    def get_paths(self):
+        result = []
+        exclude = self.get_excluded_dirs()
+        for root, dirs, files in os.walk(self.root):
+            for name in files:
+                file_path = os.path.join(root, name)
+                if root in exclude:
+                    log.debug('[ EXCLUDED ] %s' % file_path)
+                    continue
+                result.append(file_path)
+        return result
+
 
 class MimeType(object):
     """Represents a valid mimetype. Holds information like the codecs to be
     used when converting.
-
     """
 
     def __init__(self, type, subtype, extension, **kwargs):
