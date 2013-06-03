@@ -58,8 +58,7 @@ def paginate(queryset):
 
 
 class ArtistResource(Resource):
-    """
-    """
+    """ The resource resposible for artists. """
 
     def get_resource_fields(self):
         return {
@@ -131,8 +130,7 @@ class ArtistResource(Resource):
 
 
 class AlbumResource(Resource):
-    """
-    """
+    """ The resource resposible for albums. """
 
     def get_resource_fields(self):
         return {
@@ -216,8 +214,7 @@ class AlbumResource(Resource):
 
 
 class TrackResource(Resource):
-    """
-    """
+    """ The resource resposible for tracks. """
 
     def get_resource_fields(self):
         return {
@@ -324,6 +321,9 @@ class TrackResource(Resource):
 
 class LyricsResource(Resource):
     """
+    The resource responsible for a track's lyrics. Lyrics are scraped on
+    demand, and only the URI where they are found is stored in the database.
+
     """
 
     def get_resource_fields(self):
@@ -386,8 +386,7 @@ class LyricsResource(Resource):
 
 
 class ConvertResource(Resource):
-    """
-    """
+    """ Resource in charge of converting tracks from one format to another. """
 
     def get(self, track_id):
         track = Track.query.get(track_id)
@@ -485,7 +484,7 @@ class ShowsResource(Resource):
 
 
 class RandomResource(Resource):
-    """Retrieves a random instance of a specified resource."""
+    """ Retrieves a random instance of a specified resource. """
 
     def get(self, resource_name):
         get_resource = getattr(self, 'get_%s' % resource_name)
@@ -550,6 +549,8 @@ class WhatsNewResource(Resource):
 
 
 class ClientResource(Resource):
+    """ Resource that lists the known clients for Shiva. """
+
     def get(self):
         clients = [
             {
@@ -579,6 +580,8 @@ class ClientResource(Resource):
 
 
 class AboutResource(Resource):
+    """ Just some information about Shiva. """
+
     def get(self):
         info = {
             'name': 'Shiva',
