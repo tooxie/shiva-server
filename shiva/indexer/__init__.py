@@ -21,6 +21,7 @@ Options:
 from datetime import datetime
 from time import time
 import logging
+import itertools
 import os
 import sys
 import traceback
@@ -36,6 +37,49 @@ from shiva.utils import ignored, get_logger
 
 q = db.session.query
 log = get_logger()
+
+
+class MediaFile(object):
+    VALID_FILE_EXTENSIONS = (
+        'asf', 'wma',  # ASF
+        'flac',  # FLAC
+        'mp4', 'm4a', 'm4b', 'm4p',  # M4A
+        'ape',  # Monkey's Audio
+        'mp3',  # MP3
+        'mpc', 'mp+', 'mpp',  # Musepack
+        'spx',  # Ogg Speex
+        'ogg', 'oga',  # Ogg Vorbis / Theora
+        'tta',  # True Audio
+        'wv',  # WavPack
+        'ofr',  # OptimFROG
+    )
+
+    def __init__(self, path):
+        self.path = path
+
+    @classmethod
+    def get_allowed_extensions(cls):
+        return app.config.get('ALLOWED_FILE_EXTENSIONS',
+                              cls.VALID_FILE_EXTENSIONS)
+
+    def get_extension(self):
+        return self.path.rsplit('.', 1)[1].lower()
+
+    def is_track(self):
+        if '.' not in self.path:
+            return False
+        ext = self.get_extension()
+        if ext not in self.VALID_FILE_EXTENSIONS:
+            log.debug('[ SKIPPED ] %s (Unrecognized extension)' %
+                      self.path)
+
+            return False
+        elif ext not in self.get_allowed_extensions():
+            log.debug('[ SKIPPED ] %s (Ignored extension)' % self.path)
+
+            return False
+
+        return True
 
 
 class Indexer(object):
@@ -332,10 +376,15 @@ class Indexer(object):
     def run(self):
         self.initial_time = time()
 
-        for mobject in self.media_dirs:
-            for mdir in mobject.get_valid_dirs():
-                self.walk(mdir, exclude=mobject.get_excluded_dirs())
-
+        list_of_path_lists = [x.get_paths() for x in self.media_dirs]
+        flat_paths = itertools.chain.from_iterable(list_of_path_lists)
+        media_files = [MediaFile(path) for path in flat_paths]
+        valid_media_files = [x for x in media_files if x.is_track()]
+        for f in valid_media_files:
+            # TODO clean up this hack. Indexer should not have a file_path
+            self.file_path = f.path
+            self.save_track()
+        self.track_count = len(valid_media_files)
         self.final_time = time()
 
 
