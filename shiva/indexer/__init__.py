@@ -141,7 +141,7 @@ class Indexer(object):
             cover = None
             if self.use_lastfm:
                 log.debug('[ Last.FM ] Retrieving album "%s" by "%s"' % (
-                          name, artist.name))
+                    name, artist.name))
                 with ignored(Exception, print_traceback=True):
                     _artist = self.lastfm.get_artist(artist.name)
                     _album = self.lastfm.get_album(_artist, name)
@@ -291,7 +291,7 @@ class Indexer(object):
 
         """
 
-        slugs = q(model).group_by(model.slug).\
+        slugs = q(model).group_by(model.slug). \
             having(func.count(model.slug) > 1)
 
         for row in slugs:
@@ -319,12 +319,12 @@ class Indexer(object):
 
         elapsed_time = self.final_time - self.initial_time
         log.info('\nRun in %d seconds. Avg %.3fs/track.' % (
-                 elapsed_time,
-                 (elapsed_time / self.track_count)))
+            elapsed_time,
+            (elapsed_time / self.track_count)))
         log.info('Found %d tracks. Skipped: %d. Indexed: %d.' % (
-                 self.track_count,
-                 self.skipped_tracks,
-                 (self.track_count - self.skipped_tracks)))
+            self.track_count,
+            self.skipped_tracks,
+            (self.track_count - self.skipped_tracks)))
         for extension, count in self.count_by_extension.iteritems():
             if count:
                 log.info('%s: %d tracks' % (extension, count))
@@ -356,7 +356,7 @@ def main():
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
         'reindex': arguments['--reindex'],
-    }
+        }
 
     if kwargs['no_metadata']:
         kwargs['use_lastfm'] = False
