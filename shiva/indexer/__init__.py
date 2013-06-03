@@ -4,14 +4,16 @@ Index your music collection and (optionally) retrieve album covers and artist
 pictures from Last.FM.
 
 Usage:
-    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
-                  [--verbose-sql]
+    shiva-indexer [-h] [-f] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
+                  [--force] [--verbose-sql]
 
 Options:
     -h, --help     Show this help message and exit
     --lastfm       Retrieve artist and album covers from Last.FM API.
     --nometadata   Don't read file's metadata when indexing.
     --reindex      Remove all existing data from the database before indexing.
+    -f, --force    Do not ask any questions. DANGER: This can destroys your
+                   database when used with --reindex.
     --verbose-sql  Print every SQL statement. Be careful, it's a little too
                    verbose.
     -v --verbose   Show debugging messages about the progress.
@@ -135,12 +137,6 @@ class Indexer(object):
 
         if reindex:
             log.info('Dropping database...')
-
-            confirmed = raw_input('This will destroy all the information. '
-                                  'Proceed? [y/N] ') in ('y', 'Y')
-            if not confirmed:
-                log.error('Aborting.')
-                sys.exit(1)
 
             db.drop_all()
 
@@ -391,6 +387,15 @@ class Indexer(object):
 def main():
     arguments = docopt(__doc__)
 
+    if arguments['--reindex']:
+        if not arguments['--force']:
+            confirmed = raw_input('This will destroy all the information. '
+                                  'Proceed? [y/N] ') in ('y', 'Y')
+            if not confirmed:
+                log.error('Aborting.')
+                sys.exit(1)
+
+
     if arguments['--quiet']:
         log.setLevel(logging.ERROR)
     elif arguments['--verbose']:
@@ -405,7 +410,7 @@ def main():
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
         'reindex': arguments['--reindex'],
-        }
+    }
 
     if kwargs['no_metadata']:
         kwargs['use_lastfm'] = False
