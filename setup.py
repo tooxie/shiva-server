@@ -6,12 +6,12 @@ import shiva
 
 setup(
     name='shiva',
-    version='0.6',
+    version=shiva.__version__,
     description='A RESTful API to your music collection',
     long_description=shiva.__doc__,
     author=u'Alvaro Mouriño',
     author_email='alvaro@mourino.net',
-    url='https://github.com/tooxie/shiva-server',
+    url=shiva.__url__,
     download_url='https://codeload.github.com/tooxie/shiva-server/zip/master',
     classifiers=[
         'Development Status :: 3 - Alpha',
