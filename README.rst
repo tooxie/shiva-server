@@ -1,5 +1,9 @@
+.. |buildstatus| image:: https://secure.travis-ci.org/tooxie/shiva-server.png
+    :alt: Build status
+    :target: http://travis-ci.org/tooxie/shiva-server
+
 =====
-Shiva
+Shiva |buildstatus|
 =====
 
 Dinosaurs will slowly die.
