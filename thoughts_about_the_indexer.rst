@@ -52,3 +52,11 @@ proposal (pseudo code)::
     track_models_with_covers = run_lastfm(track_models_with_meta)
     db.save(track_models_with_covers)
 
+This would make multiprocessing much easier.
+
+It would also enable us to run those parts separately. Just imagine a::
+
+    models.Track.query.all()
+
+before the single step.
+
