@@ -25,13 +25,11 @@ from multiprocessing.pool import Pool
 from time import time
 import logging
 import itertools
-import os
 import sys
 import traceback
 
 from docopt import docopt
 from sqlalchemy import func
-from sqlalchemy.exc import OperationalError
 
 from shiva import models as m
 from shiva.app import app, db
@@ -174,6 +172,7 @@ def get_album(track, artist, use_lastfm=False):
 
     return album
 
+
 def save_track(media_file, empty_db=False, no_metadata=False):
     try:
         full_path = media_file.path.decode('utf-8')
@@ -193,6 +192,7 @@ def save_track(media_file, empty_db=False, no_metadata=False):
         return False
 
     if not empty_db:
+        # TODO: can be made a lot faster by pre-fetching known paths
         if q(m.Track).filter_by(path=full_path).count():
             skip(full_path)
 
@@ -215,303 +215,80 @@ def save_track(media_file, empty_db=False, no_metadata=False):
     track.album = album
     track.artist = artist
     add_to_session(track)
+    return True
 
-class Indexer(object):
 
-    VALID_FILE_EXTENSIONS = (
-        'asf', 'wma',  # ASF
-        'flac',  # FLAC
-        'mp4', 'm4a', 'm4b', 'm4p',  # M4A
-        'ape',  # Monkey's Audio
-        'mp3',  # MP3
-        'mpc', 'mp+', 'mpp',  # Musepack
-        'spx',  # Ogg Speex
-        'ogg', 'oga',  # Ogg Vorbis / Theora
-        'tta',  # True Audio
-        'wv',  # WavPack
-        'ofr',  # OptimFROG
-    )
+def get_paths():
+    media_dirs = app.config.get('MEDIA_DIRS', None)
+    if media_dirs is None:
+        log.error("Remember to set the MEDIA_DIRS option, otherwise I "
+                  "don't know where to look for.")
+        raise
+    list_of_path_lists = [x.get_paths() for x in media_dirs]
+    flat_paths = itertools.chain.from_iterable(list_of_path_lists)
+    return flat_paths
 
-    def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 reindex=False):
-        self.config = config
-        self.use_lastfm = use_lastfm
-        self.no_metadata = no_metadata
-        self.reindex = reindex
-        self.empty_db = reindex
 
-        self.session = db.session
-        self.media_dirs = config.get('MEDIA_DIRS', [])
-        self.allowed_extensions = app.config.get('ALLOWED_FILE_EXTENSIONS',
-                                                 self.VALID_FILE_EXTENSIONS)
+def run():
+    initial_time = time()
+    paths = get_paths()
+    media_files = [MediaFile(path) for path in paths]
+    valid_media_files = [x for x in media_files if x.is_track()]
+    pool = Pool(processes=4)
+    # map_result example: [True, True, False, True]
+    # means: 3 tracks ok, 1 track skipped
+    map_result = pool.map(save_track, valid_media_files)
+    count_ok = len([1 for x in map_result if x is True])
+    count_skipped = len([x for x in map_result if x is False])
+    final_time = time()
+    return count_ok, count_skipped, initial_time, final_time
 
-        self._ext = None
-        self._meta = None
-        self.track_count = 0
-        self.skipped_tracks = 0
-        self.count_by_extension = {}
-        for extension in self.allowed_extensions:
-            self.count_by_extension[extension] = 0
 
-        self.artists = {}
-        self.albums = {}
-
-        if self.use_lastfm:
-            import pylast
-
-            self.pylast = pylast
-            api_key = config['LASTFM_API_KEY']
-            self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
-
-        if not len(self.media_dirs):
-            log.error("Remember to set the MEDIA_DIRS option, otherwise I "
-                      "don't know where to look for.")
-
-        if reindex:
-            log.info('Dropping database...')
-
-            db.drop_all()
-
-            log.info('Recreating database...')
-            db.create_all()
-
-        # This is useful to know if the DB is empty, and avoid some checks
-        if not self.reindex:
-            try:
-                m.Artist.query.limit(1).all()
-            except OperationalError:
-                self.empty_db = True
-
-    def get_artist(self, name):
-        name = name.strip() if type(name) in (str, unicode) else None
-        if not name:
-            return None
-
-        if name in self.artists:
-            return self.artists[name]
-        else:
-            cover = None
-            if self.use_lastfm:
-                log.debug('[ Last.FM ] Retrieving "%s" info' % name)
-                with ignored(Exception, print_traceback=True):
-                    cover = self.lastfm.get_artist(name).get_cover_image()
-            artist = m.Artist(name=name, image=cover)
-            self.session.add(artist)
-            self.artists[name] = artist
-
-        return artist
-
-    def get_album(self, name, artist):
-        name = name.strip() if type(name) in (str, unicode) else None
-        if not name or not artist:
-            return None
-
-        if name in self.albums:
-            return self.albums[name]
-        else:
-            release_year = self.get_release_year()
-            cover = None
-            if self.use_lastfm:
-                log.debug('[ Last.FM ] Retrieving album "%s" by "%s"' % (
-                    name, artist.name))
-                with ignored(Exception, print_traceback=True):
-                    _artist = self.lastfm.get_artist(artist.name)
-                    _album = self.lastfm.get_album(_artist, name)
-                    release_year = self.get_release_year(_album)
-                    pylast_cover = self.pylast.COVER_EXTRA_LARGE
-                    cover = _album.get_cover_image(size=pylast_cover)
-
-            album = m.Album(name=name, year=release_year, cover=cover)
-            self.session.add(album)
-            self.albums[name] = album
-
-        return album
-
-    def get_release_year(self, lastfm_album=None):
-        if not self.use_lastfm or not lastfm_album:
-            return self.get_metadata_reader().release_year
-
-        _date = lastfm_album.get_release_date()
-        if not _date:
-            if not self.get_metadata_reader().release_year:
-                return None
-
-            return self.get_metadata_reader().release_year
-
-        return datetime.strptime(_date, '%d %b %Y, %H:%M').year
-
-    def add_to_session(self, track):
-        self.session.add(track)
-        ext = track.get_extension()
-        self.count_by_extension[ext] += 1
-
-        log.info('[ OK ] %s' % track.path)
+def print_stats(track_count, skipped_tracks, initial_time, final_time):
+    if track_count == 0:
+        log.info('\nNo track indexed.\n')
 
         return True
 
-    def skip(self, reason=None, print_traceback=None):
-        self.skipped_tracks += 1
+    elapsed_time = final_time - initial_time
+    log.info('\nRun in %d seconds. Avg %.3fs/track.' % (
+        elapsed_time,
+        (elapsed_time / track_count)))
+    log.info('Found %d tracks. Skipped: %d. Indexed: %d.' % (
+        track_count,
+        skipped_tracks,
+        (track_count - skipped_tracks)))
+    # TODO: enable count by extension
+    # for extension, count in self.count_by_extension.iteritems():
+    #     if count:
+    #         log.info('%s: %d tracks' % (extension, count))
 
-        if log.getEffectiveLevel() <= logging.INFO:
-            _reason = ' (%s)' % reason if reason else ''
-            log.info('[ SKIPPED ] %s%s' % (self.file_path, _reason))
-            if print_traceback:
-                log.info(traceback.format_exc())
 
-        return True
+def _make_unique(model):
+    """
+    Retrieves all repeated slugs for a given model and appends the
+    instance's primary key to it.
 
-    def save_track(self, path):
-        """
-        Takes a path to a track, reads its metadata and stores everything in
-        the database.
+    """
 
-        """
+    slugs = q(model).group_by(model.slug). \
+        having(func.count(model.slug) > 1)
 
-        try:
-            full_path = path.decode('utf-8')
-        except UnicodeDecodeError:
-            self.skip('Unrecognized encoding', print_traceback=True)
+    for row in slugs:
+        for instance in q(model).filter_by(slug=row.slug):
+            instance.slug += '-%s' % instance.pk
 
-            # If file name is in an strange encoding ignore it.
-            return False
+    return slugs
 
-        try:
-            track = m.Track(full_path, no_metadata=self.no_metadata)
-        except MetadataManagerReadError:
-            self.skip('Corrupted file', print_traceback=True)
 
-            # If the metadata manager can't read the file, it's probably not an
-            # actual music file, or it's corrupted. Ignore it.
-            return False
+def make_slugs_unique():
+    query = _make_unique(m.Artist)
+    db.session.add_all(query)
 
-        if not self.empty_db:
-            if q(m.Track).filter_by(path=full_path).count():
-                self.skip()
+    query = _make_unique(m.Track)
+    db.session.add_all(query)
 
-                return True
-
-        if self.no_metadata:
-            self.add_to_session(track)
-
-            return True
-
-        meta = self.set_metadata_reader(track)
-
-        artist = self.get_artist(meta.artist)
-        album = self.get_album(meta.album, artist)
-
-        if artist is not None and album is not None:
-            if artist not in album.artists:
-                album.artists.append(artist)
-
-        track.album = album
-        track.artist = artist
-        self.add_to_session(track)
-
-    def get_metadata_reader(self):
-        return self._meta
-
-    def set_metadata_reader(self, track):
-        self._meta = track.get_metadata_reader()
-
-        return self._meta
-
-    def get_extension(self):
-        return self.file_path.rsplit('.', 1)[1].lower()
-
-    def is_track(self):
-        """Try to guess whether the file is a valid track or not."""
-        if not os.path.isfile(self.file_path):
-            return False
-
-        if '.' not in self.file_path:
-            return False
-
-        ext = self.get_extension()
-        if ext not in self.VALID_FILE_EXTENSIONS:
-            log.debug('[ SKIPPED ] %s (Unrecognized extension)' %
-                      self.file_path)
-
-            return False
-        elif ext not in self.allowed_extensions:
-            log.debug('[ SKIPPED ] %s (Ignored extension)' % self.file_path)
-
-            return False
-
-        return True
-
-    def walk(self, target, exclude=tuple()):
-        """Recursively walks through a directory looking for tracks."""
-
-        if not os.path.isdir(target):
-            return False
-
-        for root, dirs, files in os.walk(target, exclude):
-            for name in files:
-                self.file_path = os.path.join(root, name)
-                if root in exclude:
-                    log.debug('[ EXCLUDED ] %s' % self.file_path)
-                else:
-                    if self.is_track():
-                        self.track_count += 1
-                        self.save_track()
-
-    def _make_unique(self, model):
-        """
-        Retrieves all repeated slugs for a given model and appends the
-        instance's primary key to it.
-
-        """
-
-        slugs = q(model).group_by(model.slug). \
-            having(func.count(model.slug) > 1)
-
-        for row in slugs:
-            slug = row.slug
-            for instance in q(model).filter_by(slug=row.slug):
-                instance.slug += '-%s' % instance.pk
-
-        return slugs
-
-    # SELECT pk, slug, COUNT(*) FROM tracks GROUP BY slug HAVING COUNT(*) > 1;
-    def make_slugs_unique(self):
-        query = self._make_unique(m.Artist)
-        self.session.add_all(query)
-
-        query = self._make_unique(m.Track)
-        self.session.add_all(query)
-
-        self.session.commit()
-
-    def print_stats(self):
-        if self.track_count == 0:
-            log.info('\nNo track indexed.\n')
-
-            return True
-
-        elapsed_time = self.final_time - self.initial_time
-        log.info('\nRun in %d seconds. Avg %.3fs/track.' % (
-            elapsed_time,
-            (elapsed_time / self.track_count)))
-        log.info('Found %d tracks. Skipped: %d. Indexed: %d.' % (
-            self.track_count,
-            self.skipped_tracks,
-            (self.track_count - self.skipped_tracks)))
-        for extension, count in self.count_by_extension.iteritems():
-            if count:
-                log.info('%s: %d tracks' % (extension, count))
-
-    def run(self):
-        self.initial_time = time()
-
-        list_of_path_lists = [x.get_paths() for x in self.media_dirs]
-        flat_paths = itertools.chain.from_iterable(list_of_path_lists)
-        media_files = [MediaFile(path) for path in flat_paths]
-        valid_media_files = [x for x in media_files if x.is_track()]
-        pool = Pool(processes=4)
-        pool.map(save_track, valid_media_files)
-        self.track_count = len(valid_media_files)
-        self.final_time = time()
+    db.session.commit()
 
 
 def main():
@@ -524,7 +301,6 @@ def main():
             if not confirmed:
                 log.error('Aborting.')
                 sys.exit(1)
-
 
     if arguments['--quiet']:
         log.setLevel(logging.ERROR)
@@ -553,18 +329,16 @@ def main():
     # Generate database
     db.create_all()
 
-    lola = Indexer(app.config, **kwargs)
-    lola.run()
-
-    lola.print_stats()
+    count, skipped, t0, t1 = run()
+    print_stats(count, skipped, t0, t1)
 
     # Petit performance hack: Every track will be added to the session but they
     # will be written down to disk only once, at the end.
     log.debug('Writing to database...')
-    lola.session.commit()
+    db.session.commit()
 
     log.debug('Checking for duplicated tracks...')
-    lola.make_slugs_unique()
+    make_slugs_unique()
 
 
 if __name__ == '__main__':
