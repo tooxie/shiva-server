@@ -40,6 +40,37 @@ q = db.session.query
 log = get_logger()
 
 
+VALID_FILE_EXTENSIONS = (
+    'asf', 'wma',  # ASF
+    'flac',  # FLAC
+    'mp4', 'm4a', 'm4b', 'm4p',  # M4A
+    'ape',  # Monkey's Audio
+    'mp3',  # MP3
+    'mpc', 'mp+', 'mpp',  # Musepack
+    'spx',  # Ogg Speex
+    'ogg', 'oga',  # Ogg Vorbis / Theora
+    'tta',  # True Audio
+    'wv',  # WavPack
+    'ofr',  # OptimFROG
+)
+
+allowed_extensions = app.config.get('ALLOWED_FILE_EXTENSIONS',
+                                    VALID_FILE_EXTENSIONS)
+
+
+def is_track(path):
+    if '.' not in path:
+        return False
+    ext = path.rsplit('.', 1)[1].lower()
+    if ext not in VALID_FILE_EXTENSIONS:
+        log.debug('[ SKIPPED ] %s (Unrecognized extension)' % path)
+        return False
+    if ext not in allowed_extensions:
+        log.debug('[ SKIPPED ] %s (Ignored extension)' % path)
+        return False
+    return True
+
+
 skipped_tracks = 0
 
 
@@ -54,49 +85,6 @@ def skip(path, reason=None, print_traceback=None):
             log.info(traceback.format_exc())
 
     return True
-
-
-class MediaFile(object):
-    VALID_FILE_EXTENSIONS = (
-        'asf', 'wma',  # ASF
-        'flac',  # FLAC
-        'mp4', 'm4a', 'm4b', 'm4p',  # M4A
-        'ape',  # Monkey's Audio
-        'mp3',  # MP3
-        'mpc', 'mp+', 'mpp',  # Musepack
-        'spx',  # Ogg Speex
-        'ogg', 'oga',  # Ogg Vorbis / Theora
-        'tta',  # True Audio
-        'wv',  # WavPack
-        'ofr',  # OptimFROG
-    )
-
-    def __init__(self, path):
-        self.path = path
-
-    @classmethod
-    def get_allowed_extensions(cls):
-        return app.config.get('ALLOWED_FILE_EXTENSIONS',
-                              cls.VALID_FILE_EXTENSIONS)
-
-    def get_extension(self):
-        return self.path.rsplit('.', 1)[1].lower()
-
-    def is_track(self):
-        if '.' not in self.path:
-            return False
-        ext = self.get_extension()
-        if ext not in self.VALID_FILE_EXTENSIONS:
-            log.debug('[ SKIPPED ] %s (Unrecognized extension)' %
-                      self.path)
-
-            return False
-        elif ext not in self.get_allowed_extensions():
-            log.debug('[ SKIPPED ] %s (Ignored extension)' % self.path)
-
-            return False
-
-        return True
 
 
 def add_to_session(track):
@@ -173,9 +161,9 @@ def get_album(track, artist, use_lastfm=False):
     return album
 
 
-def save_track(media_file, empty_db=False, no_metadata=False):
+def save_track(path, empty_db=False, no_metadata=False):
     try:
-        full_path = media_file.path.decode('utf-8')
+        full_path = path.decode('utf-8')
     except UnicodeDecodeError:
         skip('Unrecognized encoding', print_traceback=True)
 
@@ -232,12 +220,11 @@ def get_paths():
 def run():
     initial_time = time()
     paths = get_paths()
-    media_files = [MediaFile(path) for path in paths]
-    valid_media_files = [x for x in media_files if x.is_track()]
+    valid_paths = [x for x in paths if is_track(x)]
     pool = Pool(processes=4)
     # map_result example: [True, True, False, True]
     # means: 3 tracks ok, 1 track skipped
-    map_result = pool.map(save_track, valid_media_files)
+    map_result = pool.map(save_track, valid_paths)
     count_ok = len([1 for x in map_result if x is True])
     count_skipped = len([x for x in map_result if x is False])
     final_time = time()
