@@ -4,13 +4,14 @@ Index your music collection and (optionally) retrieve album covers and artist
 pictures from Last.FM.
 
 Usage:
-    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
-                  [--verbose-sql]
+    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--low-ram]
+                  [--reindex] [--verbose-sql]
 
 Options:
     -h, --help     Show this help message and exit
     --lastfm       Retrieve artist and album covers from Last.FM API.
     --nometadata   Don't read file's metadata when indexing.
+    --low-ram      Keep RAM usage as low as possible.
     --reindex      Remove all existing data from the database before indexing.
     --verbose-sql  Print every SQL statement. Be careful, it's a little too
                    verbose.
@@ -55,12 +56,13 @@ class Indexer(object):
     )
 
     def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 reindex=False):
+                 low_ram=False, reindex=False):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
+        self.low_ram = low_ram
         self.reindex = reindex
-        self.empty_db = reindex
+        self.empty_db = reindex and not low_ram
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -104,7 +106,7 @@ class Indexer(object):
             db.create_all()
 
         # This is useful to know if the DB is empty, and avoid some checks
-        if not self.reindex:
+        if not self.reindex and not self.low_ram:
             try:
                 m.Artist.query.limit(1).all()
             except OperationalError:
@@ -125,7 +127,9 @@ class Indexer(object):
                     cover = self.lastfm.get_artist(name).get_cover_image()
             artist = m.Artist(name=name, image=cover)
             self.session.add(artist)
-            self.artists[name] = artist
+
+            if not self.low_ram:
+                self.artists[name] = artist
 
         return artist
 
@@ -151,7 +155,9 @@ class Indexer(object):
 
             album = m.Album(name=name, year=release_year, cover=cover)
             self.session.add(album)
-            self.albums[name] = album
+
+            if not self.low_ram:
+                self.albums[name] = album
 
         return album
 
@@ -235,6 +241,9 @@ class Indexer(object):
         track.album = album
         track.artist = artist
         self.add_to_session(track)
+
+        if self.low_ram:
+            self.session.commit()
 
     def get_metadata_reader(self):
         return self._meta
@@ -355,6 +364,7 @@ def main():
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
+        'low_ram': arguments['--low-ram'],
         'reindex': arguments['--reindex'],
     }
 
@@ -375,7 +385,8 @@ def main():
     lola.print_stats()
 
     # Petit performance hack: Every track will be added to the session but they
-    # will be written down to disk only once, at the end.
+    # will be written down to disk only once, at the end. Unless the --low-ram
+    # flag is set, then every track is immediately persisted.
     log.debug('Writing to database...')
     lola.session.commit()
 
