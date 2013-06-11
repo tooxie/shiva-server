@@ -47,6 +47,14 @@ To install all the dependencies on Debian (and derivatives)::
 
     sudo apt-get install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
 
+If at some point of the installation process you get the error:
+
+.. code::
+
+    /usr/bin/ld: cannot find -lz
+
+You also need the package ``lib32z1-dev``
+
 On Mac OS X with `homebrew <http://mxcl.github.com/homebrew/>`_ you can get the
 libxml headers with::
 
