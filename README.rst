@@ -1,4 +1,4 @@
-.. |buildstatus| image:: https://secure.travis-ci.org/tooxie/shiva-server.png
+.. |buildstatus| image:: https://secure.travis-ci.org/tooxie/shiva-server.png?branch=master
     :alt: Build status
     :target: http://travis-ci.org/tooxie/shiva-server
 
