@@ -17,6 +17,7 @@ class LyricScraper(object):
     def fetch(self):
         raise NotImplementedError
 
+
 def get_lyrics(track):
     try:
         scrapers = app.config['SCRAPERS']['lyrics']

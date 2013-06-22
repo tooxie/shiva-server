@@ -34,7 +34,8 @@ class Configurator(object):
         * The ``$XDG_CONFIG_HOME/shiva/config.py`` file. If
           ``$XDG_CONFIG_HOME`` is not set, defaults to ``$HOME/.config``, as
           defined by the `XDG Base Directory Specification
-          <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html>`_.
+          <http://standards.freedesktop.org/basedir-spec/basedir-spec-latest\
+.html>`_.
     """
 
     def __init__(self):
