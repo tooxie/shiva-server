@@ -188,6 +188,7 @@ The indexer receives the following command line arguments.
 * ``--lastfm``
 * ``--nometadata``
 * ``--reindex``
+* ``--write-every=<num>``
 
 If you set the ``--lastfm`` flag Shiva will retrieve artist and album images
 from Last.FM, but for this to work you need to get an API key (see
@@ -208,6 +209,15 @@ update your music collection, run the indexer again **without** the
 The indexer is optimized for performance; hard drive hits, like file reading or
 DB queries, are done as few as possible. As a consequence, memory usage is
 quite heavy. Keep that in mind when indexing large collections.
+
+To keep memory usage down, you can use the ``--write-every`` parameter. It
+receives a number and will write down to disk and clear cache after that many
+tracks indexed. If you pass 1, it will completely ignore cache and just write
+every track to disk. This has the lowest possible memory usage, but as a
+downside, indexing will be much slower.
+
+It's up to you to find a good balance between the size of your music collection
+and the available RAM that you have.
 
 
 ----------------------
