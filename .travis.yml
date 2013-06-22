@@ -7,9 +7,11 @@ python:
 before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
+                               pep8
 
 install:
     - python setup.py develop
+    - find shiva -name '*.py' -exec pep8 '{}' \+
 
 script:
     - nosetests
