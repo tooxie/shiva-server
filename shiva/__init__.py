@@ -42,7 +42,7 @@ __author__ = u'Alvaro Mouriño'
 __author_email__ = 'alvaro@mourino.net'
 __copyright__ = '2013 Alvaro Mouriño'
 __url__ = 'https://github.com/tooxie/shiva-server'
-__contibutors__ = [
+__contributors__ = [
     u'Bojan Mihelac <bmihelac@mihelac.org>',
     u'Danilo Bargen <gezuru@gmail.com>',
     u'Felix Hummel <felix@felixhummel.de>',
@@ -62,4 +62,4 @@ def get_version():
 
 
 def get_contributors():
-    return __contibutors__
+    return __contributors__
