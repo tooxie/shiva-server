@@ -11,7 +11,12 @@ before_install:
 
 install:
     - python setup.py develop
+    - cp shiva/config/local.py.example shiva/config/local.py
+    - echo "import os" >> shiva/config/local.py
+    - echo "MEDIA_DIRS = (MediaDir(os.environ['HOME']),)" >> shiva/config/local.py
+    - cat shiva/config/local.py
 
 script:
     - find shiva -name '*.py' -exec pep8 '{}' \+
+    - shiva-indexer
     - nosetests
