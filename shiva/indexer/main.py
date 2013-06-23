@@ -36,7 +36,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
-from shiva.lastfm import LastFM
+from shiva.indexer.lastfm import LastFM
 from shiva.utils import ignored, get_logger
 
 q = db.session.query
@@ -472,7 +472,3 @@ def main():
 
     log.debug('Checking for duplicated tracks...')
     lola.make_slugs_unique()
-
-
-if __name__ == '__main__':
-    main()
