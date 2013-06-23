@@ -11,7 +11,7 @@ before_install:
 
 install:
     - python setup.py develop
-    - find shiva -name '*.py' -exec pep8 '{}' \+
 
 script:
+    - find shiva -name '*.py' -exec pep8 '{}' \+
     - nosetests
