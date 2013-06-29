@@ -5,6 +5,7 @@ import traceback
 
 from flask import request, current_app as app, g
 from flask.ext.restful import abort, fields, marshal
+from werkzeug.exceptions import NotFound
 import requests
 
 from shiva import get_version, get_contributors
@@ -246,7 +247,8 @@ class TrackResource(Resource):
             track = self.get_one(track_id)
 
         if full_tree():
-            return self.get_full_tree(track, include_scraped=True)
+            return self.get_full_tree(track, include_scraped=True,
+                                      include_related=True)
 
         return marshal(track, self.get_resource_fields())
 
@@ -264,7 +266,10 @@ class TrackResource(Resource):
 
         queryset = tracks.order_by(Track.album_pk, Track.number, Track.pk)
         for track in paginate(queryset):
-            yield marshal(track, self.get_resource_fields())
+            if full_tree():
+                yield self.get_full_tree(track, include_related=True)
+            else:
+                yield marshal(track, self.get_resource_fields())
 
     def get_one(self, track_id):
         track = Track.query.get(track_id)
@@ -282,23 +287,39 @@ class TrackResource(Resource):
 
         return track
 
-    def get_full_tree(self, track, include_scraped=False):
+    def get_full_tree(self, track, include_scraped=False,
+                      include_related=False):
         """
-        Retrives the full tree for a track. If the include_scraped option is
+        Retrives the full tree for a track. If the include_related option is
         not set then a normal track structure will be retrieved. If its set
         external resources that need to be scraped, like lyrics, will also be
-        included.
+        included. Also related objects like artist and album will be expanded
+        to provide all their respective information.
 
         This is disabled by default to avois DoS'ing lyrics' websites when
         requesting many tracks at once.
 
         """
 
-        _track = marshal(track, self.get_resource_fields())
+        resource_fields = self.get_resource_fields()
+        if include_related:
+            artist = ArtistResource()
+            resource_fields['artist'] = ForeignKeyField(
+                Artist,
+                artist.get_resource_fields())
+            album = AlbumResource()
+            resource_fields['album'] = ForeignKeyField(
+                Album,
+                album.get_resource_fields())
+
+        _track = marshal(track, resource_fields)
 
         if include_scraped:
             lyrics = LyricsResource()
-            _track['lyrics'] = lyrics.get_for(track)
+            try:
+                _track['lyrics'] = lyrics.get_for(track)
+            except NotFound:
+                _track['lyrics'] = None
 
         # tabs = TabsResource()
         # _track['tabs'] = tabs.get()
