@@ -8,7 +8,7 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get -qq install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
                                pep8
-    - pip install nose-cov mock
+    - pip install nose-cov mock python-coveralls
 
 install:
     - python setup.py develop
@@ -20,3 +20,6 @@ script:
     - find shiva -name '*.py' -exec pep8 '{}' \+
     - shiva-indexer
     - nosetests --with-cov --cov shiva
+
+after_success:
+    - coveralls
