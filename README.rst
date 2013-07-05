@@ -1,12 +1,17 @@
 .. |buildstatus| image:: https://secure.travis-ci.org/tooxie/shiva-server.png?branch=master
     :alt: Build status
     :target: http://travis-ci.org/tooxie/shiva-server
+.. |testcoverage| image:: https://coveralls.io/repos/tooxie/shiva-server/badge.png
+    :alt: Test coverage
+    :target: https://coveralls.io/r/tooxie/shiva-server
 
 =====
-Shiva |buildstatus|
+Shiva
 =====
 
 Dinosaurs will slowly die.
+
+|buildstatus| |testcoverage|
 
 
 License
