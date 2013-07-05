@@ -77,8 +77,8 @@ Installation
 
 .. code:: sh
 
-      $ git clone https://github.com/tooxie/shiva-server.git
-      $ cd shiva-server
+    $ git clone https://github.com/tooxie/shiva-server.git
+    $ cd shiva-server
 
 * Create and activate your virtalenv (highly recommended)::
 
@@ -97,7 +97,7 @@ Installation
 
 .. code:: sh
 
-      $ cp shiva/config/local.py.example shiva/config/local.py
+    $ cp shiva/config/local.py.example shiva/config/local.py
 
 See `Configuring`_ for more info.
 
@@ -1172,6 +1172,47 @@ against it. If they match, a header is added:
 .. code:: html
 
     Access-Control-Allow-Origin: http://napster.com
+
+
+Want to contribute?
+===================
+
+There are many ways you can contribute:
+
+* File bug reports.
+* Implement new features.
+* Build your own client.
+* Write documentation.
+* Write tests.
+* Talk about Shiva.
+
+  + Write an article.
+  + Give a talk.
+
+* Use it!
+
+If you build a client or write an article about Shiva, let us know and we'll
+include it in our documentation.
+
+
+------------
+Sending code
+------------
+
+If you want to implement a new feature or fix a bug, remember that every PR
+that you issue must:
+
+* Strictly follow the `PEP8 <http://www.python.org/dev/peps/pep-0008/>`_.
+* Include documentation, if applicable.
+
+  + Detailed documentation of the new feature.
+  + Update old documentation for functionality changes.
+
+* Include tests.
+* Not break previous tests.
+
+The `CI tool <https://travis-ci.org/tooxie/shiva-server>`_ will check for most
+of this, so make sure the build passes.
 
 
 Bug Reports
