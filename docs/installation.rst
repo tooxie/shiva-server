@@ -28,6 +28,10 @@ To install all the dependencies on Debian (and derivatives)::
 
     sudo apt-get install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
 
+For simplicity, you can just run::
+
+    sudo apt-get install `cat dependencies.apt`
+
 If at some point of the installation process you get the error:
 
 .. code::

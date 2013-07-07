@@ -1,0 +1,4 @@
+mock==1.0.1
+nose-cov==1.6
+python-coveralls==2.2.0
+pep8==1.5.7
