@@ -778,6 +778,7 @@ Those are:
 
 * ``/artist/<int:artist_id>``
 * ``/album/<int:album_id>``
+* ``/tracks``
 * ``/track/<int:track_id>``
 
 Whenever you set ``fulltree`` to any value that evaluates to ``True`` (i.e.,
@@ -862,11 +863,14 @@ Using ``fulltree`` on tracks
 ----------------------------
 
 The behaviour on a track resource is a little different. In the previous
-example tracks are the leaves of the tree, but when the fulltree of a track is
+example tracks are the leaves of the tree, but when the full tree of a track is
 requested then all the scraped resources are also included, like lyrics.
 
 This is not the default behaviour to avoid DoS'ing scraped websites when
 fetching the complete discography of an artist.
+
+Note that if you request the list of tracks with ``fulltree``, only the related
+resources will be included (i.e.: artists and albums) but not the scraped ones.
 
 
 ----------
