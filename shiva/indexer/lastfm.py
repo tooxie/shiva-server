@@ -5,7 +5,7 @@ log = get_logger()
 
 
 class LastFM(object):
-    def __init__(api_key, use_cache=True):
+    def __init__(self, api_key, use_cache=True):
         """
         Wrapper around LastFM's library, pylast. Simplifies handling and adds
         caching.
@@ -31,7 +31,11 @@ class LastFM(object):
                 log.debug('[ Last.FM ] Retrieving artist "%s"' % name)
                 artist = self.lib.get_artist(name)
             if artist and self.use_cache:
-                self.cache[name]['object'] = artist
+                self.cache.update({
+                    name: {
+                        'object': artist
+                    }
+                })
 
         return artist
 
@@ -53,7 +57,13 @@ class LastFM(object):
                 album = self.lib.get_album(artist, name)
 
             if album and self.use_cache:
-                self.cache[artist.name]['albums'][album.name] = album
+                self.cache.update({
+                    artist.name: {
+                        'albums': {
+                            album.name: album
+                        }
+                    }
+                })
 
         return album
 
