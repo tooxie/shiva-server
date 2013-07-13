@@ -9,6 +9,8 @@ before_install:
     - sudo apt-get -qq install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
                                pep8
     - pip install nose-cov mock python-coveralls
+    - pip install --timeout 120 "python-dateutil==2.1"
+    - if [ $(python -V 2>&1 | grep -c "2\.6\.") -eq 1 ]; then pip install unittest2; fi
 
 install:
     - python setup.py develop

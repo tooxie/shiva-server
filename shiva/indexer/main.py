@@ -4,19 +4,21 @@ Index your music collection and (optionally) retrieve album covers and artist
 pictures from Last.FM.
 
 Usage:
-    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--low-ram]
-                  [--reindex] [--verbose-sql]
+    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
+                  [--write-every=<num>] [--verbose-sql]
 
 Options:
-    -h, --help     Show this help message and exit
-    --lastfm       Retrieve artist and album covers from Last.FM API.
-    --nometadata   Don't read file's metadata when indexing.
-    --low-ram      Keep RAM usage as low as possible.
-    --reindex      Remove all existing data from the database before indexing.
-    --verbose-sql  Print every SQL statement. Be careful, it's a little too
-                   verbose.
-    -v --verbose   Show debugging messages about the progress.
-    -q --quiet     Suppress warnings.
+    -h, --help           Show this help message and exit
+    --lastfm             Retrieve artist and album covers from Last.FM API.
+    --nometadata         Don't read file's metadata when indexing.
+    --reindex            Remove all existing data from the database before
+                         indexing.
+    --write-every=<num>  Write to disk and clear cache every <num> tracks
+                         indexed.
+    --verbose-sql        Print every SQL statement. Be careful, it's a little
+                         too verbose.
+    -v --verbose         Show debugging messages about the progress.
+    -q --quiet           Suppress warnings.
 """
 # K-Pg
 from datetime import datetime
@@ -33,6 +35,8 @@ from sqlalchemy.exc import OperationalError
 from shiva import models as m
 from shiva.app import app, db
 from shiva.exceptions import MetadataManagerReadError
+from shiva.indexer.cache import CacheManager
+from shiva.indexer.lastfm import LastFM
 from shiva.utils import ignored, get_logger
 
 q = db.session.query
@@ -56,13 +60,17 @@ class Indexer(object):
     )
 
     def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 low_ram=False, reindex=False):
+                 reindex=False, write_every=None):
         self.config = config
         self.use_lastfm = use_lastfm
         self.no_metadata = no_metadata
-        self.low_ram = low_ram
         self.reindex = reindex
-        self.empty_db = reindex and not low_ram
+        self.write_every = write_every
+        self.empty_db = reindex
+        # If we are going to have only 1 track in cache at any time, then we
+        # better just ignore it completely.
+        self.cache = CacheManager(ram_cache=(write_every > 1),
+                                  use_db=not self.empty_db)
 
         self.session = db.session
         self.media_dirs = config.get('MEDIA_DIRS', [])
@@ -77,15 +85,9 @@ class Indexer(object):
         for extension in self.allowed_extensions:
             self.count_by_extension[extension] = 0
 
-        self.artists = {}
-        self.albums = {}
-
         if self.use_lastfm:
-            import pylast
-
-            self.pylast = pylast
-            api_key = config['LASTFM_API_KEY']
-            self.lastfm = self.pylast.LastFMNetwork(api_key=api_key)
+            self.lastfm = LastFM(api_key=config['LASTFM_API_KEY'],
+                                 use_cache=(write_every > 1))
 
         if not len(self.media_dirs):
             log.error("Remember to set the MEDIA_DIRS option, otherwise I "
@@ -106,9 +108,9 @@ class Indexer(object):
             db.create_all()
 
         # This is useful to know if the DB is empty, and avoid some checks
-        if not self.reindex and not self.low_ram:
+        if not self.reindex:
             try:
-                m.Artist.query.limit(1).all()
+                m.Track.query.limit(1).all()
             except OperationalError:
                 self.empty_db = True
 
@@ -117,62 +119,52 @@ class Indexer(object):
         if not name:
             return None
 
-        if name in self.artists:
-            return self.artists[name]
-        else:
-            cover = None
-            if self.use_lastfm:
-                log.debug('[ Last.FM ] Retrieving "%s" info' % name)
-                with ignored(Exception, print_traceback=True):
-                    cover = self.lastfm.get_artist(name).get_cover_image()
-            artist = m.Artist(name=name, image=cover)
-            self.session.add(artist)
+        artist = self.cache.get_artist(name)
+        if artist:
+            return artist
 
-            if not self.low_ram:
-                self.artists[name] = artist
+        artist = m.Artist(name=name, image=self.get_artist_image(name))
+
+        self.session.add(artist)
+        self.cache.add_artist(artist)
 
         return artist
+
+    def get_artist_image(self, name):
+        if self.use_lastfm:
+            return self.lastfm.get_artist_image(name)
+
+        return None
 
     def get_album(self, name, artist):
         name = name.strip() if type(name) in (str, unicode) else None
         if not name or not artist:
             return None
 
-        if name in self.albums:
-            return self.albums[name]
-        else:
-            release_year = self.get_release_year()
-            cover = None
-            if self.use_lastfm:
-                log.debug('[ Last.FM ] Retrieving album "%s" by "%s"' % (
-                          name, artist.name))
-                with ignored(Exception, print_traceback=True):
-                    _artist = self.lastfm.get_artist(artist.name)
-                    _album = self.lastfm.get_album(_artist, name)
-                    release_year = self.get_release_year(_album)
-                    pylast_cover = self.pylast.COVER_EXTRA_LARGE
-                    cover = _album.get_cover_image(size=pylast_cover)
+        album = self.cache.get_album(name, artist)
+        if album:
+            return album
 
-            album = m.Album(name=name, year=release_year, cover=cover)
-            self.session.add(album)
+        release_year = self.get_release_year(name, artist)
+        cover = self.get_album_cover(name, artist)
+        album = m.Album(name=name, year=release_year, cover=cover)
 
-            if not self.low_ram:
-                self.albums[name] = album
+        self.session.add(album)
+        self.cache.add_album(album, artist)
 
         return album
 
-    def get_release_year(self, lastfm_album=None):
-        if not self.use_lastfm or not lastfm_album:
-            return self.get_metadata_reader().release_year
+    def get_album_cover(self, album, artist):
+        if self.use_lastfm:
+            return self.lastfm.get_album_cover(album, artist)
 
-        _date = lastfm_album.get_release_date()
-        if not _date:
-            if not self.get_metadata_reader().release_year:
-                return None
+        return None
 
-            return self.get_metadata_reader().release_year
+    def get_release_year(self, album, artist):
+        if self.use_lastfm:
+            return self.lastfm.get_release_year(album, artist)
 
-        return datetime.strptime(_date, '%d %b %Y, %H:%M').year
+        return self.get_metadata_reader().release_year
 
     def add_to_session(self, track):
         self.session.add(track)
@@ -191,6 +183,25 @@ class Indexer(object):
             log.info('[ SKIPPED ] %s%s' % (self.file_path, _reason))
             if print_traceback:
                 log.info(traceback.format_exc())
+
+        return True
+
+    def commit(self, force=False):
+        if not force:
+            if not self.write_every:
+                return False
+
+            if self.track_count % self.write_every != 0:
+                return False
+
+        log.debug('Writing to database...')
+        self.session.commit()
+
+        if self.write_every > 1:
+            log.debug('Clearing cache')
+            self.cache.clear()
+            if self.use_lastfm:
+                self.lastfm.clear_cache()
 
         return True
 
@@ -234,7 +245,7 @@ class Indexer(object):
         artist = self.get_artist(meta.artist)
         album = self.get_album(meta.album, artist)
 
-        if artist is not None and album is not None:
+        if album and artist:
             if artist not in album.artists:
                 album.artists.append(artist)
 
@@ -242,8 +253,7 @@ class Indexer(object):
         track.artist = artist
         self.add_to_session(track)
 
-        if self.low_ram:
-            self.session.commit()
+        self.commit()
 
     def get_metadata_reader(self):
         return self._meta
@@ -364,8 +374,8 @@ def main():
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
         'no_metadata': arguments['--nometadata'],
-        'low_ram': arguments['--low-ram'],
         'reindex': arguments['--reindex'],
+        'write_every': arguments['--write-every'],
     }
 
     if kwargs['no_metadata']:
@@ -374,7 +384,16 @@ def main():
     if kwargs['use_lastfm'] and not app.config.get('LASTFM_API_KEY'):
         sys.stderr.write('ERROR: You need a Last.FM API key if you set the '
                          '--lastfm flag.\n')
-        sys.exit(1)
+        sys.exit(2)
+
+    try:
+        if kwargs['write_every'] is not None:
+            kwargs['write_every'] = int(kwargs['write_every'])
+    except TypeError:
+        sys.stderr.write('ERROR: Invalid value for --write-every, expected '
+                         '<int>, got "%s" <%s>. instead' % (
+            kwargs['write_every'], type(kwargs['write_every'])))
+        sys.exit(3)
 
     # Generate database
     db.create_all()
@@ -385,14 +404,9 @@ def main():
     lola.print_stats()
 
     # Petit performance hack: Every track will be added to the session but they
-    # will be written down to disk only once, at the end. Unless the --low-ram
-    # flag is set, then every track is immediately persisted.
-    log.debug('Writing to database...')
-    lola.session.commit()
+    # will be written down to disk only once, at the end. Unless the
+    # --write-every flag is set, then tracks are persisted in batch.
+    lola.commit(force=True)
 
     log.debug('Checking for duplicated tracks...')
     lola.make_slugs_unique()
-
-
-if __name__ == '__main__':
-    main()
