@@ -37,7 +37,7 @@ to-your-music-collection/
 Copyright © 2013 Alvaro Mouriño
 """
 
-__version__ = '0.6'
+__version__ = '0.7.0'
 __author__ = u'Alvaro Mouriño'
 __author_email__ = 'alvaro@mourino.net'
 __copyright__ = '2013 Alvaro Mouriño'
