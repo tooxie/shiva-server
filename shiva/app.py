@@ -18,22 +18,22 @@ api = Api(app)
 
 # Artists
 api.add_resource(resources.ArtistResource, '/artists',
-                 '/artist/<int:artist_id>', '/artist/<artist_slug>',
-                 endpoint='artist')
-api.add_resource(resources.ShowsResource, '/artist/<int:artist_id>/shows',
-                 '/artist/<artist_slug>/shows', endpoint='shows')
+                 '/artists/<int:artist_id>', '/artists/<artist_slug>',
+                 endpoint='artists')
+api.add_resource(resources.ShowsResource, '/artists/<int:artist_id>/shows',
+                 '/artists/<artist_slug>/shows', endpoint='shows')
 
 # Albums
-api.add_resource(resources.AlbumResource, '/albums', '/album/<int:album_id>',
-                 '/album/<album_slug>', endpoint='album')
+api.add_resource(resources.AlbumResource, '/albums', '/albums/<int:album_id>',
+                 '/albums/<album_slug>', endpoint='albums')
 
 # Tracks
-api.add_resource(resources.TrackResource, '/tracks', '/track/<int:track_id>',
-                 '/track/<track_slug>', endpoint='track')
-api.add_resource(resources.LyricsResource, '/track/<int:track_id>/lyrics',
-                 '/track/<track_slug>/lyrics', endpoint='lyrics')
-api.add_resource(resources.ConvertResource, '/track/<int:track_id>/convert',
-                 '/track/<track_slug>/convert', endpoint='convert')
+api.add_resource(resources.TrackResource, '/tracks', '/tracks/<int:track_id>',
+                 '/tracks/<track_slug>', endpoint='tracks')
+api.add_resource(resources.LyricsResource, '/tracks/<int:track_id>/lyrics',
+                 '/tracks/<track_slug>/lyrics', endpoint='lyrics')
+api.add_resource(resources.ConvertResource, '/tracks/<int:track_id>/convert',
+                 '/tracks/<track_slug>/convert', endpoint='convert')
 
 # Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>',
