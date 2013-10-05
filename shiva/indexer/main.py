@@ -69,7 +69,7 @@ class Indexer(object):
         self.empty_db = reindex
         # If we are going to have only 1 track in cache at any time, then we
         # better just ignore it completely.
-        self.cache = CacheManager(ram_cache=(write_every > 1),
+        self.cache = CacheManager(ram_cache=(write_every != 1),
                                   use_db=not self.empty_db)
 
         self.session = db.session
