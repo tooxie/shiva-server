@@ -41,10 +41,12 @@ class LastFM(object):
 
     def get_artist_image(self, name):
         image = None
-        if self.use_lastfm:
-            log.debug('[ Last.FM ] Retrieving artist image for "%s"' % name)
-            with ignored(Exception, print_traceback=True):
-                image = self.get_artist(name).get_cover_image()
+
+        log.debug('[ Last.FM ] Retrieving artist image for "%s"' % name)
+        with ignored(Exception, print_traceback=True):
+            image = self.get_artist(name).get_cover_image()
+
+        return image
 
     def get_album(self, name, artist_name):
         album = self.cache.get(artist_name, {}).get('albums', {}).get(name)
@@ -68,19 +70,19 @@ class LastFM(object):
         return album
 
     def get_release_date(self, album_name, artist_name):
+        rdate = None
         album = self.get_album(album_name, artist_name)
+
         if not album:
             return None
 
         log.debug('[ Last.FM ] album "%s" by "%s" release date' % (
-                  name, artist.name))
+                  album_name, artist_name))
         with ignored(Exception, print_traceback=True):
             rdate = album.get_release_date()
+            rdate = datetime.strptime(rdate, '%d %b %Y, %H:%M')
 
-        if not rdate:
-            return None
-
-        return datetime.strptime(rdate, '%d %b %Y, %H:%M')
+        return rdate
 
     def get_album_cover(self, album_name, artist_name):
         cover = None
@@ -90,9 +92,9 @@ class LastFM(object):
             return None
 
         log.debug('[ Last.FM ] Retrieving album "%s" by "%s" cover image' % (
-                  name, artist.name))
+                  album_name, artist_name))
         with ignored(Exception, print_traceback=True):
-            cover = album.get_cover_image(size=self.lib.COVER_EXTRA_LARGE)
+            cover = album.get_cover_image(size=self.pylast.COVER_EXTRA_LARGE)
 
         return cover
 

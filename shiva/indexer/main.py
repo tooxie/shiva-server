@@ -162,7 +162,8 @@ class Indexer(object):
 
     def get_release_year(self, album, artist):
         if self.use_lastfm:
-            return self.lastfm.get_release_year(album, artist)
+            rdate = self.lastfm.get_release_date(album, artist)
+            return rdate.year if rdate else None
 
         return self.get_metadata_reader().release_year
 
