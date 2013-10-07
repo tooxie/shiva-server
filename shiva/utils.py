@@ -84,11 +84,13 @@ def _import(class_path):
 def ignored(*exceptions, **kwargs):
     """Context manager that ignores all of the specified exceptions. This will
     be in the standard library starting with Python 3.4."""
+
+    log = get_logger()
     try:
         yield
     except exceptions:
         if kwargs.get('print_traceback'):
-            print(traceback.format_exc())
+            log.debug(traceback.format_exc())
 
 
 class MetadataManager(object):
