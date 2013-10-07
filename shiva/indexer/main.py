@@ -4,12 +4,13 @@ Index your music collection and (optionally) retrieve album covers and artist
 pictures from Last.FM.
 
 Usage:
-    shiva-indexer [-h] [-v] [-q] [--lastfm] [--nometadata] [--reindex]
+    shiva-indexer [-h] [-v] [-q] [--lastfm] [--hash] [--nometadata] [--reindex]
                   [--write-every=<num>] [--verbose-sql]
 
 Options:
     -h, --help           Show this help message and exit
     --lastfm             Retrieve artist and album covers from Last.FM API.
+    --hash               Hash each file to find (and ignore) duplicates.
     --nometadata         Don't read file's metadata when indexing.
     --reindex            Remove all existing data from the database before
                          indexing.
@@ -59,10 +60,11 @@ class Indexer(object):
         'ofr',  # OptimFROG
     )
 
-    def __init__(self, config=None, use_lastfm=False, no_metadata=False,
-                 reindex=False, write_every=None):
+    def __init__(self, config=None, use_lastfm=False, hash_files=False,
+                 no_metadata=False, reindex=False, write_every=0):
         self.config = config
         self.use_lastfm = use_lastfm
+        self.hash_files = hash_files
         self.no_metadata = no_metadata
         self.reindex = reindex
         self.write_every = write_every
@@ -223,7 +225,8 @@ class Indexer(object):
             return False
 
         try:
-            track = m.Track(full_path, no_metadata=self.no_metadata)
+            track = m.Track(full_path, no_metadata=self.no_metadata,
+                            hash_file=self.hash_files)
         except MetadataManagerReadError:
             self.skip('Corrupted file', print_traceback=True)
 
@@ -234,6 +237,12 @@ class Indexer(object):
         if not self.empty_db:
             if q(m.Track).filter_by(path=full_path).count():
                 self.skip()
+
+                return True
+
+        if self.hash_files:
+            if self.cache.hash_exists(track.hash):
+                self.skip('Duplicated file')
 
                 return True
 
@@ -254,6 +263,7 @@ class Indexer(object):
         track.album = album
         track.artist = artist
         self.add_to_session(track)
+        self.cache.add_hash(track.hash)
 
         self.commit()
 
@@ -375,6 +385,7 @@ def main():
 
     kwargs = {
         'use_lastfm': arguments['--lastfm'],
+        'hash_files': arguments['--hash'],
         'no_metadata': arguments['--nometadata'],
         'reindex': arguments['--reindex'],
         'write_every': arguments['--write-every'],
