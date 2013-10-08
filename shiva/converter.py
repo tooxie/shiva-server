@@ -23,7 +23,7 @@ class Converter(object):
 
     """
 
-    CONVERSION_URI = '/track/%s/convert?%s'
+    CONVERSION_URI = '/tracks/%s/convert?%s'
 
     def __init__(self, track, mimetype):
         self.track = track
