@@ -53,7 +53,7 @@ class ArtistResource(Resource):
             'id': fields.Integer(attribute='pk'),
             'name': fields.String,
             'slug': fields.String,
-            'uri': InstanceURI('artist'),
+            'uri': InstanceURI('artists'),
             'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
             'events_uri': fields.String(attribute='events'),
         }
@@ -126,10 +126,10 @@ class AlbumResource(Resource):
             'name': fields.String,
             'slug': fields.String,
             'year': fields.Integer,
-            'uri': InstanceURI('album'),
+            'uri': InstanceURI('albums'),
             'artists': ManyToManyField(Artist, {
                 'id': fields.Integer(attribute='pk'),
-                'uri': InstanceURI('artist'),
+                'uri': InstanceURI('artists'),
             }),
             'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
         }
@@ -207,7 +207,7 @@ class TrackResource(Resource):
     def get_resource_fields(self):
         return {
             'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('track'),
+            'uri': InstanceURI('tracks'),
             'files': TrackFiles,
             'bitrate': fields.Integer,
             'length': fields.Integer,
@@ -215,11 +215,11 @@ class TrackResource(Resource):
             'slug': fields.String,
             'artist': ForeignKeyField(Artist, {
                 'id': fields.Integer(attribute='pk'),
-                'uri': InstanceURI('artist'),
+                'uri': InstanceURI('artists'),
             }),
             'album': ForeignKeyField(Album, {
                 'id': fields.Integer(attribute='pk'),
-                'uri': InstanceURI('album'),
+                'uri': InstanceURI('albums'),
             }),
             'number': fields.Integer,
         }
