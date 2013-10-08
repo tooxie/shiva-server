@@ -186,6 +186,7 @@ Indexing
 The indexer receives the following command line arguments.
 
 * ``--lastfm``
+* ``--hash``
 * ``--nometadata``
 * ``--reindex``
 * ``--write-every=<num>``
@@ -194,12 +195,16 @@ If you set the ``--lastfm`` flag Shiva will retrieve artist and album images
 from Last.FM, but for this to work you need to get an API key (see
 `Prerequisites`_) and include it in your ``local.py`` config file.
 
+When ``--hash`` is present, Shiva will hash every file using the md5 algorithm,
+in order to find duplicates, which will be ignored. Note that this will
+decrease indexing speed notably.
+
 The ``--nometadata`` option saves dummy tracks with only path information,
 ignoring the file's metadata. This means that albums and artists will not be
 saved, but indexing will be as fast as it gets.
 
-If both flags are set, ``--nometadata`` will take precedence and ``--lastfm``
-will be ignored.
+If both the ``--nometadata`` and ``--lastfm`` flags are set, ``--nometadata``
+will take precedence and ``--lastfm`` will be ignored.
 
 With ``--reindex`` the whole database will be dropped and recreated. Be
 careful, all existing information **will be deleted**. If you just want to

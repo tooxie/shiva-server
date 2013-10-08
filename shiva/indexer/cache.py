@@ -26,6 +26,7 @@ class CacheManager(object):
 
         self.artists = {}
         self.albums = {}
+        self.hashes = set()
 
     def get_artist(self, name):
         artist = self.artists.get(name)
@@ -66,6 +67,20 @@ class CacheManager(object):
 
             self.albums[artist.name][album.name] = album
 
+    def add_hash(self, hash):
+        if self.ram_cache:
+            self.hashes.add(hash)
+
+    def hash_exists(self, hash):
+        if hash in self.hashes:
+            return True
+
+        if self.use_db:
+            return bool(q(m.Track).filter_by(hash=hash).count())
+
+        return False
+
     def clear(self):
         self.artists = {}
         self.albums = {}
+        self.hashes = set()

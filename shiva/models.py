@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import hashlib
 import os
 
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -123,6 +124,7 @@ class Track(db.Model):
     # TODO number should probably be renamed to track or track_number
     number = db.Column(db.Integer)
     date_added = db.Column(db.Date(), nullable=False)
+    hash = db.Column(db.String(32))
 
     lyrics = db.relationship('LyricsCache', backref='track', uselist=False)
 
@@ -144,8 +146,15 @@ class Track(db.Model):
             no_metadata = kwargs.get('no_metadata', False)
             del(kwargs['no_metadata'])
 
+        hash_file = False
+        if 'hash_file' in kwargs:
+            hash_file = kwargs.get('hash_file', False)
+            del(kwargs['hash_file'])
+
         self._meta = None
         self.set_path(_path, no_metadata=no_metadata)
+        if hash_file:
+            self.hash = self.calculate_hash()
 
         if 'date_added' not in kwargs:
             kwargs['date_added'] = datetime.today()
@@ -181,6 +190,16 @@ class Track(db.Model):
                 self.length = meta.length
                 self.number = meta.track_number
                 self.title = meta.title
+
+    def calculate_hash(self):
+        md5 = hashlib.md5()
+        block_size = 128 * md5.block_size
+
+        with open(self.get_path(), 'rb') as f:
+            for chunk in iter(lambda: f.read(block_size), b''):
+                md5.update(chunk)
+
+        return md5.hexdigest()
 
     def get_metadata_reader(self):
         """Return a MetadataManager object."""

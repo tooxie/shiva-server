@@ -27,8 +27,8 @@ class LastFM(object):
         artist = self.cache.get(name, {}).get('object')
 
         if not artist:
+            log.debug('[ Last.FM ] Retrieving artist "%s"' % name)
             with ignored(Exception, print_traceback=True):
-                log.debug('[ Last.FM ] Retrieving artist "%s"' % name)
                 artist = self.lib.get_artist(name)
             if artist and self.use_cache:
                 self.cache.update({
