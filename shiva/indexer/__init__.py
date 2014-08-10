@@ -57,21 +57,25 @@ VALID_FILE_EXTENSIONS = (
 allowed_extensions = app.config.get('ALLOWED_FILE_EXTENSIONS',
                                     VALID_FILE_EXTENSIONS)
 
+albums = {}
+artists = {}
+skipped_tracks = 0
+
 
 def is_track(path):
     if '.' not in path:
         return False
+
     ext = path.rsplit('.', 1)[1].lower()
     if ext not in VALID_FILE_EXTENSIONS:
         log.debug('[ SKIPPED ] %s (Unrecognized extension)' % path)
         return False
+
     if ext not in allowed_extensions:
         log.debug('[ SKIPPED ] %s (Ignored extension)' % path)
         return False
+
     return True
-
-
-skipped_tracks = 0
 
 
 def skip(path, reason=None, print_traceback=None):
@@ -81,6 +85,7 @@ def skip(path, reason=None, print_traceback=None):
     if log.getEffectiveLevel() <= logging.INFO:
         _reason = ' (%s)' % reason if reason else ''
         log.info('[ SKIPPED ] %s%s' % (path, _reason))
+
         if print_traceback:
             log.info(traceback.format_exc())
 
@@ -92,11 +97,9 @@ def add_to_session(track):
     log.info('[ OK ] %s' % track.path)
 
 
-artists = {}
-
-
 def get_lastfm():
     import pylast
+
     api_key = app.config['LASTFM_API_KEY']
     return pylast.LastFMNetwork(api_key=api_key)
 
@@ -104,7 +107,8 @@ def get_lastfm():
 def get_artist(name, use_lastfm=False):
     # TODO use_lastfm
     global artists
-    name = name.strip() if type(name) in (str, unicode) else None
+
+    name = name.strip() if (type(name) in (str, unicode)) else None
     if not name:
         return None
 
@@ -136,9 +140,6 @@ def get_release_year(track, lastfm_album=None):
         return track.get_metadata_reader().release_year
 
     return datetime.strptime(_date, '%d %b %Y, %H:%M').year
-
-
-albums = {}
 
 
 def get_album(track, artist, use_lastfm=False):

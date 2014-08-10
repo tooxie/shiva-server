@@ -7,7 +7,7 @@ Minimal Mode
 ------------
 Given the ``--nometadata`` flag, the indexer operates in "minimal" mode.
 
-It gets paths from configured MediaDirs and add tracks to the DB containing 
+It gets paths from configured MediaDirs and add tracks to the DB containing
 only path and date_added (which are not nullable).
 All we need to do is to *traverse* the MediaDirs and their child
 *directories*. No files need to be opened / read.
