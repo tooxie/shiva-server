@@ -26,3 +26,8 @@ CORS_ENABLED = False
 # An specific domain: 'google.com'
 # A tuple of strings to allow multiple domains: ('google.com', 'napster.com')
 CORS_ALLOWED_ORIGINS = '*'
+
+# Allow the deletion of objects through the REST interface. If this is set to
+# True, anyone with access will be able to delete objects from the database. It
+# won't delete files from the FS, though.
+ALLOW_DELETE = False
