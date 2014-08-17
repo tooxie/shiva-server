@@ -14,6 +14,7 @@ class StatusCodesTestCase(unittest.TestCase):
         db_uri = 'sqlite:///%s' % self.db_path
         shiva.app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         shiva.app.config['TESTING'] = True
+        shiva.app.config['ALLOW_DELETE'] = False
         shiva.db.create_all()
         self.app = shiva.app.test_client()
 
@@ -48,3 +49,7 @@ class StatusCodesTestCase(unittest.TestCase):
     def test_track_404(self):
         rv = self.app.get('/track/1')
         nose.eq_(rv.status_code, 404)
+
+    def test_delete_not_allowed(self):
+        rv = self.app.delete('/tracks/1')
+        nose.eq_(rv.status_code, 405)
