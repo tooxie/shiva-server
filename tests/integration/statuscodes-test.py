@@ -31,7 +31,7 @@ class StatusCodesTestCase(unittest.TestCase):
         nose.eq_(rv.status_code, 200)
 
     def test_artist_404(self):
-        rv = self.app.get('/artist/1')
+        rv = self.app.get('/artists/1')
         nose.eq_(rv.status_code, 404)
 
     def test_albums(self):
@@ -39,7 +39,7 @@ class StatusCodesTestCase(unittest.TestCase):
         nose.eq_(rv.status_code, 200)
 
     def test_album_404(self):
-        rv = self.app.get('/album/1')
+        rv = self.app.get('/albums/1')
         nose.eq_(rv.status_code, 404)
 
     def test_tracks(self):
@@ -47,7 +47,7 @@ class StatusCodesTestCase(unittest.TestCase):
         nose.eq_(rv.status_code, 200)
 
     def test_track_404(self):
-        rv = self.app.get('/track/1')
+        rv = self.app.get('/tracks/1')
         nose.eq_(rv.status_code, 404)
 
     def test_delete_not_allowed(self):
