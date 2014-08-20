@@ -87,6 +87,9 @@ class Resource(restful.Resource):
         return queryset
 
     def full_tree(self, result):
+        if not hasattr(self, 'get_full_tree'):
+            return result
+
         options = request.args.to_dict()
         false_values = ('false', '0', '')
         full_tree = options.get('fulltree', '').lower() not in false_values
