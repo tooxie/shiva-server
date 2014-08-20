@@ -67,14 +67,14 @@ class LyricsResource(Resource):
             }),
         }
 
-    def get(self, track_id=None, track_slug=None):
-        if not track_id and not track_slug:
+    def get(self, id=None, slug=None):
+        if not id and not slug:
             abort(404)
 
-        if not track_id and track_slug:
-            track = Track.query.filter_by(slug=track_slug).first()
+        if not id and slug:
+            track = Track.query.filter_by(slug=slug).first()
         else:
-            track = Track.query.get(track_id)
+            track = Track.query.get(id)
 
         return self.get_for(track)
 
@@ -93,12 +93,12 @@ class LyricsResource(Resource):
 
         return marshal(lyrics, self.get_resource_fields())
 
-    def post(self, track_id):
+    def post(self, id):
         text = request.form.get('text', None)
         if not text:
             return JSONResponse(400)
 
-        track = Track.query.get(track_id)
+        track = Track.query.get(id)
         lyric = LyricsCache(track=track, text=text)
 
         g.db.session.add(lyric)
@@ -106,8 +106,8 @@ class LyricsResource(Resource):
 
         return JSONResponse(200)
 
-    def delete(self, track_id):
-        track = Track.query.get(track_id)
+    def delete(self, id):
+        track = Track.query.get(id)
         g.db.session.delete(track.lyrics)
         g.db.session.commit()
 
@@ -117,8 +117,8 @@ class LyricsResource(Resource):
 class ConvertResource(Resource):
     """ Resource in charge of converting tracks from one format to another. """
 
-    def get(self, track_id):
-        track = Track.query.get(track_id)
+    def get(self, id):
+        track = Track.query.get(id)
         mimetype = request.args.get('mimetype')
         if not track or not mimetype:
             abort(404)
@@ -158,14 +158,14 @@ class ShowsResource(Resource):
             }),
         }
 
-    def get(self, artist_id=None, artist_slug=None):
-        if not artist_id and not artist_slug:
+    def get(self, id=None, slug=None):
+        if not id and not slug:
             abort(404)
 
-        if not artist_id and artist_slug:
-            artist = Artist.query.filter_by(slug=artist_slug).first()
+        if not id and slug:
+            artist = Artist.query.filter_by(slug=slug).first()
         else:
-            artist = Artist.query.get(artist_id)
+            artist = Artist.query.get(id)
 
         if not artist:
             abort(404)
