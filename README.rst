@@ -4,6 +4,10 @@
 .. |testcoverage| image:: https://coveralls.io/repos/tooxie/shiva-server/badge.png
     :alt: Test coverage
     :target: https://coveralls.io/r/tooxie/shiva-server
+.. |documentation| image:: https://readthedocs.org/projects/shiva/badge/?version=latest
+    :alt: Documentation
+    :target: http://shiva.readthedocs.org/en/latest/
+
 
 =====
 Shiva
@@ -11,7 +15,7 @@ Shiva
 
 Dinosaurs will slowly die.
 
-|buildstatus| |testcoverage|
+|buildstatus| |testcoverage| |documentation|
 
 
 License
