@@ -4,13 +4,13 @@ Base Resources
 You have the following resources available:
 
 * ``/artists``
-* ``/artist/<int:artist_id>``
-* ``/artist/<int:artist_id>/shows``
+* ``/artists/<int:artist_id>``
+* ``/artists/<int:artist_id>/shows``
 * ``/albums``
-* ``/album/<int:album_id>``
+* ``/albums/<int:album_id>``
 * ``/tracks``
-* ``/track/<int:track_id>``
-* ``/track/<int:track_id>/lyrics``
+* ``/tracks/<int:track_id>``
+* ``/tracks/<int:track_id>/lyrics``
 
 And some meta resources:
 
@@ -23,21 +23,21 @@ And some meta resources:
 /artists
 --------
 
-Example response for the request ``GET /artist/3``:
+Example response for the request ``GET /artists/3``:
 
 .. code:: javascript
 
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        "uri": "/artist/3",
+        "uri": "/artists/3",
         "slug": "eterna-inocencia",
         "id": 3
     }
 
 
 Fields
-------
+~~~~~~
 
 * ``id``: The object's ID.
 * ``image``: Link to a photo. (Provided by last.fm)
@@ -47,14 +47,15 @@ Fields
 * ``uri``: The URI of this resource's instance.
 
 
-/artist/<int:id>/shows
-----------------------
+/artists/<int:id>/shows
+~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 Information provided by `BandsInTown <http://www.bandsintown.com/>`_. This is
 the only resource that is not cached in the local database given to it's
 dynamic nature.
 
-Example response for the request ``GET /artist/1/shows``:
+Example response for the request ``GET /artists/1/shows``:
 
 .. code:: javascript
 
@@ -71,7 +72,7 @@ Example response for the request ``GET /artist/1/shows``:
             "artists": [
                 {
                     "id": 1,
-                    "uri": "/artist/1"
+                    "uri": "/artists/1"
                 }
             ],
             "tickets_left": true,
@@ -89,7 +90,7 @@ Example response for the request ``GET /artist/1/shows``:
 
 
 Fields
-------
+~~~~~~
 
 * ``other_artists``: A list with artists that are not in Shiva's database.
 
@@ -114,7 +115,7 @@ Fields
 
 
 Parameters
-----------
+~~~~~~~~~~
 
 The Shows resource accepts, optionally, two pairs of parameters:
 
@@ -129,7 +130,7 @@ and if both pairs are provided, the coordinates will take precedence.
 /albums
 -------
 
-Example response for the request ``GET /album/9``:
+Example response for the request ``GET /albums/9``:
 
 .. code:: javascript
 
@@ -137,16 +138,16 @@ Example response for the request ``GET /album/9``:
         "artists": [
             {
                 "id": 2,
-                "uri": "/artist/2"
+                "uri": "/artists/2"
             },
             {
                 "id": 5,
-                "uri": "/artist/5"
+                "uri": "/artists/5"
             }
         ],
         "name": "NOFX & Rancid - BYO Split Series (Vol. III)",
         "year": 2002,
-        "uri": "/album/9",
+        "uri": "/albums/9",
         "cover": "http://userserve-ak.last.fm/serve/300x300/72986694.jpg",
         "id": 9,
         "slug": "nofx-rancid-byo-split-series-vol-iii"
@@ -154,7 +155,7 @@ Example response for the request ``GET /album/9``:
 
 
 Fields
-------
+~~~~~~
 
 * ``artists``: A list of the artists involved in that record.
 * ``cover``: A link to an image of the album's cover. (Provided by last.fm)
@@ -167,7 +168,7 @@ Fields
 
 
 Filtering
----------
+~~~~~~~~~
 
 The album list accepts an ``artist`` parameter in which case will filter the
 list of albums only to those corresponding to that artist.
@@ -181,12 +182,12 @@ Example response for the request ``GET /albums/?artist=7``:
             "artists": [
                 {
                     "id": 7,
-                    "uri": "/artist/7"
+                    "uri": "/artists/7"
                 }
             ],
             "name": "Anesthesia",
             "year": 1995,
-            "uri": "/album/12",
+            "uri": "/albums/12",
             "cover": "http://userserve-ak.last.fm/serve/300x300/3489534.jpg",
             "id": 12,
             "slug": "anesthesia"
@@ -195,12 +196,12 @@ Example response for the request ``GET /albums/?artist=7``:
             "artists": [
                 {
                     "id": 7,
-                    "uri": "/artist/7"
+                    "uri": "/artists/7"
                 }
             ],
             "name": "Kum Kum",
             "year": 1996,
-            "uri": "/album/27",
+            "uri": "/albums/27",
             "cover": "http://userserve-ak.last.fm/serve/300x300/62372889.jpg",
             "id": 27,
             "slug": "kum-kum"
@@ -208,11 +209,10 @@ Example response for the request ``GET /albums/?artist=7``:
     ]
 
 
---------------
-Track Resource
---------------
+/tracks
+-------
 
-Example response for the request ``GET /track/510``:
+Example response for the request ``GET /tracks/510``:
 
 .. code:: javascript
 
@@ -223,26 +223,26 @@ Example response for the request ``GET /track/510``:
         "slug": "dinosaurs-will-die",
         "album": {
             "id": 35,
-            "uri": "/album/35"
+            "uri": "/albums/35"
         },
         "title": "Dinosaurs Will Die",
         "artist": {
             "id": 2,
-            "uri": "/artist/2"
+            "uri": "/artists/2"
         },
-        "uri": "/track/510",
+        "uri": "/tracks/510",
         "id": 510,
         "length": 180,
         "files": {
             "audio/mp3": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
-            "audio/ogg": "/track/510/convert?mimetype=audio%2Fogg"
+            "audio/ogg": "/tracks/510/convert?mimetype=audio%2Fogg"
         }
 
     }
 
 
 Fields
-------
+~~~~~~
 
 * ``album``: The album to which this track belongs.
 * ``bitrate``: In MP3s this value is directly proportional to the `sound
@@ -259,15 +259,8 @@ Fields
   according to the MEDIA_DIRS setting.
 
 
-Filtering
----------
-
-The track listing accepts one of two possible parameters to filter down the
-list only to those tracks corresponding to a given ``album`` or ``artist``.
-
-
-By artist
-~~~~~~~~~
+Filtering by artist
+~~~~~~~~~~~~~~~~~~~
 
 Example response for the request ``GET /tracks?artist=16``:
 
@@ -280,19 +273,19 @@ Example response for the request ``GET /tracks?artist=16``:
             "slug": "pay-cheque-heritage-ii",
             "album": {
                 "id": 36,
-                "uri": "/album/36"
+                "uri": "/albums/36"
             },
             "title": "Pay Cheque (Heritage II)",
             "artist": {
                 "id": 16,
-                "uri": "/artist/16"
+                "uri": "/artists/16"
             },
-            "uri": "/track/523",
+            "uri": "/tracks/523",
             "id": 523,
             "length": 189,
             "files": {
                 "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3",
-                "audio/ogg": "/track/523/convert?mimetype=audio%2Fogg"
+                "audio/ogg": "/tracks/523/convert?mimetype=audio%2Fogg"
             }
         },
         {
@@ -301,26 +294,26 @@ Example response for the request ``GET /tracks?artist=16``:
             "slug": "in-your-dreams",
             "album": {
                 "id": 36,
-                "uri": "/album/36"
+                "uri": "/albums/36"
             },
             "title": "In Your Dreams",
             "artist": {
                 "id": 16,
-                "uri": "/artist/16"
+                "uri": "/artists/16"
             },
-            "uri": "/track/531",
+            "uri": "/tracks/531",
             "id": 531,
             "length": 171,
             "files": {
                 "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3",
-                "audio/ogg": "/track/523/convert?mimetype=audio%2Fogg"
+                "audio/ogg": "/tracks/523/convert?mimetype=audio%2Fogg"
             }
         }
     ]
 
 
-By album
-~~~~~~~~
+Filtering by album
+~~~~~~~~~~~~~~~~~~
 
 Example response for the request ``GET /tracks?album=18``:
 
@@ -331,60 +324,59 @@ Example response for the request ``GET /tracks?album=18``:
         {
             "album": {
                 "id": 18,
-                "uri": "/album/18"
+                "uri": "/albums/18"
             },
             "length": 132,
             "files": {
                 "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
-                "audio/ogg": "/track/277/convert?mimetype=audio%2Fogg"
+                "audio/ogg": "/tracks/277/convert?mimetype=audio%2Fogg"
             }
             "number": 1,
             "title": "Shapes",
             "slug": "shapes",
             "artist": {
                 "id": 9,
-                "uri": "/artist/9"
+                "uri": "/artists/9"
             },
             "bitrate": 192,
             "id": 277,
-            "uri": "/track/277"
+            "uri": "/tracks/277"
         },
         {
             "album": {
                 "id": 18,
-                "uri": "/album/18"
+                "uri": "/albums/18"
             },
             "length": 118,
             "files": {
                 "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
-                "audio/ogg": "/track/281/convert?mimetype=audio%2Fogg"
+                "audio/ogg": "/tracks/281/convert?mimetype=audio%2Fogg"
             }
             "number": 2,
             "title": "Stucked to The Ground",
             "slug": "stucked-to-the-ground",
             "artist": {
                 "id": 9,
-                "uri": "/artist/9"
+                "uri": "/artists/9"
             },
             "bitrate": 192,
             "id": 281,
-            "uri": "/track/281"
+            "uri": "/tracks/281"
         }
     ]
 
 
----------------
-Lyrics Resource
----------------
+/tracks/<int:id>/lyrics
+-----------------------
 
-Example response for the request ``GET /track/256/lyrics``:
+Example response for the request ``GET /tracks/256/lyrics``:
 
 .. code:: javascript
 
     {
         "track": {
             "id": 256,
-            "uri": "/track/256"
+            "uri": "/tracks/256"
         },
         "source_uri": "http://lyrics.com/eterna-inocencia/my-family/",
         "id": 6,
@@ -393,7 +385,7 @@ Example response for the request ``GET /track/256/lyrics``:
 
 
 Fields
-------
+~~~~~~
 
 * ``id``: The object's ID.
 * ``source_uri``: The URI where the lyrics were fetched from.
@@ -402,7 +394,7 @@ Fields
 
 
 Adding more lyric sources
--------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Everytime you request a lyric, Shiva checks if there's a lyric associated with
 that track in the database. If it's there it will immediately retrieve it,
@@ -467,7 +459,6 @@ found.
 For more details check the source of the other scrapers.
 
 
--------------------------
 The ``fulltree`` modifier
 -------------------------
 
@@ -475,23 +466,23 @@ The three main resources accept a ``fulltree`` parameter when retrieving an
 instance.
 Those are:
 
-* ``/artist/<int:artist_id>``
-* ``/album/<int:album_id>``
+* ``/artists/<int:artist_id>``
+* ``/albums/<int:album_id>``
 * ``/tracks``
-* ``/track/<int:track_id>``
+* ``/tracks/<int:track_id>``
 
 Whenever you set ``fulltree`` to any value that evaluates to ``True`` (i.e.,
 any string except ``'false'`` and ``'0'``) Shiva will include not only the
 information of the object you are requesting, but also the child objects.
 
-Here's an example response for the request ``GET /artist/2?fulltree=true``:
+Here's an example response for the request ``GET /artists/2?fulltree=true``:
 
 .. code:: javascript
 
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        "uri": "/artist/2",
+        "uri": "/artists/2",
         "events_uri": null,
         "id": 2,
         "slug": "eterna-inocencia",
@@ -500,12 +491,12 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                 "artists": [
                     {
                         "id": 2,
-                        "uri": "/artist/2"
+                        "uri": "/artists/2"
                     }
                 ],
                 "name": "Tomalo Con Calma EP",
                 "year": 2002,
-                "uri": "/album/2",
+                "uri": "/albums/2",
                 "cover": "http://spe.fotolog.com/photo/30/54/51/alkoldinamita/1230537010699_f.jpg",
                 "id": 2,
                 "slug": "tomalo-con-calma-ep",
@@ -513,44 +504,44 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
                     {
                         "album": {
                             "id": 2,
-                            "uri": "/album/2"
+                            "uri": "/albums/2"
                         },
                         "length": 161,
                         "files": {
                             "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/tomalo-con-calma.mp3",
-                            "audio/ogg": "/track/27/convert?mimetype=audio%2Fogg"
+                            "audio/ogg": "/tracks/27/convert?mimetype=audio%2Fogg"
                         }
                         "number": 0,
                         "title": "02 - Rio Lujan",
                         "slug": "02-rio-lujan",
                         "artist": {
                             "id": 2,
-                            "uri": "/artist/2"
+                            "uri": "/artists/2"
                         },
                         "bitrate": 192,
                         "id": 27,
-                        "uri": "/track/27"
+                        "uri": "/tracks/27"
                     },
                     {
                         "album": {
                             "id": 2,
-                            "uri": "/album/2"
+                            "uri": "/albums/2"
                         },
                         "length": 262,
                         "files": {
                             "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/estoy-herido-en-mi-interior.mp3",
-                            "audio/ogg": "/track/28/convert?mimetype=audio%2Fogg"
+                            "audio/ogg": "/tracks/28/convert?mimetype=audio%2Fogg"
                         }
                         "number": 0,
                         "title": "03 - Estoy herido en mi interior",
                         "slug": "03-estoy-herido-en-mi-interior",
                         "artist": {
                             "id": 2,
-                            "uri": "/artist/2"
+                            "uri": "/artists/2"
                         },
                         "bitrate": 192,
                         "id": 28,
-                        "uri": "/track/28"
+                        "uri": "/tracks/28"
                     },
                 ]
             }
@@ -559,7 +550,7 @@ Here's an example response for the request ``GET /artist/2?fulltree=true``:
 
 
 Using ``fulltree`` on tracks
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The behaviour on a track resource is a little different. In the previous
 example tracks are the leaves of the tree, but when the full tree of a track is
@@ -572,7 +563,6 @@ Note that if you request the list of tracks with ``fulltree``, only the related
 resources will be included (i.e.: artists and albums) but not the scraped ones.
 
 
-----------
 Pagination
 ----------
 
@@ -588,7 +578,6 @@ will be retrieved.
 An example request is ``GET /artists?page_size=10&page=3``.
 
 
---------------------------
 Using slugs instead of IDs
 --------------------------
 
@@ -596,22 +585,21 @@ It is possible to use slugs instead of IDs when requesting an specific
 resource. It will work the exact same way because slugs, as IDs, are unique. An
 example on the ``/artist`` resource:
 
-Example response for the request ``GET /artist/eterna-inocencia``:
+Example response for the request ``GET /artists/eterna-inocencia``:
 
 .. code:: javascript
 
     {
         "name": "Eterna Inocencia",
         "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        "uri": "/artist/3",
+        "uri": "/artists/3",
         "slug": "eterna-inocencia",
         "id": 3
     }
 
 
--------------------
 Uniqueness of slugs
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 Slugs are generated from the following fields:
 
