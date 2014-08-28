@@ -13,7 +13,7 @@
 Shiva
 =====
 
-Dinosaurs will slowly die.
+More than a RESTful API to your music collection.
 
 |buildstatus| |testcoverage| |documentation|
 
@@ -30,7 +30,7 @@ What is Shiva?
 The Mozilla Hacks blog kindly published a nice article that explains the ideas
 that inspire this software:
 `Shiva: More than a RESTful API to your music collection
-<https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to-your-music-collection/>`_
+<https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to-your-music-collection/>`_.
 
 You can find the technical documentation at `Read The Docs
 <http://shiva.readthedocs.org/en/latest/>`_.
