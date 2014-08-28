@@ -28,6 +28,9 @@ that inspire this software:
 `Shiva: More than a RESTful API to your music collection
 <https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-to-your-music-collection/>`_
 
+You can find the technical documentation at `Read The Docs
+<http://shiva.readthedocs.org/en/latest/>`_.
+
 
 Want to contribute?
 ===================
