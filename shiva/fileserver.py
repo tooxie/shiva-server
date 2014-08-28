@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config.from_object(Configurator())
 
 log = get_logger()
-RANGE_RE = re.compile(r'(\d+)-(\d*)')
+RANGE_RE = re.compile(r'(\d*)-(\d*)')
 
 
 @app.after_request
@@ -45,7 +45,12 @@ def get_range_bytes(range_header):
 
     """
 
-    _range = RANGE_RE.search(range_header).groups()
+    _range = RANGE_RE.search(range_header)
+    if not _range:
+        return (0, None)
+
+    _range = _range.groups()
+
     try:
         start_byte = int(_range[0])
     except ValueError:
