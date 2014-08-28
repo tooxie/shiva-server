@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.config.from_object(Configurator())
 
 log = get_logger()
-RANGE_RE = re.compile(r'(\d+)-(\d*)')
+RANGE_RE = re.compile(r'(\d*)-(\d*)')
 
 
 @app.after_request
@@ -40,16 +40,25 @@ def get_absolute_path(relative_path):
 def get_range_bytes(range_header):
     """
     Returns a tuple of the form (start_byte, end_byte) with the information
-    provided by range_header. Defaults to (0, None) in case one of the provided
-    values is not an int.
+    provided by range_header. The start_byte defaults to 0 if it's not a valid
+    int, while the end_byte defaults to None (the end of the file).
 
     """
 
-    _range = RANGE_RE.search(range_header).groups()
+    _range = RANGE_RE.search(range_header)
+    if not _range:
+        return (0, None)
+
+    _range = _range.groups()
+
     try:
-        start_byte, end_byte = [int(bit) for bit in _range]
-    except:
+        start_byte = int(_range[0])
+    except ValueError:
         start_byte = 0
+
+    try:
+        end_byte = int(_range[1])
+    except ValueError:
         end_byte = None
 
     return (start_byte, end_byte)
@@ -79,8 +88,9 @@ def serve(relative_path):
     response = Response(content, status_code, mimetype=mimetype,
                         direct_passthrough=True)
 
-    response.headers.add('Content-Range', 'bytes %d-%d/%d' % (
-        start_byte, start_byte + length - 1, size))
+    crange = 'bytes %d-%d/%d' % (start_byte, start_byte + length - 1, size)
+    response.headers.add('Content-Range', crange)
+    response.headers.add('Content-Length', size)
 
     return response
 
