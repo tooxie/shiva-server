@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from sqlalchemy.exc import IntegrityError
 
 
 class MetadataManagerReadError(Exception):
@@ -32,4 +33,8 @@ class NoUploadPathConfigError(Exception):
 
 
 class InvalidFileTypeError(Exception):
+    pass
+
+
+class ObjectExistsError(Exception):
     pass
