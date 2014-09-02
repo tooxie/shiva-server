@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from flask import request, current_app as app
+from flask import current_app as app, request, url_for
 from flask.ext.restful import abort, fields, marshal
 from werkzeug.exceptions import NotFound
 
+from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
+                              ObjectExistsError)
 from shiva.http import Resource, JSONResponse
-from shiva.models import Artist, Album, Track
+from shiva.models import Album, Artist, db, Track
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
 
@@ -26,6 +28,28 @@ class ArtistResource(Resource):
             'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
             'events_uri': fields.String(attribute='events'),
         }
+
+    def post(self):
+        name = request.values.get('name')
+        image_url = request.values.get('image_url')
+
+        try:
+            artist = self.create(name, image_url)
+        except (IntegrityError, ObjectExistsError):
+            abort(409)
+
+        response = marshal(artist, self.get_resource_fields())
+        headers = {'Location': url_for('artists', id=artist.pk)}
+
+        return response, 201, headers
+
+    def create(self, name, image_url):
+        artist = Artist(name=name, image=image_url)
+
+        db.session.add(artist)
+        db.session.commit()
+
+        return artist
 
     def get_full_tree(self, artist):
         _artist = marshal(artist, self.get_resource_fields())
@@ -64,6 +88,46 @@ class AlbumResource(Resource):
             }),
             'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
         }
+
+    def post(self):
+        params = {
+            'name': request.values.get('name'),
+            'year': request.values.get('year'),
+            'cover_url': request.values.get('cover_url'),
+            'artists': request.values.getlist('artist_id'),
+        }
+
+        try:
+            album = self.create(**params)
+        except (IntegrityError, ObjectExistsError):
+            abort(409)
+
+        response = marshal(album, self.get_resource_fields())
+        headers = {'Location': url_for('albums', id=album.pk)}
+
+        return response, 201, headers
+
+    # TODO: Document creation of objects and multivalued arguments
+    # (i.e. /albums?name=Derp&artist_id=1&artist_id2)
+    def create(self, name, year, cover_url, artists=[]):
+        albums = Album.query.filter_by(name=name).all()
+        if albums:
+            for album in albums:
+                if album.artists == artists:
+                    raise ObjectExistsError
+
+                if map(lambda a: a.pk in artists, album.artists):
+                    raise ObjectExistsError
+
+        album = Album(name=name, year=year, cover=cover_url)
+
+        for artist in artists:
+            album.artists.append(Artist.query.get(artist))
+
+        db.session.add(album)
+        db.session.commit()
+
+        return album
 
     def get_filters(self):
         return (
@@ -117,6 +181,59 @@ class TrackResource(Resource):
             }),
             'ordinal': fields.Integer,
         }
+
+    def post(self):
+        params = {
+            'title': request.values.get('title'),
+            'artist_id': request.values.get('artist_id'),
+            'album_id': request.values.get('album_id'),
+            'ordinal': request.values.get('ordinal'),
+        }
+
+        try:
+            track = self.create(**params)
+        except (IntegrityError, ObjectExistsError):
+            abort(409)
+
+        response = marshal(track, self.get_resource_fields())
+        headers = {'Location': url_for('tracks', id=track.pk)}
+
+        return response, 201, headers
+
+    def create(self, title, artist_id, album_id, ordinal):
+        if not request.files:
+            abort(400)
+
+        UploadHandler = app.config.get('UPLOAD_HANDLER')
+        try:
+            handler = UploadHandler(track=request.files.get('track'))
+        except InvalidFileTypeError, e:
+            abort(415)  # Unsupported Media Type
+
+        handler.save()
+
+        track = Track(path=handler.path, hash_file=True)
+        db.session.add(track)
+
+        if handler.artist:
+            artist = Artist.query.filter_by(name=handler.artist).first()
+            if not artist:
+                artist = Artist(name=handler.artist)
+                db.session.add(artist)
+
+            artist.tracks.append(track)
+
+        if handler.album:
+            album = Album.query.filter_by(name=handler.album).first()
+            if not album:
+                album = Album(name=handler.album)
+                db.session.add(album)
+
+            album.tracks.append(track)
+
+        db.session.commit()
+
+        return track
 
     def get_filters(self):
         return (

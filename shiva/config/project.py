@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from shiva.converter import Converter
+from shiva.resources.upload import UploadHandler
 from shiva.media import MimeType
 
 DEBUG = True
@@ -31,3 +32,16 @@ CORS_ALLOWED_ORIGINS = '*'
 # True, anyone with access will be able to delete objects from the database. It
 # won't delete files from the FS, though.
 ALLOW_DELETE = False
+
+# If you need to change the way uploaded files are handled (e.g. where they are
+# stored) extend this class and modify its behaviour. Read the class source for
+# more info.
+UPLOAD_HANDLER = UploadHandler
+# This setting, in addition to MEDIA_DIRS, is used by the converter and the
+# file server to know where track files are stored.
+UPLOAD_PATH = ''
+# The following 2 settings will be appended to UPLOAD_PATH in case the track
+# contains no metadata. For more info read the source of the `shiva.upload`
+# module.
+UPLOAD_DEFAULT_ARTIST = 'unknown'
+UPLOAD_DEFAULT_ALBUM = 'unknown'
