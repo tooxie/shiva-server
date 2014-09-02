@@ -1,6 +1,29 @@
+# -*- coding: utf-8 -*-
 from functools import wraps
-from flask import g, request, make_response
-from flask import current_app as app
+
+from flask import current_app as app, g, request
+from flask.ext.restful import abort
+
+
+def allow_method(func=None):
+    """Checks if the method is globally allowed, raising a 405 if not.
+    """
+
+    def wrapped(func):
+        @wraps(func)
+        def decorated(*args, **kwargs):
+            allow_delete = app.config.get('ALLOW_DELETE', False)
+            if func.func_name == 'delete' and not allow_delete:
+                abort(405)
+
+            return func(*args, **kwargs)
+
+        return decorated
+
+    if func:
+        return wrapped(func)
+
+    return wrapped
 
 
 def allow_origins(func=None, custom_origins=None):

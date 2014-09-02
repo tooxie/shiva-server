@@ -4,14 +4,16 @@ from math import ceil
 from flask import current_app as app, Response, request, g
 from flask.ext import restful
 
-from shiva.decorators import allow_origins
+from shiva.decorators import allow_origins, allow_method
 
 
 class Resource(restful.Resource):
     def __new__(cls, *args, **kwargs):
+        cls.method_decorators.append(allow_method)
+
         if app.config.get('CORS_ENABLED') is True:
             # Applies to all inherited resources
-            cls.method_decorators = [allow_origins]
+            cls.method_decorators.append(allow_origins)
 
         return super(Resource, cls).__new__(cls, *args, **kwargs)
 
@@ -31,6 +33,17 @@ class Resource(restful.Resource):
             result = self._all()
 
         return result
+
+    def delete(self, id=None):
+        if not id:
+            return restful.abort(405)
+
+        item = self._by_id(id)
+
+        g.db.session.delete(item)
+        g.db.session.commit()
+
+        return ''
 
     def _by_id(self, id):
         try:
@@ -140,20 +153,6 @@ class Resource(restful.Resource):
             'pages': total_pages,
         }
 
-    def delete(self, id=None):
-        if not id:
-            return restful.abort(405)
-
-        if not app.config.get('ALLOW_DELETE', False):
-            return restful.abort(405)
-
-        item = self._by_id(id)
-
-        g.db.session.delete(item)
-        g.db.session.commit()
-
-        return {}
-
 
 class JSONResponse(Response):
     """
@@ -164,11 +163,14 @@ class JSONResponse(Response):
 
     def __init__(self, status=200, **kwargs):
         params = {
-            'headers': [],
+            'headers': {},
             'mimetype': 'application/json',
             'response': '',
             'status': status,
         }
         params.update(kwargs)
+
+        if params['status'] == 200 and params['response'] == '':
+            params['status'] = 204
 
         super(JSONResponse, self).__init__(**params)
