@@ -27,6 +27,9 @@ class Converter(object):
 
     def __init__(self, track, mimetype):
         self.track = track
+        self.fullpath = None
+        self.uri = None
+        self.mimetype = None
         self.mimetypes = self.get_mimetypes()
         self.set_mimetype(mimetype)
 
@@ -61,7 +64,7 @@ class Converter(object):
         else:
             raise InvalidMimeTypeError(mimetype)
 
-    def get_dest_directory(self, mime=None):
+    def get_dest_directory(self):
         """
         Retrieves the path on which a track's duplicates, i.e. that same track
         converted to other formats, will be stored.
@@ -71,11 +74,24 @@ class Converter(object):
 
         """
 
-        return os.path.dirname(self.track.path)
+        file_path = os.path.dirname(self.track.path)
+
+        # If we are asked for the destination path of the original file, we
+        # don't need to append the extension to the path.
+        if self.track.path.endswith(self.mimetype.extension):
+            return file_path
+
+        path = os.path.join(file_path, self.mimetype.extension)
+
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        return path
 
     def get_dest_filename(self):
         filename = os.path.basename(self.track.path)
-        filename = '.'.join(filename.split('.')[0:-1])
+        if '.' in filename and not filename.startswith('.'):
+            filename = '.'.join(filename.split('.')[0:-1])
 
         return '.'.join((filename, self.mimetype.extension))
 
@@ -85,9 +101,8 @@ class Converter(object):
 
         directory = self.get_dest_directory()
         filename = self.get_dest_filename()
-        self.fullpath = os.path.join(directory, filename)
 
-        return self.fullpath
+        return os.path.join(directory, filename)
 
     def get_conversion_uri(self):
         mimetype = urllib.urlencode({'mimetype': str(self.mimetype)})
