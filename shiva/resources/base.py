@@ -136,7 +136,6 @@ class TrackResource(Resource):
         return queryset.filter(Track.artist_pk == pk)
 
     def album_filter(self, queryset, album_pk):
-        # TODO: Document the artist=0 and album=0 parameters
         try:
             pk = album_pk if int(album_pk) > 0 else None
         except ValueError:

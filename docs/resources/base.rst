@@ -208,6 +208,9 @@ Example response for the request ``GET /albums/?artist=7``:
         }
     ]
 
+Giving '0' instead you get the albums with no artist. If the argument is
+non-numeric you will get a ``400 Bad Request`` error.
+
 
 /tracks
 -------
@@ -311,6 +314,9 @@ Example response for the request ``GET /tracks?artist=16``:
         }
     ]
 
+Giving '0' instead you get the tracks with no artist. If the argument is
+non-numeric you will get a ``400 Bad Request`` error.
+
 
 Filtering by album
 ~~~~~~~~~~~~~~~~~~
@@ -364,6 +370,18 @@ Example response for the request ``GET /tracks?album=18``:
             "uri": "/tracks/281"
         }
     ]
+
+Giving '0' instead you get the tracks with no album. If the argument is
+non-numeric you will get a ``400 Bad Request`` error.
+
+
+Listing orphan tracks
+~~~~~~~~~~~~~~~~~~~~~
+
+It is possible to obtain the list of tracks with no album by giving '0' to the
+``album`` parameter. The same is true for the ``artist`` parameter. By
+combining both (``/tracks?album=0&artist=0``) you can get the list of "orphan"
+tracks.
 
 
 /tracks/<int:id>/lyrics
@@ -561,6 +579,36 @@ fetching the complete discography of an artist.
 
 Note that if you request the list of tracks with ``fulltree``, only the related
 resources will be included (i.e.: artists and albums) but not the scraped ones.
+
+
+Using ``fulltree`` on artists
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The tree for artists will contain the extra field ``no_album_tracks``, which is
+simply a list of tracks that are not related to any album:
+
+.. code:: javascript
+
+    no_album_tracks: [
+        {
+            album: null,
+            artist: {
+                id: 4,
+                uri: "/artists/4"
+            },
+            bitrate: 192,
+            files: {
+                audio/mp3: "http://127.0.0.1:8001/music/dead_fish-1998-sirva-se/14-dead_fish-the_party-buc.mp3",
+                audio/ogg: "/tracks/82/convert?mimetype=audio%2Fogg"
+            },
+            id: 82,
+            length: 1,
+            number: 0,
+            slug: "14-dead-fish-the-party-buc",
+            title: "14-dead fish-the party-buc",
+            uri: "/tracks/82"
+        }
+    ],
 
 
 Pagination
