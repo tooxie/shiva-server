@@ -10,7 +10,12 @@ from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
 
 
 class ArtistResource(Resource):
-    """ The resource resposible for artists. """
+    """ The resource responsible for artists. """
+
+    def __init__(self, *args, **kwargs):
+        self.db_model = Artist
+
+        super(ArtistResource, self).__init__(*args, **kwargs)
 
     def get_resource_fields(self):
         return {
@@ -21,15 +26,6 @@ class ArtistResource(Resource):
             'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
             'events_uri': fields.String(attribute='events'),
         }
-
-    def get_by_id(self, artist_id):
-        return Artist.query.get(artist_id)
-
-    def get_by_slug(self, artist_slug):
-        return Artist.query.filter_by(slug=artist_slug).first()
-
-    def get_all(self):
-        return Artist.query.order_by(Artist.name)
 
     def get_full_tree(self, artist):
         _artist = marshal(artist, self.get_resource_fields())
@@ -48,7 +44,12 @@ class ArtistResource(Resource):
 
 
 class AlbumResource(Resource):
-    """ The resource resposible for albums. """
+    """ The resource responsible for albums. """
+
+    def __init__(self, *args, **kwargs):
+        self.db_model = Album
+
+        super(AlbumResource, self).__init__(*args, **kwargs)
 
     def get_resource_fields(self):
         return {
@@ -77,15 +78,6 @@ class AlbumResource(Resource):
 
         return queryset.join(Album.artists).filter(Artist.pk == pk)
 
-    def get_by_id(self, album_id):
-        return Album.query.get(album_id)
-
-    def get_by_slug(self, album_slug):
-        return Album.query.filter_by(slug=album_slug).first()
-
-    def get_all(self):
-        return Album.query.order_by(Album.year, Album.name, Album.pk)
-
     def get_full_tree(self, album):
         _album = marshal(album, self.get_resource_fields())
         _album['tracks'] = []
@@ -99,7 +91,12 @@ class AlbumResource(Resource):
 
 
 class TrackResource(Resource):
-    """ The resource resposible for tracks. """
+    """ The resource responsible for tracks. """
+
+    def __init__(self, *args, **kwargs):
+        self.db_model = Track
+
+        super(TrackResource, self).__init__(*args, **kwargs)
 
     def get_resource_fields(self):
         return {
@@ -142,15 +139,6 @@ class TrackResource(Resource):
             abort(400)
 
         return queryset.filter_by(album_pk=pk)
-
-    def get_by_id(self, track_id):
-        return Track.query.get(track_id)
-
-    def get_by_slug(self, track_slug):
-        return Track.query.filter_by(slug=track_slug).first()
-
-    def get_all(self):
-        return Track.query.order_by(Track.title)
 
     def get_full_tree(self, track, include_scraped=False,
                       include_related=True):
