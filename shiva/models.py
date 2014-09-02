@@ -119,8 +119,7 @@ class Track(db.Model):
     bitrate = db.Column(db.Integer)
     file_size = db.Column(db.Integer)
     length = db.Column(db.Integer)
-    # TODO number should probably be renamed to track or track_number
-    number = db.Column(db.Integer)
+    ordinal = db.Column(db.Integer)
     date_added = db.Column(db.Date(), nullable=False)
     hash = db.Column(db.String(32))
 
@@ -139,14 +138,12 @@ class Track(db.Model):
         if isinstance(path, file):
             _path = path.name
 
-        no_metadata = False
+        no_metadata = kwargs.get('no_metadata', False)
         if 'no_metadata' in kwargs:
-            no_metadata = kwargs.get('no_metadata', False)
             del(kwargs['no_metadata'])
 
-        hash_file = False
+        hash_file = kwargs.get('hash_file', False)
         if 'hash_file' in kwargs:
-            hash_file = kwargs.get('hash_file', False)
             del(kwargs['hash_file'])
 
         self._meta = None
@@ -186,7 +183,7 @@ class Track(db.Model):
                 self.file_size = meta.filesize
                 self.bitrate = meta.bitrate
                 self.length = meta.length
-                self.number = meta.track_number
+                self.ordinal = meta.track_number
                 self.title = meta.title
 
     def calculate_hash(self):

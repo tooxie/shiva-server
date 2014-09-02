@@ -221,7 +221,7 @@ Example response for the request ``GET /tracks/510``:
 
     {
 
-        "number": 4,
+        "ordinal": 4,
         "bitrate": 128,
         "slug": "dinosaurs-will-die",
         "album": {
@@ -252,8 +252,8 @@ Fields
   quality <https://en.wikipedia.org/wiki/Bit_rate#MP3>`_.
 * ``id``: The object's ID.
 * ``length``: The length in seconds of the track.
-* ``number``: The `ordinal number <https://en.wikipedia.org/wiki/Ordinal_number>`_
-  of this track with respect to this album.
+* ``ordinal``: The `ordinal <https://en.wikipedia.org/wiki/Ordinal_number>`_ of
+  this track with respect to this album.
 * ``slug``: A `slug <https://en.wikipedia.org/wiki/Slug_(web_publishing)#Slug>`_
   of the track's title.
 * ``title``: The title of the track.
@@ -271,7 +271,7 @@ Example response for the request ``GET /tracks?artist=16``:
 
     [
         {
-            "number": 1,
+            "ordinal": 1,
             "bitrate": 196,
             "slug": "pay-cheque-heritage-ii",
             "album": {
@@ -292,7 +292,7 @@ Example response for the request ``GET /tracks?artist=16``:
             }
         },
         {
-            "number": 2,
+            "ordinal": 2,
             "bitrate": 186,
             "slug": "in-your-dreams",
             "album": {
@@ -337,7 +337,7 @@ Example response for the request ``GET /tracks?album=18``:
                 "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
                 "audio/ogg": "/tracks/277/convert?mimetype=audio%2Fogg"
             }
-            "number": 1,
+            "ordinal": 1,
             "title": "Shapes",
             "slug": "shapes",
             "artist": {
@@ -358,7 +358,7 @@ Example response for the request ``GET /tracks?album=18``:
                 "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
                 "audio/ogg": "/tracks/281/convert?mimetype=audio%2Fogg"
             }
-            "number": 2,
+            "ordinal": 2,
             "title": "Stucked to The Ground",
             "slug": "stucked-to-the-ground",
             "artist": {
@@ -529,7 +529,7 @@ Here's an example response for the request ``GET /artists/2?fulltree=true``:
                             "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/tomalo-con-calma.mp3",
                             "audio/ogg": "/tracks/27/convert?mimetype=audio%2Fogg"
                         }
-                        "number": 0,
+                        "ordinal": 0,
                         "title": "02 - Rio Lujan",
                         "slug": "02-rio-lujan",
                         "artist": {
@@ -550,7 +550,7 @@ Here's an example response for the request ``GET /artists/2?fulltree=true``:
                             "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/estoy-herido-en-mi-interior.mp3",
                             "audio/ogg": "/tracks/28/convert?mimetype=audio%2Fogg"
                         }
-                        "number": 0,
+                        "ordinal": 0,
                         "title": "03 - Estoy herido en mi interior",
                         "slug": "03-estoy-herido-en-mi-interior",
                         "artist": {
@@ -603,7 +603,7 @@ simply a list of tracks that are not related to any album:
             },
             id: 82,
             length: 1,
-            number: 0,
+            ordinal: 0,
             slug: "14-dead-fish-the-party-buc",
             title: "14-dead fish-the party-buc",
             uri: "/tracks/82"

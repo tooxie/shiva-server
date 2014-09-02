@@ -92,7 +92,7 @@ class AlbumResource(Resource):
 
         tracks = TrackResource()
 
-        for track in album.tracks.order_by('number', 'title'):
+        for track in album.tracks.order_by(Track.ordinal, Track.title):
             _album['tracks'].append(tracks.get_full_tree(track))
 
         return _album
@@ -118,7 +118,7 @@ class TrackResource(Resource):
                 'id': fields.Integer(attribute='pk'),
                 'uri': InstanceURI('albums'),
             }),
-            'number': fields.Integer,
+            'ordinal': fields.Integer,
         }
 
     def get_filters(self):
