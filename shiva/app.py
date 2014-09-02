@@ -34,6 +34,10 @@ api.add_resource(resources.LyricsResource, '/tracks/<int:id>/lyrics',
 api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
                  '/tracks/<slug>/convert', endpoint='convert')
 
+# Users
+api.add_resource(resources.UserResource, '/users', '/users/<int:id>',
+                 '/users/<slug>', endpoint='users')
+
 # Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>',
                  endpoint='random')

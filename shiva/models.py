@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import bcrypt
 import hashlib
 import os
 
@@ -247,3 +248,37 @@ class LyricsCache(db.Model):
 
     def __repr__(self):
         return "<LyricsCache ('%s')>" % self.track.title
+
+
+class User(db.Model):
+    """
+    """
+
+    __tablename__ = 'users'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=True)
+    salt = db.Column(db.String(256), nullable=True)
+
+    def __setattr__(self, *args, **kwargs):
+        if args[0] == 'password':
+            password = args[1]
+            salt = None
+
+            if password is not None:
+                password, salt = self.hash_password(password)
+
+            self.salt = salt
+            args = ('password', password)
+
+        super(User, self).__setattr__(*args, **kwargs)
+
+    def hash_password(self, password, salt=None):
+        salt = salt if salt else bcrypt.gensalt()
+        _pass = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+        return (_pass, salt)
+
+    def __repr__(self):
+        return "<User ('%s')>" % self.email

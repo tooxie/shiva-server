@@ -6,7 +6,7 @@ from werkzeug.exceptions import NotFound
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
 from shiva.http import Resource, JSONResponse
-from shiva.models import Album, Artist, db, Track
+from shiva.models import Album, Artist, db, Track, User
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
 from shiva.utils import parse_bool
@@ -342,3 +342,45 @@ class TrackResource(Resource):
         # _track['tabs'] = tabs.get()
 
         return _track
+
+
+class UserResource(Resource):
+    """ The resource responsible for users. """
+
+    def __init__(self, *args, **kwargs):
+        self.db_model = User
+
+        super(UserResource, self).__init__(*args, **kwargs)
+
+    def get_resource_fields(self):
+        return {
+            'id': fields.Integer(attribute='pk'),
+            'email': fields.String,
+        }
+
+    def post(self):
+        email = request.values.get('email')
+        if not email:
+            abort(400)
+
+        password = request.values.get('password')
+
+        try:
+            user = self.create(email=email, password=password)
+        except (IntegrityError, ObjectExistsError):
+            abort(409)
+
+        response = marshal(user, self.get_resource_fields())
+        headers = {'Location': url_for('users', id=user.pk)}
+
+        return response, 201, headers
+
+    def create(self, email, password):
+        user = User(email=email, password=password)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return user
+
+    # TODO: PUT
