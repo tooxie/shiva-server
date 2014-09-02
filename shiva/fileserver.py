@@ -34,6 +34,11 @@ def get_absolute_path(relative_path):
         if os.path.exists(full_path):
             return full_path
 
+    upath = app.config.get('UPLOAD_PATH')
+    full_path = os.path.join(upath, relative_path)
+    if os.path.exists(full_path):
+        return full_path
+
     return None
 
 

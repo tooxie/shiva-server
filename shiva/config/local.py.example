@@ -9,6 +9,8 @@ MEDIA_DIRS = (
     # MediaDir('/home/fatmike/music/shiva'),
     # If in doubt, read the source.
 )
+# The path where uploaded files will be stored.
+UPLOAD_PATH = ''
 # Add your own mimetypes here.
 # MIMETYPES = (
 #     MimeType(type='audio', subtype='mp3', extension='mp3',

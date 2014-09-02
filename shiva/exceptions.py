@@ -22,3 +22,14 @@ class NoConfigFoundError(Exception):
                '\t  $HOME/.config/shiva/config.py')
 
         super(NoConfigFoundError, self).__init__(msg)
+
+
+class NoUploadPathConfigError(Exception):
+    def __init__(self):
+        msg = "No UPLOAD_PATH config defined."
+
+        super(NoUploadPathConfigError, self).__init__(msg)
+
+
+class InvalidFileTypeError(Exception):
+    pass
