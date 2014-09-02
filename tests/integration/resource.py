@@ -5,7 +5,7 @@ import unittest
 
 from shiva import app as shiva
 from shiva.converter import Converter
-from shiva.models import Artist, Album, Track
+from shiva.models import Artist, Album, Track, User
 from shiva.resources.upload import UploadHandler
 
 
@@ -46,10 +46,12 @@ class ResourceTestCase(unittest.TestCase):
             self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
                                hash_file=False, no_metadata=True)
             self.album.artists.append(self.artist)
+            self.user = User(email='derp@mail.com', password='blink182')
 
             shiva.db.session.add(self.artist)
             shiva.db.session.add(self.album)
             shiva.db.session.add(self.track)
+            shiva.db.session.add(self.user)
             shiva.db.session.commit()
 
             self.app = shiva.app.test_client()
@@ -57,6 +59,7 @@ class ResourceTestCase(unittest.TestCase):
             self.artist_pk = self.artist.pk
             self.album_pk = self.album.pk
             self.track_pk = self.track.pk
+            self.user_pk = self.user.pk
 
     def tearDown(self):
         os.close(self.db_fd)
