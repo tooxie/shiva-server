@@ -34,6 +34,9 @@ To sum up, Shiva is a distributed social network for sharing music.
 Read more on https://hacks.mozilla.org/2013/03/shiva-more-than-a-restful-api-\
 to-your-music-collection/
 
+You can find the technical documentation at `Read The Docs
+<http://shiva.readthedocs.org/en/latest/>`_.
+
 Copyright © 2014 Alvaro Mouriño
 """
 
