@@ -2,6 +2,8 @@
 import os
 import urllib2
 
+from flask import current_app as app
+
 from shiva.utils import get_logger
 
 log = get_logger()
@@ -56,6 +58,7 @@ class MediaDir(object):
         if type(dirs) != tuple:
             raise TypeError("The 'dirs' attribute has to be a tuple.")
 
+        # MediaDir('/path/to/dir', exclude='sub/path')
         if type(exclude) not in (tuple, str, unicode):
             raise TypeError("The 'exclude' attribute has to be tuple or " +
                             'string.')
@@ -75,11 +78,9 @@ class MediaDir(object):
                 raise TypeError('You need to supply a root directory for ' +
                                 'this url.')
 
-        if type(root) in (str, unicode) and root != '/':
-            root = self.root_slashes(root)
-
-        if type(dirs) == tuple:
-            dirs = tuple((self.dirs_slashes(d) for d in dirs))
+        root = self.root_slashes(root)
+        dirs = tuple((self.dirs_slashes(d) for d in dirs))
+        exclude = tuple((self.dirs_slashes(xd) for xd in exclude))
 
         if type(url) in (str, unicode) and not url.endswith('/'):
             url += '/'
@@ -102,6 +103,9 @@ class MediaDir(object):
         """Removes the trailing slash, and makes sure the path begins with a
         slash.
         """
+
+        if path == '/':
+            return path
 
         path = path.rstrip('/')
         if not path.startswith('/'):
@@ -128,15 +132,14 @@ class MediaDir(object):
 
         if self.root:
             if self.dirs:
-                for music_dir in self.dirs:
-                    dirs.append('/%s' % '/'.join(p.strip('/')
-                                for p in (self.root, music_dir)).lstrip('/'))
+                for _dir in self.dirs:
+                    dirs.append(os.path.join(self.root, _dir))
             else:
                 dirs.append(self.root)
         else:
             if self.dirs:
-                for music_dir in self.dirs:
-                    dirs.append(music_dir)
+                for _dir in self.dirs:
+                    dirs.append(_dir)
 
         return dirs
 
@@ -144,19 +147,22 @@ class MediaDir(object):
         if type(self.excluded_dirs) is list:
             return self.excluded_dirs
 
+        if not self.exclude:
+            return []
+
         self.excluded_dirs = []
+        _xdir = ''
 
-        if not len(self.exclude):
-            return self.excluded_dirs
-
-        media_dirs = self.dirs if len(self.dirs) else (self.root,)
-        for media_dir in media_dirs:
-            for _excluded in self.exclude:
-                if _excluded.startswith('/'):
-                    self.excluded_dirs.append(_excluded)
-                else:
-                    _path = os.path.join(self.root, media_dir, _excluded)
-                    self.excluded_dirs.append(_path)
+        # MediaDir('/path/to', dirs=('dir',), exclude='sub/path')
+        if self.dirs:
+            for d in self.dirs:
+                for xd in self.exclude:
+                    _xdir = self.root_slashes(os.path.join(self.root, d, xd))
+                    self.excluded_dirs.append(_xdir)
+        else:
+            for xd in self.exclude:
+                _xdir = self.root_slashes(os.path.join(self.root, xd))
+                self.excluded_dirs.append(_xdir)
 
         return self.excluded_dirs
 
@@ -182,16 +188,25 @@ class MediaDir(object):
 
     # TODO: Simplify this method and document it better.
     def urlize(self, path):
-        """
+        """Given a path to a track, returns a URL pointing to it.
         """
 
         url = None
-        for mdir in self.get_dirs():
+        dirs = self.get_dirs()
+        # FIXME: Be careful, urls could clash here. If there are similar paths
+        # under different media dirs we are going to end up with clashing URLs.
+        # For example:
+        # `/media/dir/flip/keep-rockin/track.mp3` and
+        # `/uploads/dir/flip/keep-rockin/track.mp3` will both be urlized to
+        # `http://127.0.0.1:8001/flip/keep-rockin/track.mp3`. Maybe the track's
+        # id could be included in the URL to discriminate them.
+        dirs.append(app.config.get('UPLOAD_PATH'))
+
+        for mdir in dirs:
             if path.startswith(mdir):
-                if self.url:
-                    # Remove trailing slash to avoid double-slashed URL.
-                    url = path[len(self.root):]
-                    url = str(url.encode('utf-8'))
+                # Remove trailing slash to avoid double-slashed URL.
+                url = path[(len(mdir) - 1):]
+                url = str(url.encode('utf-8'))
 
         if self.url:
             url = ''.join((self.url.rstrip('/'), urllib2.quote(url)))
@@ -245,6 +260,4 @@ class MimeType(object):
 
 
 def get_mimetypes():
-    from flask import current_app as app
-
     return app.config.get('MIMETYPES', [])

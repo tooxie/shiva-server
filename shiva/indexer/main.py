@@ -301,19 +301,26 @@ class Indexer(object):
 
     def walk(self, target, exclude=tuple()):
         """Recursively walks through a directory looking for tracks."""
+        _ignored = ''
 
         if not os.path.isdir(target):
             return False
 
-        for root, dirs, files in os.walk(target, exclude):
+        for root, dirs, files in os.walk(target):
+            if _ignored and root.startswith(_ignored):
+                # Is there a nicer way to express this?
+                continue
+
+            if root in exclude:
+                log.debug('[ SKIPPED ] %s (Excluded by config)' % root)
+                _ignored = root
+                continue
+
             for name in files:
                 self.file_path = os.path.join(root, name)
-                if root in exclude:
-                    log.debug('[ EXCLUDED ] %s' % self.file_path)
-                else:
-                    if self.is_track():
-                        self.track_count += 1
-                        self.save_track()
+                if self.is_track():
+                    self.track_count += 1
+                    self.save_track()
 
     def _make_unique(self, model):
         """
