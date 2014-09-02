@@ -17,7 +17,7 @@ class CacheManager(object):
     """
 
     def __init__(self, ram_cache=True, use_db=True):
-        log.debug('[CACHE] Initilizing...')
+        log.debug('[CACHE] Initializing...')
 
         if not ram_cache:
             log.debug('[CACHE] Ignoring RAM cache')
