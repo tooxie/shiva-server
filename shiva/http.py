@@ -43,6 +43,9 @@ class Resource(restful.Resource):
 
         return result
 
+    def get_by_id(self, id):
+        return self.db_model.query.get(id)
+
     def _by_slug(self, slug):
         try:
             result = self.get_by_slug(slug)
@@ -54,10 +57,16 @@ class Resource(restful.Resource):
 
         return result
 
+    def get_by_slug(self, slug):
+        return self.db_model.query.filter_by(slug=slug).first()
+
     def _all(self):
         result = self.get_all()
 
         return self.paginate(result)
+
+    def get_all(self):
+        return self.db_model.query  # all()
 
     def filter(self, queryset, filters):
         """
