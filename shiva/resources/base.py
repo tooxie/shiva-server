@@ -40,6 +40,10 @@ class ArtistResource(Resource):
         for album in artist.albums:
             _artist['albums'].append(albums.get_full_tree(album))
 
+        no_album = artist.tracks.filter_by(album=None).all()
+        track_fields = TrackResource().get_resource_fields()
+        _artist['no_album_tracks'] = marshal(no_album, track_fields)
+
         return _artist
 
 
@@ -66,7 +70,12 @@ class AlbumResource(Resource):
         )
 
     def artist_filter(self, queryset, artist_pk):
-        return queryset.join(Album.artists).filter(Artist.pk == artist_pk)
+        try:
+            pk = artist_pk if int(artist_pk) > 0 else None
+        except ValueError:
+            abort(400)
+
+        return queryset.join(Album.artists).filter(Artist.pk == pk)
 
     def get_by_id(self, album_id):
         return Album.query.get(album_id)
@@ -119,10 +128,20 @@ class TrackResource(Resource):
         )
 
     def artist_filter(self, queryset, artist_pk):
-        return queryset.filter(Track.artist_pk == artist_pk)
+        try:
+            pk = artist_pk if int(artist_pk) > 0 else None
+        except ValueError:
+            abort(400)
+
+        return queryset.filter(Track.artist_pk == pk)
 
     def album_filter(self, queryset, album_pk):
-        return queryset.filter_by(album_pk=album_pk)
+        try:
+            pk = album_pk if int(album_pk) > 0 else None
+        except ValueError:
+            abort(400)
+
+        return queryset.filter_by(album_pk=pk)
 
     def get_by_id(self, track_id):
         return Track.query.get(track_id)
