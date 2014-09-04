@@ -7,11 +7,15 @@ from flask.ext.restful import Api
 from shiva import resources
 from shiva.config import Configurator
 from shiva.models import db
+from shiva.auth import register
 
 app = Flask(__name__)
 app.config.from_object(Configurator())
 db.app = app
 db.init_app(app)
+
+# OAuth
+register(app)
 
 # RESTful API
 api = Api(app)
