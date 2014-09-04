@@ -282,3 +282,40 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User ('%s')>" % self.email
+
+
+class Client(db.Model):
+    __tablename__ = 'clients'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(256))
+    secret = db.Column(db.String(256))
+    rsa_key = db.Column(db.Text)
+    user = db.Column(db.Integer, db.ForeignKey("users.pk"))
+
+    # You could represent it either as a list of keys or by serializing
+    # the scopes into a string.
+    realms = db.Column(db.Text)
+
+    # You might also want to mark a certain set of scopes as default
+    # scopes in case the client does not specify any in the authorization
+    default_realms = db.Column(db.Text)
+
+    # You could represent the URIs either as a list of keys or by
+    # serializing them into a string.
+    redirect_uris = db.Column(db.Text)
+
+    # You might also want to mark a certain URI as default in case the
+    # client does not specify any in the authorization
+    default_redirect_uri = db.Column(db.String(64))
+
+
+class RequestToken(db.Model):
+    __tablename__ = 'requesttokens'
+
+    client = db.Column(db.Integer, db.ForeignKey("clients.pk"))
+    user = db.Column(db.Integer, db.ForeignKey("users.pk"))
+    # You could represent it either as a list of keys or by serializing
+    # the scopes into a string.
+    realms = db.Column(db.Text)
+    redirect_uri = db.Column(db.Text)
