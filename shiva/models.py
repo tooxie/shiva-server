@@ -295,27 +295,88 @@ class Client(db.Model):
 
     # You could represent it either as a list of keys or by serializing
     # the scopes into a string.
-    realms = db.Column(db.Text)
-
-    # You might also want to mark a certain set of scopes as default
-    # scopes in case the client does not specify any in the authorization
-    default_realms = db.Column(db.Text)
+    _realms = db.Column(db.Text)
 
     # You could represent the URIs either as a list of keys or by
     # serializing them into a string.
-    redirect_uris = db.Column(db.Text)
+    _redirect_uris = db.Column(db.Text)
 
-    # You might also want to mark a certain URI as default in case the
-    # client does not specify any in the authorization
-    default_redirect_uri = db.Column(db.String(64))
+    @property
+    def redirect_uris(self):
+        if self._redirect_uris:
+            return self._redirect_uris.split()
+        return []
+
+    @property
+    def default_redirect_uri(self):
+        return self.redirect_uris[0]
+
+    @property
+    def default_realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []
 
 
 class RequestToken(db.Model):
     __tablename__ = 'requesttokens'
 
-    client = db.Column(db.Integer, db.ForeignKey("clients.pk"))
+    pk = db.Column(db.Integer, primary_key=True)
     user = db.Column(db.Integer, db.ForeignKey("users.pk"))
-    # You could represent it either as a list of keys or by serializing
-    # the scopes into a string.
-    realms = db.Column(db.Text)
+
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False,)
+    client = db.Column(db.Integer,
+                       db.ForeignKey("clients.pk", ondelete="CASCADE"))
+
     redirect_uri = db.Column(db.Text)
+
+    token = db.Column(db.String(255), index=True, unique=True)
+    secret = db.Column(db.String(255), nullable=False)
+
+    verifier = db.Column(db.String(255))
+
+    redirect_uri = db.Column(db.Text)
+    _realms = db.Column(db.Text)
+
+    @property
+    def realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []
+
+
+class Nonce(db.Model):
+    __tablename__ = 'nonces'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.Integer)
+    nonce = db.Column(db.String(40))
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False)
+    client = db.Column(db.Integer, db.ForeignKey('clients.pk'))
+    request_token = db.Column(db.String(50))
+    access_token = db.Column(db.String(50))
+
+
+class AccessToken(db.Model):
+    __tablename__ = 'accesstokens'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False)
+    client = db.Column(db.Integer, db.ForeignKey('clients.pk'))
+
+    user = db.Column(db.Integer, db.ForeignKey('users.pk'))
+    # user = db.relationship('User')
+
+    token = db.Column(db.String(255))
+    secret = db.Column(db.String(255))
+
+    _realms = db.Column(db.Text)
+
+    @property
+    def realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []
