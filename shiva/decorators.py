@@ -78,3 +78,20 @@ def allow_origins(func=None, custom_origins=None):
         return wrapped(func)
 
     return wrapped
+
+def oauth_protected(realms=None):
+    def wrapper(f):
+        @functools.wraps(f)
+        def verify_oauth(*args, **kwargs):
+            v, r = provider.validate_protected_resource_request(
+                request.url,
+                http_method=request.method,
+                body=request.data,
+                headers=request.headers,
+                valid_realms=realms or [])
+            if v:
+                return f(*args, **kwargs)
+            else:
+                return abort(403)
+        return verify_oauth
+    return wrapper

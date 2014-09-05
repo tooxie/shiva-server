@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from flask import session, request, redirect, render_template
 from flask_oauthlib.provider import OAuth1Provider
 
 from shiva.models import AccessToken, Client, Nonce, RequestToken
@@ -11,6 +12,13 @@ def register(app):
     """ Registers the app as an OAuth provider. """
 
     oauth = OAuth1Provider(app)
+
+    def current_user():
+        if 'id' in session:
+            uid = session['id']
+            return User.query.get(uid)
+
+        return None
 
     @app.before_request
     def auth():
