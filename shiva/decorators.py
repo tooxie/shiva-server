@@ -79,6 +79,7 @@ def allow_origins(func=None, custom_origins=None):
 
     return wrapped
 
+
 def oauth_protected(realms=None):
     def wrapper(f):
         @functools.wraps(f)

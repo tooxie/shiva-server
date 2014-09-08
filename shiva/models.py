@@ -287,11 +287,11 @@ class User(db.Model):
 class Client(db.Model):
     __tablename__ = 'clients'
 
-    pk = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(256))
-    secret = db.Column(db.String(256))
+    key = db.Column(db.String(256), primary_key=True)
+    secret = db.Column(db.String(55), index=True, nullable=False)
+
     rsa_key = db.Column(db.Text)
-    user = db.Column(db.Integer, db.ForeignKey("users.pk"))
+    user_pk = db.Column(db.Integer, db.ForeignKey("users.pk"))
 
     # You could represent it either as a list of keys or by serializing
     # the scopes into a string.
@@ -322,12 +322,11 @@ class RequestToken(db.Model):
     __tablename__ = 'requesttokens'
 
     pk = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.Integer, db.ForeignKey("users.pk"))
+    user_pk = db.Column(db.Integer, db.ForeignKey("users.pk"))
 
     client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
                            nullable=False,)
-    client = db.Column(db.Integer,
-                       db.ForeignKey("clients.pk", ondelete="CASCADE"))
+    client = db.relationship('Client')
 
     redirect_uri = db.Column(db.Text)
 
@@ -354,7 +353,6 @@ class Nonce(db.Model):
     nonce = db.Column(db.String(40))
     client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
                            nullable=False)
-    client = db.Column(db.Integer, db.ForeignKey('clients.pk'))
     request_token = db.Column(db.String(50))
     access_token = db.Column(db.String(50))
 
@@ -365,9 +363,8 @@ class AccessToken(db.Model):
     pk = db.Column(db.Integer, primary_key=True)
     client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
                            nullable=False)
-    client = db.Column(db.Integer, db.ForeignKey('clients.pk'))
 
-    user = db.Column(db.Integer, db.ForeignKey('users.pk'))
+    user_pk = db.Column(db.Integer, db.ForeignKey('users.pk'))
     # user = db.relationship('User')
 
     token = db.Column(db.String(255))

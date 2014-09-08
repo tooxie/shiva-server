@@ -384,3 +384,7 @@ class UserResource(Resource):
         return user
 
     # TODO: PUT
+
+
+class ClientResource(Resource):
+    pass

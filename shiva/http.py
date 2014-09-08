@@ -180,6 +180,7 @@ class JSONResponse(Response):
             'response': '',
             'status': status,
         }
+
         params.update(kwargs)
 
         if params['status'] == 200 and params['response'] == '':

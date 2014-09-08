@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from flask import session, request, redirect, render_template
+from flask import redirect, render_template, request, session
 from flask_oauthlib.provider import OAuth1Provider
 
 from shiva.models import AccessToken, Client, Nonce, RequestToken
-
-oauth = None
+from shiva.http import JSONResponse
 
 
 # Code copied from http://lepture.com/en/2013/create-oauth-server
@@ -24,15 +23,24 @@ def register(app):
     def auth():
         # TODO: Close everything to authenticated users only, unless otherwise
         # specified. Use the settings ALLOW_ANONYMOUS_ACCESS for that.
-        return authorize()
+        if not app.config.get('ALLOW_ANONYMOUS_ACCESS'):
+            client_key = request.values.get('client_key')
+
+            if not client_key:
+                return JSONResponse(401)
+
+            # TODO: How do you check if the user was authorized already or not?
+            # client = Client.query.get(client_key)
+            if Client.query.filter_by(key=client_key).count() == 0:
+                return JSONResponse(401)
 
     @oauth.clientgetter
-    def load_client(client_key):
-        return Client.query.get(client_key)
+    def load_client(key):
+        return Client.query.get(key)
 
     @oauth.clientgetter
-    def load_client(client_key):
-        return Client.query.get(client_key)
+    def load_client(key):
+        return Client.query.get(key)
 
     @oauth.grantgetter
     def load_request_token(token):
@@ -68,43 +76,48 @@ def register(app):
         tok.user = current_user()
         db.session.add(tok)
         db.session.commit()
+
         return tok
 
     @oauth.noncegetter
     def load_nonce(client_key, timestamp, nonce, request_token, access_token):
-        return Nonce.query.filter_by(
-            client_key=client_key, timestamp=timestamp, nonce=nonce,
-            request_token=request_token, access_token=access_token,
-        ).first()
+        params = {
+            'access_token': access_token,
+            'client_key': client_key,
+            'nonce': nonce,
+            'request_token': request_token,
+            'timestamp': timestamp,
+        }
+
+        return Nonce.query.filter_by(**params).first()
 
     @oauth.noncesetter
     def save_nonce(client_key, timestamp, nonce, request_token, access_token):
-        nonce = Nonce(
-            client_key=client_key,
-            timestamp=timestamp,
-            nonce=nonce,
-            request_token=request_token,
-            access_token=access_token,
-        )
+        params = {
+            'access_token': access_token,
+            'client_key': client_key,
+            'nonce': nonce,
+            'request_token': request_token,
+            'timestamp': timestamp,
+        }
+
+        nonce = Nonce(**params)
         db.session.add(nonce)
         db.session.commit()
+
         return nonce
 
     @oauth.tokengetter
     def load_access_token(client_key, token, *args, **kwargs):
-        return AccessToken.query.filter_by(
-            client_key=client_key, token=token
-        ).first()
+        return AccessToken.query.filter_by(client_key=client_key,
+                                           token=token).first()
 
     @oauth.tokensetter
     def save_access_token(token, request):
-        tok = AccessToken(
-            client=request.client,
-            user=request.user,
-            token=token['oauth_token'],
-            secret=token['oauth_token_secret'],
-            _realms=token['oauth_authorized_realms'],
-        )
+        tok = AccessToken(client=request.client, user=request.user,
+                          token=token['oauth_token'],
+                          secret=token['oauth_token_secret'],
+                          _realms=token['oauth_authorized_realms'])
         db.session.add(tok)
         db.session.commit()
 
@@ -122,19 +135,25 @@ def register(app):
     @oauth.authorize_handler
     def authorize(*args, **kwargs):
         user = current_user()
+
         if not user:
             return redirect('/')
+
         if request.method == 'GET':
             client_key = kwargs.get('resource_owner_key')
-            client = Client.query.filter_by(client_key=client_key).first()
+            client = Client.query.filter_by(key=client_key).first()
             kwargs['client'] = client
             kwargs['user'] = user
+
             return render_template('authorize.html', **kwargs)
+
         confirm = request.form.get('confirm', 'no')
+
         return confirm == 'yes'
 
     @app.route('/api/me')
     @oauth.require_oauth()
-    def me(req):
-        user = req.user
+    def me():
+        user = request.user
+
         return jsonify(username=user.username)
