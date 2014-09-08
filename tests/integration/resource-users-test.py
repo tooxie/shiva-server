@@ -16,7 +16,7 @@ class UsersResourceTestCase(ResourceTestCase):
 
     def test_user_base_resource(self):
         rv = self.app.get('/users')
-        nose.eq_(rv.status_code, 200)
+        nose.eq_(rv.status_code, 405)
 
     def test_nonexistent_user(self):
         rv = self.app.get('/users/123')
@@ -32,8 +32,7 @@ class UsersResourceTestCase(ResourceTestCase):
         nose.eq_(_rv.status_code, 409)  # Conflict
 
     def test_user_deletion(self):
+        # The correct status code in this case would be 405, but to prevent
+        # brute-force attacks we return always 404.
         rv = self.app.delete('/users/%i' % self.user.pk)
-        nose.eq_(rv.status_code, 200)
-
-        rv = self.app.get('/users/%i' % self.user.pk)
         nose.eq_(rv.status_code, 404)

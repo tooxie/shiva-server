@@ -39,7 +39,8 @@ api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
                  '/tracks/<slug>/convert', endpoint='convert')
 
 # Users
-api.add_resource(resources.UserResource, '/user', endpoint='users')
+api.add_resource(resources.UserResource, '/users', '/users/<int:id>',
+                 endpoint='users')
 api.add_resource(resources.ClientResource, '/user/clients', endpoint='clients')
 
 # Other

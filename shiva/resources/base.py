@@ -347,11 +347,6 @@ class TrackResource(Resource):
 class UserResource(Resource):
     """ The resource responsible for users. """
 
-    def __init__(self, *args, **kwargs):
-        self.db_model = User
-
-        super(UserResource, self).__init__(*args, **kwargs)
-
     def get_resource_fields(self):
         return {
             'id': fields.Integer(attribute='pk'),
