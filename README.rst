@@ -7,6 +7,9 @@
 .. |documentation| image:: https://readthedocs.org/projects/shiva/badge/?version=latest
     :alt: Documentation
     :target: http://shiva.readthedocs.org/en/latest/
+.. |downloads| image:: https://pypip.in/d/shiva/badge.png
+    :alt: PyPi downloads
+    :target: https://pypi.python.org/pypi/shiva
 
 
 Shiva
@@ -14,7 +17,7 @@ Shiva
 
 More than a RESTful API to your music collection.
 
-|buildstatus| |testcoverage| |documentation|
+|buildstatus| |testcoverage| |documentation| |downloads|
 
 
 What is Shiva?
