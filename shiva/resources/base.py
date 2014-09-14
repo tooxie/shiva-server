@@ -52,6 +52,13 @@ class ArtistResource(Resource):
 
         return artist
 
+    def update(self, artist):
+        artist.name = request.form.get('name')
+        artist.image = request.form.get('image')
+
+        db.session.add(artist)
+        db.session.commit()
+
     def get_full_tree(self, artist):
         _artist = marshal(artist, self.get_resource_fields())
         _artist['albums'] = []
@@ -61,7 +68,7 @@ class ArtistResource(Resource):
         for album in artist.albums:
             _artist['albums'].append(albums.get_full_tree(album))
 
-        no_album = artist.tracks.filter_by(album=None).all()
+        no_album = artist.tracks.filter(Track.albums == None).all()
         track_fields = TrackResource().get_resource_fields()
         _artist['no_album_tracks'] = marshal(no_album, track_fields)
 
@@ -130,6 +137,20 @@ class AlbumResource(Resource):
 
         return album
 
+    def update(self, album):
+        """
+        Updates an album object with the given attributes. The `artists`
+        attribute, however, is treated as a calculated value so it cannot be
+        set through a PUT request. It has to be done through the Track model.
+        """
+
+        album.name = request.form.get('name')
+        album.year = request.form.get('year')
+        album.cover = request.form.get('cover_url')
+
+        db.session.add(album)
+        db.session.commit()
+
     def get_filters(self):
         return (
             ('artist', 'artist_filter'),
@@ -172,11 +193,11 @@ class TrackResource(Resource):
             'length': fields.Integer,
             'title': fields.String,
             'slug': fields.String,
-            'artist': ForeignKeyField(Artist, {
+            'artists': ManyToManyField(Artist, {
                 'id': fields.Integer(attribute='pk'),
                 'uri': InstanceURI('artists'),
             }),
-            'album': ForeignKeyField(Album, {
+            'albums': ManyToManyField(Album, {
                 'id': fields.Integer(attribute='pk'),
                 'uri': InstanceURI('albums'),
             }),
@@ -240,6 +261,27 @@ class TrackResource(Resource):
         db.session.commit()
 
         return track
+
+    def update(self, track):
+        track.title = request.form.get('title')
+        track.ordinal = request.form.get('ordinal')
+
+        for artist_pk in request.form.getlist('artist_id'):
+            try:
+                artist = Artist.query.get(artist_pk)
+                track.artists.append(artist)
+            except:
+                pass
+
+        for album_pk in request.form.getlist('album_id'):
+            try:
+                album = Album.query.get(album_pk)
+                track.albums.append(album)
+            except:
+                pass
+
+        db.session.add(track)
+        db.session.commit()
 
     def get_filters(self):
         return (

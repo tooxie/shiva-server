@@ -35,6 +35,18 @@ class Resource(restful.Resource):
 
         return result
 
+    def put(self, id=None):
+        if not id:
+            return restful.abort(405)
+
+        if not hasattr(self, 'update'):
+            return restful.abort(405)
+
+        # TODO: Check permissions
+        item = self._by_id(id)
+
+        self.update(item)
+
     def delete(self, id=None):
         if not id:
             return restful.abort(405)

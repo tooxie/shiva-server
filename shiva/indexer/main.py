@@ -256,12 +256,12 @@ class Indexer(object):
         artist = self.get_artist(meta.artist)
         album = self.get_album(meta.album, artist)
 
-        if album and artist:
-            if artist not in album.artists:
-                album.artists.append(artist)
+        if album:
+            track.albums.append(album)
 
-        track.album = album
-        track.artist = artist
+        if artist:
+            track.artists.append(artist)
+
         self.add_to_session(track)
         self.cache.add_hash(track.hash)
 

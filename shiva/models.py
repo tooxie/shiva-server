@@ -59,6 +59,18 @@ class Artist(db.Model):
 
         super(Artist, self).__init__(*args, **kwargs)
 
+    @property
+    def albums(self):
+        # FIXME: Optimize. Check comments for Album.artists method.
+        albums = []
+
+        for track in self.tracks:
+            for album in track.albums:
+                if album not in albums:
+                    albums.append(album)
+
+        return albums
+
     @classmethod
     def random(cls):
         return random_row(cls)
