@@ -16,6 +16,12 @@ import shiva
 from shiva.exceptions import MetadataManagerReadError
 
 
+def parse_bool(value):
+    false_values = ('false', '0', '')
+
+    return value.lower() not in false_values
+
+
 def get_shiva_path():
     return os.path.dirname(os.path.abspath(shiva.__file__))
 

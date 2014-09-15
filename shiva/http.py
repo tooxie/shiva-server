@@ -5,6 +5,7 @@ from flask import current_app as app, Response, request, g
 from flask.ext import restful
 
 from shiva.decorators import allow_origins, allow_method
+from shiva.utils import parse_bool
 
 
 class Resource(restful.Resource):
@@ -113,8 +114,7 @@ class Resource(restful.Resource):
             return result
 
         options = request.args.to_dict()
-        false_values = ('false', '0', '')
-        full_tree = options.get('fulltree', '').lower() not in false_values
+        full_tree = parse_bool(options.get('fulltree', ''))
 
         if full_tree:
             return self.get_full_tree(result)

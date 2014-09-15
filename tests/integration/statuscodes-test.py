@@ -26,14 +26,6 @@ class StatusCodesTestCase(unittest.TestCase):
         rv = self.app.get('/')
         nose.eq_(rv.status_code, 404)
 
-    def test_artists(self):
-        rv = self.app.get('/artists')
-        nose.eq_(rv.status_code, 200)
-
-    def test_artist_404(self):
-        rv = self.app.get('/artists/1')
-        nose.eq_(rv.status_code, 404)
-
     def test_albums(self):
         rv = self.app.get('/albums')
         nose.eq_(rv.status_code, 200)
