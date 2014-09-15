@@ -9,6 +9,7 @@ from shiva.http import Resource, JSONResponse
 from shiva.models import Album, Artist, db, Track
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
+from shiva.utils import parse_bool
 
 
 class ArtistResource(Resource):
@@ -212,7 +213,12 @@ class TrackResource(Resource):
 
         handler.save()
 
-        track = Track(path=handler.path, hash_file=True)
+        # TODO: Document this.
+        hash_file = parse_bool(request.form.get('hash_file', True))
+        no_metadata = parse_bool(request.form.get('no_metadata', False))
+
+        track = Track(path=handler.path, hash_file=hash_file,
+                      no_metadata=no_metadata)
         db.session.add(track)
 
         if handler.artist:
