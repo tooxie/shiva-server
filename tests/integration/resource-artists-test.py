@@ -28,6 +28,10 @@ class ArtistResourceTestCase(ResourceTestCase):
         rv = self.app.get('/artists/123')
         nose.eq_(rv.status_code, 404)
 
+    def test_fulltree(self):
+        rv = self.app.get('/artists/%s?fulltree=1' % self.album.pk)
+        nose.eq_(rv.status_code, 200)
+
     def test_artist_creation(self):
         rv = self.app.post('/artists', data=self.get_payload())
         resp = json.loads(rv.data)

@@ -119,13 +119,12 @@ class AlbumResource(Resource):
     # (i.e. /albums?name=Derp&artist_id=1&artist_id2)
     def create(self, name, year, cover_url, artists=[]):
         albums = Album.query.filter_by(name=name).all()
-        if albums:
-            for album in albums:
-                if album.artists == artists:
-                    raise ObjectExistsError
+        for album in albums:
+            if album.artists == artists:
+                raise ObjectExistsError
 
-                if map(lambda a: a.pk in artists, album.artists):
-                    raise ObjectExistsError
+            if map(lambda a: a.pk in artists, album.artists):
+                raise ObjectExistsError
 
         album = Album(name=name, year=year, cover=cover_url)
 

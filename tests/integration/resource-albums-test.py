@@ -28,6 +28,10 @@ class AlbumResourceTestCase(ResourceTestCase):
         rv = self.app.get('/albums/123')
         nose.eq_(rv.status_code, 404)
 
+    def test_fulltree(self):
+        rv = self.app.get('/albums/%s?fulltree=1' % self.album_pk)
+        nose.eq_(rv.status_code, 200)
+
     def test_album_creation(self):
         rv = self.app.post('/albums', data=self.get_payload())
         resp = json.loads(rv.data)
@@ -48,8 +52,13 @@ class AlbumResourceTestCase(ResourceTestCase):
         nose.ok_(resp['name'] != old_name)
 
     def test_album_deletion(self):
-        rv = self.app.delete('/albums/%i' % self.album.pk)
+        rv = self.app.post('/albums', data={'name': 'derp'})
+        resp = json.loads(rv.data)
+
+        album_id = resp['id']
+
+        rv = self.app.delete('/albums/%i' % album_id)
         nose.eq_(rv.status_code, 200)
 
-        rv = self.app.get('/albums/%i' % self.album.pk)
+        rv = self.app.get('/albums/%i' % album_id)
         nose.eq_(rv.status_code, 404)
