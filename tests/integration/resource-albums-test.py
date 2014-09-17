@@ -37,6 +37,16 @@ class AlbumResourceTestCase(ResourceTestCase):
         _rv = self.app.post('/albums', data=self.get_payload())
         nose.eq_(_rv.status_code, 409)  # Conflict
 
+    def test_album_update(self):
+        url = '/albums/%s' % self.album.pk
+        old_name = self.album.name
+
+        rv = self.app.put(url, data={'name': 'Rock no more'})
+        rv = self.app.get(url)
+        resp = json.loads(rv.data)
+
+        nose.ok_(resp['name'] != old_name)
+
     def test_album_deletion(self):
         rv = self.app.delete('/albums/%i' % self.album.pk)
         nose.eq_(rv.status_code, 200)
