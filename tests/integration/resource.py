@@ -37,20 +37,26 @@ class ResourceTestCase(unittest.TestCase):
         shiva.app.config['ALLOW_DELETE'] = True
         shiva.app.config['CONVERTER_CLASS'] = ConverterMock
         shiva.app.config['UPLOAD_HANDLER'] = UploadHandlerMock
-        shiva.db.create_all()
 
-        self.app = shiva.app.test_client()
+        with shiva.app.test_request_context():
+            shiva.db.create_all()
 
-        self.artist = Artist(name='4no1')
-        self.album = Album(name='Falling down')
-        self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
-                           hash_file=False, no_metadata=True)
-        self.album.artists.append(self.artist)
+            self.artist = Artist(name='4no1')
+            self.album = Album(name='Falling down')
+            self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
+                               hash_file=False, no_metadata=True)
+            self.album.artists.append(self.artist)
 
-        shiva.db.session.add(self.artist)
-        shiva.db.session.add(self.album)
-        shiva.db.session.add(self.track)
-        shiva.db.session.commit()
+            shiva.db.session.add(self.artist)
+            shiva.db.session.add(self.album)
+            shiva.db.session.add(self.track)
+            shiva.db.session.commit()
+
+            self.app = shiva.app.test_client()
+
+            self.artist_pk = self.artist.pk
+            self.album_pk = self.album.pk
+            self.track_pk = self.track.pk
 
     def tearDown(self):
         os.close(self.db_fd)

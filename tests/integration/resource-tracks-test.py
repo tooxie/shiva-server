@@ -44,6 +44,16 @@ class TrackResourceTestCase(ResourceTestCase):
         _rv = self.app.post('/tracks', data=self.get_payload())
         nose.eq_(_rv.status_code, 409)  # Conflict
 
+    def test_track_update(self):
+        url = '/tracks/%s' % self.track.pk
+        old_title = self.track.title
+
+        rv = self.app.put(url, data={'title': 'Downfall'})
+        rv = self.app.get(url)
+        resp = json.loads(rv.data)
+
+        nose.ok_(resp['title'] != old_title)
+
     def test_track_deletion(self):
         # TODO: Test ALLOW_DELETE=False
         rv = self.app.delete('/tracks/%i' % self.track.pk)

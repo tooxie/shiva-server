@@ -15,7 +15,9 @@ class StatusCodesTestCase(unittest.TestCase):
         shiva.app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         shiva.app.config['TESTING'] = True
         shiva.app.config['ALLOW_DELETE'] = False
-        shiva.db.create_all()
+        with shiva.app.test_request_context():
+            shiva.db.create_all()
+
         self.app = shiva.app.test_client()
 
     def tearDown(self):

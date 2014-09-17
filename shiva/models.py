@@ -27,10 +27,19 @@ def random_row(model):
     return instance
 
 
-class Artist(db.Model):
-    """
-    """
+# Table relationships
+track_artist = db.Table('trackartist',
+    db.Column('track_pk', db.Integer, db.ForeignKey('tracks.pk')),
+    db.Column('artist_pk', db.Integer, db.ForeignKey('artists.pk')),
+)
 
+track_album = db.Table('trackalbum',
+    db.Column('track_pk', db.Integer, db.ForeignKey('tracks.pk')),
+    db.Column('album_pk', db.Integer, db.ForeignKey('albums.pk')),
+)
+
+
+class Artist(db.Model):
     __tablename__ = 'artists'
 
     pk = db.Column(db.Integer, primary_key=True)
@@ -41,13 +50,26 @@ class Artist(db.Model):
     events = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
 
-    tracks = db.relationship('Track', backref='artist', lazy='dynamic')
+    tracks = db.relationship('Track', secondary=track_artist,
+                             backref="artists", lazy='dynamic')
 
     def __init__(self, *args, **kwargs):
         if 'date_added' not in kwargs:
             kwargs['date_added'] = datetime.today()
 
         super(Artist, self).__init__(*args, **kwargs)
+
+    @property
+    def albums(self):
+        # FIXME: Optimize. Check comments for Album.artists method.
+        albums = []
+
+        for track in self.tracks:
+            for album in track.albums:
+                if album not in albums:
+                    albums.append(album)
+
+        return albums
 
     @classmethod
     def random(cls):
@@ -63,16 +85,7 @@ class Artist(db.Model):
         return '<Artist (%s)>' % self.name
 
 
-artists = db.Table('albumartists',
-    db.Column('artist_pk', db.Integer, db.ForeignKey('artists.pk')),
-    db.Column('album_pk', db.Integer, db.ForeignKey('albums.pk'))
-)
-
-
 class Album(db.Model):
-    """
-    """
-
     __tablename__ = 'albums'
 
     pk = db.Column(db.Integer, primary_key=True)
@@ -82,16 +95,33 @@ class Album(db.Model):
     cover = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
 
-    tracks = db.relationship('Track', backref='album', lazy='dynamic')
-
-    artists = db.relationship('Artist', secondary=artists,
-                              backref=db.backref('albums', lazy='dynamic'))
+    tracks = db.relationship('Track', secondary=track_album, backref="albums",
+                             lazy='dynamic')
 
     def __init__(self, *args, **kwargs):
         if 'date_added' not in kwargs:
             kwargs['date_added'] = datetime.today()
 
         super(Album, self).__init__(*args, **kwargs)
+
+    @property
+    def artists(self):
+        """
+        Calculates the artists for this album by traversing the list of tracks.
+        This is a terrible way of doing this, but we assume that the worst case
+        will still be good enough to defer the optimization of this method for
+        the future.
+        """
+
+        artists = []
+
+        # FIXME: Optimize
+        for track in self.tracks:
+            for artist in track.artists:
+                if artist not in artists:
+                    artists.append(artist)
+
+        return artists
 
     @classmethod
     def random(cls):
@@ -108,8 +138,6 @@ class Album(db.Model):
 
 
 class Track(db.Model):
-    """Track model."""
-
     __tablename__ = 'tracks'
 
     pk = db.Column(db.Integer, primary_key=True)
@@ -208,9 +236,6 @@ class Track(db.Model):
 
 
 class LyricsCache(db.Model):
-    """
-    """
-
     __tablename__ = 'lyricscache'
 
     pk = db.Column(db.Integer, primary_key=True)

@@ -6,6 +6,7 @@ except ImportError:
     import unittest
 import os
 
+from shiva.app import app
 from shiva.indexer.main import Indexer
 
 
@@ -16,7 +17,8 @@ class IndexerTestCase(unittest.TestCase):
             'MEDIA_DIRS': [],
             'VALID_FILE_EXTENSIONS': ('mp3',),
         }
-        self.indexer = Indexer(self.config)
+        with app.test_request_context():
+            self.indexer = Indexer(self.config)
 
         os.path.isfile = Mock()
 
