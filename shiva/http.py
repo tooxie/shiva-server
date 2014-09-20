@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from math import ceil
+import json
 
 from flask import current_app as app, Response, request, g
 from flask.ext import restful
 
+
 from shiva.decorators import allow_origins, allow_method
-from shiva.utils import parse_bool
+from shiva.utils import parse_bool, unpack
 
 
 class Resource(restful.Resource):
@@ -168,23 +170,30 @@ class Resource(restful.Resource):
         }
 
 
-class JSONResponse(Response):
+class JSONResponse(restful.Response):
     """
     A subclass of flask.Response that sets the Content-Type header by default
     to "application/json".
-
     """
 
-    def __init__(self, status=200, **kwargs):
+    def __init__(self, *args, **kwargs):
+        data, status, headers = unpack(args)
+
         params = {
-            'headers': {},
             'mimetype': 'application/json',
-            'response': '',
+            'response': data,
             'status': status,
+            'headers': headers,
         }
-        params.update(kwargs)
+        params.update(kwargs.copy())
+
+        if status >= 400:
+            params['response'] = restful.utils.error_data(status)
 
         if params['status'] == 200 and params['response'] == '':
             params['status'] = 204
+
+        if isinstance(params['response'], dict):
+            params['response'] = json.dumps(params['response'])
 
         super(JSONResponse, self).__init__(**params)
