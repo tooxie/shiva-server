@@ -26,6 +26,18 @@ class Resource(restful.Resource):
         return JSONResponse()
 
     def get(self, id=None, slug=None):
+        """
+        Handler for the GET method. Given, for example:
+
+        /artists
+        /artists/<id>
+
+        if a db_model attribute exists in the resource pointing to the
+        respective model of the resource, the class will try to fetch the
+        requested instance by id or slug. If such attribute doesn't exist it
+        will return a 405 (Method Not Allowed) status code.
+        """
+
         result = None
 
         if id:

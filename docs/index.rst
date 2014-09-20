@@ -20,6 +20,7 @@ Contents:
    resources/meta
    conversion
    cors
+   users
    contributing
    wishlist
 
