@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
-from shiva.http import Resource, JSONResponse
+from shiva.http import Resource
 from shiva.models import Album, Artist, db, Track, User
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
