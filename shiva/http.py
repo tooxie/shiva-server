@@ -33,6 +33,9 @@ class Resource(restful.Resource):
         elif slug:
             result = self.marshal(self.full_tree(self._by_slug(slug)))
         else:
+            if not hasattr(self, 'db_model'):
+                return restful.abort(405)
+
             result = self._all()
 
         return result

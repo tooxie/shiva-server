@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
-from shiva.http import Resource, JSONResponse
+from shiva.http import Resource
 from shiva.models import Album, Artist, db, Track, User
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
@@ -352,3 +352,75 @@ class TrackResource(Resource):
         # _track['tabs'] = tabs.get()
 
         return _track
+
+
+class UserResource(Resource):
+    """ The resource responsible for users. """
+
+    db_model = User
+
+    def get_resource_fields(self):
+        return {
+            'id': fields.Integer(attribute='pk'),
+            'email': fields.String,
+            'is_active': fields.Boolean,
+            'is_admin': fields.Boolean,
+            'creation_date': fields.DateTime,
+        }
+
+    def get(self, id=None):
+        if id is None:
+            abort(405)
+
+        return super(UserResource, self).get(id)
+
+    def post(self):
+        email = request.form.get('email')
+        if not email:
+            abort(400)
+
+        is_active = False
+        password = request.form.get('password')
+        if password:
+            is_active = parse_bool(request.form.get('is_active', False))
+        # FIXME: Check permissions
+        is_admin = parse_bool(request.form.get('admin', False))
+
+        try:
+            user = self.create(email=email, password=password,
+                               is_active=is_active, is_admin=is_admin)
+        except (IntegrityError, ObjectExistsError):
+            abort(409)
+
+        response = marshal(user, self.get_resource_fields())
+        headers = {'Location': url_for('users', id=user.pk)}
+
+        return response, 201, headers
+
+    def create(self, email, password, is_active, is_admin):
+        user = User(email=email, password=password, is_active=is_active,
+                    is_admin=is_admin)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return user
+
+    def update(self, user):
+        email = request.form.get('email')
+        if email:
+            user.email = email
+
+        if 'password' in request.form:
+            user.password = request.form.get('password')
+
+        if user.password == '':
+            user.is_active = False
+        else:
+            if 'is_active' in request.form:
+                user.is_active = parse_bool(request.form.get('is_active'))
+
+        if 'is_admin' in request.form:
+            user.is_admin = parse_bool(request.form.get('is_admin'))
+
+        return user
