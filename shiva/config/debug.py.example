@@ -1,2 +1,3 @@
 # -*- coding: utf-8 -*-
 # Use this file to define settings that will only take effect on DEBUG = True.
+OAUTH1_PROVIDER_ENFORCE_SSL = False

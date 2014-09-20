@@ -32,7 +32,9 @@ setup(
     package_dir={'': '.'},
     packages=find_packages('.'),
     install_requires=[
+        'bcrypt==1.0.2',
         'docopt==0.6.1',
+        'Flask-OAuthlib==0.7.0',
         'Flask-Restful==0.2.3',
         'Flask-SQLAlchemy==0.16',
         'Flask==0.10',

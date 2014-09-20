@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import bcrypt
 import hashlib
 import os
 
@@ -247,3 +248,132 @@ class LyricsCache(db.Model):
 
     def __repr__(self):
         return "<LyricsCache ('%s')>" % self.track.title
+
+
+class User(db.Model):
+    """
+    """
+
+    __tablename__ = 'users'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=True)
+    salt = db.Column(db.String(256), nullable=True)
+
+    def __setattr__(self, *args, **kwargs):
+        if args[0] == 'password':
+            password = args[1]
+            salt = None
+
+            if password is not None:
+                password, salt = self.hash_password(password)
+
+            self.salt = salt
+            args = ('password', password)
+
+        super(User, self).__setattr__(*args, **kwargs)
+
+    def hash_password(self, password, salt=None):
+        salt = salt if salt else bcrypt.gensalt()
+        _pass = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+        return (_pass, salt)
+
+    def __repr__(self):
+        return "<User ('%s')>" % self.email
+
+
+class Client(db.Model):
+    __tablename__ = 'clients'
+
+    key = db.Column(db.String(256), primary_key=True)
+    secret = db.Column(db.String(55), index=True, nullable=False)
+
+    rsa_key = db.Column(db.Text)
+    user_pk = db.Column(db.Integer, db.ForeignKey("users.pk"))
+
+    # You could represent it either as a list of keys or by serializing
+    # the scopes into a string.
+    _realms = db.Column(db.Text)
+
+    # You could represent the URIs either as a list of keys or by
+    # serializing them into a string.
+    _redirect_uris = db.Column(db.Text)
+
+    @property
+    def redirect_uris(self):
+        if self._redirect_uris:
+            return self._redirect_uris.split()
+        return []
+
+    @property
+    def default_redirect_uri(self):
+        return self.redirect_uris[0]
+
+    @property
+    def default_realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []
+
+
+class RequestToken(db.Model):
+    __tablename__ = 'requesttokens'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    user_pk = db.Column(db.Integer, db.ForeignKey("users.pk"))
+
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False,)
+    client = db.relationship('Client')
+
+    redirect_uri = db.Column(db.Text)
+
+    token = db.Column(db.String(255), index=True, unique=True)
+    secret = db.Column(db.String(255), nullable=False)
+
+    verifier = db.Column(db.String(255))
+
+    redirect_uri = db.Column(db.Text)
+    _realms = db.Column(db.Text)
+
+    @property
+    def realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []
+
+
+class Nonce(db.Model):
+    __tablename__ = 'nonces'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.Integer)
+    nonce = db.Column(db.String(40))
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False)
+    request_token = db.Column(db.String(50))
+    access_token = db.Column(db.String(50))
+
+
+class AccessToken(db.Model):
+    __tablename__ = 'accesstokens'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    client_key = db.Column(db.String(40), db.ForeignKey('clients.key'),
+                           nullable=False)
+
+    user_pk = db.Column(db.Integer, db.ForeignKey('users.pk'))
+    # user = db.relationship('User')
+
+    token = db.Column(db.String(255))
+    secret = db.Column(db.String(255))
+
+    _realms = db.Column(db.Text)
+
+    @property
+    def realms(self):
+        if self._realms:
+            return self._realms.split()
+        return []

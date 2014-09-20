@@ -7,11 +7,15 @@ from flask.ext.restful import Api
 from shiva import resources
 from shiva.config import Configurator
 from shiva.models import db
+from shiva.auth import register
 
 app = Flask(__name__)
 app.config.from_object(Configurator())
 db.app = app
 db.init_app(app)
+
+# OAuth
+register(app)
 
 # RESTful API
 api = Api(app)
@@ -33,6 +37,11 @@ api.add_resource(resources.LyricsResource, '/tracks/<int:id>/lyrics',
                  '/tracks/<slug>/lyrics', endpoint='lyrics')
 api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
                  '/tracks/<slug>/convert', endpoint='convert')
+
+# Users
+api.add_resource(resources.UserResource, '/users', '/users/<int:id>',
+                 endpoint='users')
+api.add_resource(resources.ClientResource, '/user/clients', endpoint='clients')
 
 # Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>',

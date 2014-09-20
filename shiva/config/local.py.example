@@ -30,3 +30,6 @@ METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
 BANDSINTOWN_APP_ID = 'SHIVA_APP_ID'
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.
+
+# Be careful who you give access to
+ALLOW_ANONYMOUS_ACCESS = True

@@ -232,3 +232,29 @@ class MetadataManager(object):
     def save(self):
         """Save changes to file metadata."""
         self.reader.save()
+
+
+def unpack(value):
+    """Return a three tuple of data, code, and headers"""
+    if not isinstance(value, tuple):
+        return value, 200, {}
+    else:
+        if len(value) == 0:
+            return '', 200, {}
+
+    try:
+        data, code, headers = value
+        return data, code, headers
+    except ValueError:
+        pass
+
+    try:
+        data, code = value
+        return data, code, {}
+    except ValueError:
+        pass
+
+    if isinstance(value[0], int):
+        return '', value[0], {}
+
+    return value[0], 200, {}

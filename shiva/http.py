@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from math import ceil
+import json
 
 from flask import current_app as app, Response, request, g
 from flask.ext import restful
 
+
 from shiva.decorators import allow_origins, allow_method
-from shiva.utils import parse_bool
+from shiva.utils import parse_bool, unpack
 
 
 class Resource(restful.Resource):
@@ -24,6 +26,18 @@ class Resource(restful.Resource):
         return JSONResponse()
 
     def get(self, id=None, slug=None):
+        """
+        Handler for the GET method. Given, for example:
+
+        /users
+        /users/<id>
+
+        if a db_model attribute exists in the resource pointing to the
+        respective model of the resource, the class will try to fetch the
+        requested instance by id or slug. If such attribute doesn't exist it
+        will return a 405 (Method Not Allowed) status code.
+        """
+
         result = None
 
         if id:
@@ -31,6 +45,9 @@ class Resource(restful.Resource):
         elif slug:
             result = self.marshal(self.full_tree(self._by_slug(slug)))
         else:
+            if not hasattr(self, 'db_model'):
+                return restful.abort(405)
+
             result = self._all()
 
         return result
@@ -166,23 +183,30 @@ class Resource(restful.Resource):
         }
 
 
-class JSONResponse(Response):
+class JSONResponse(restful.Response):
     """
     A subclass of flask.Response that sets the Content-Type header by default
     to "application/json".
-
     """
 
-    def __init__(self, status=200, **kwargs):
+    def __init__(self, *args, **kwargs):
+        data, status, headers = unpack(args)
+
         params = {
-            'headers': {},
             'mimetype': 'application/json',
-            'response': '',
+            'response': data,
             'status': status,
+            'headers': headers,
         }
-        params.update(kwargs)
+        params.update(kwargs.copy())
+
+        if status >= 400:
+            params['response'] = restful.utils.error_data(status)
 
         if params['status'] == 200 and params['response'] == '':
             params['status'] = 204
+
+        if isinstance(params['response'], dict):
+            params['response'] = json.dumps(params['response'])
 
         super(JSONResponse, self).__init__(**params)
