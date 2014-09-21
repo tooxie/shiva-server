@@ -31,8 +31,8 @@ class ArtistResource(Resource):
         }
 
     def post(self):
-        name = request.values.get('name')
-        image_url = request.values.get('image_url')
+        name = request.form.get('name')
+        image_url = request.form.get('image_url')
 
         try:
             artist = self.create(name, image_url)
@@ -98,10 +98,10 @@ class AlbumResource(Resource):
 
     def post(self):
         params = {
-            'name': request.values.get('name'),
-            'year': request.values.get('year'),
-            'cover_url': request.values.get('cover_url'),
-            'artists': request.values.getlist('artist_id'),
+            'name': request.form.get('name'),
+            'year': request.form.get('year'),
+            'cover_url': request.form.get('cover_url'),
+            'artists': request.form.getlist('artist_id'),
         }
 
         try:
@@ -203,10 +203,10 @@ class TrackResource(Resource):
 
     def post(self):
         params = {
-            'title': request.values.get('title'),
-            'artist_id': request.values.get('artist_id'),
-            'album_id': request.values.get('album_id'),
-            'ordinal': request.values.get('ordinal'),
+            'title': request.form.get('title'),
+            'artist_id': request.form.get('artist_id'),
+            'album_id': request.form.get('album_id'),
+            'ordinal': request.form.get('ordinal'),
         }
 
         try:
