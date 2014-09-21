@@ -34,14 +34,15 @@ class TrackResourceTestCase(ResourceTestCase):
         nose.eq_(rv.status_code, 404)
 
     def test_track_creation(self):
-        rv = self.app.post('/tracks', data=self.get_payload(),
+        url = '/tracks?hash_file=false&no_metadata=true'
+        rv = self.app.post(url, data=self.get_payload(),
                            content_type='multipart/form-data')
 
         resp = json.loads(rv.data)
 
         nose.eq_(rv.status_code, 201)
 
-        _rv = self.app.post('/tracks', data=self.get_payload())
+        _rv = self.app.post(url, data=self.get_payload())
         nose.eq_(_rv.status_code, 409)  # Conflict
 
     def test_track_update(self):
