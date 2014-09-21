@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
-from hashlib import md5
-from random import random
 import datetime
 import logging
 import logging.config
 import os
+import random
+import re
+import string
 import traceback
 
 from slugify import slugify as do_slug
@@ -33,20 +34,24 @@ def get_logger():
     return logging.getLogger('shiva')
 
 
-def randstr(length=None):
-    """ Generates a random string of the given length. """
+def randstr(length=32):
+    """
+    Generates a random string of the given length. Defaults to 32 characters.
+
+    """
+
+    if not isinstance(length, int):
+        raise ValueError
 
     if length < 1:
         return ''
 
-    digest = ''
-    while len(digest) < length:
-        digest += md5(str(random())).hexdigest()
+    invalid_chars_re = re.compile(r'[\'"\\]*')
 
-    if length:
-        return digest[:length]
+    chars = string.digits + string.letters + string.punctuation
+    chars = ''.join(invalid_chars_re.split(chars))
 
-    return digest
+    return ''.join(random.choice(chars) for _ in range(length))
 
 
 def slugify(text):

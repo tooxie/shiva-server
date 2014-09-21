@@ -14,6 +14,19 @@ so ``$XDG_CONFIG_HOME/shiva/config.py`` will take precedence over
 ``config/local.py``.
 
 
+SECRET_KEY
+----------
+
+It's mandatory that you define a ``SECRET_KEY`` in your local configuration
+file, ``shiva-server`` won't start otherwise. However, shiva will suggest you
+one which will be based on all printable characters, except for spaces and
+quotes. Read the source of ``shiva.utils.randstr`` for more information.
+
+The key will be used to sign the authentication tokens, so make sure that it's
+long, random, and securely generated. Don't ever use any 3rd party service for
+this.
+
+
 DEBUG mode
 ----------
 
