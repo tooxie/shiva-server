@@ -35,6 +35,7 @@ class ResourceTestCase(unittest.TestCase):
         shiva.app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         shiva.app.config['TESTING'] = True
         shiva.app.config['ALLOW_DELETE'] = True
+        shiva.app.config['ALLOW_ANONYMOUS_ACCESS'] = True
         shiva.app.config['CONVERTER_CLASS'] = ConverterMock
         shiva.app.config['UPLOAD_HANDLER'] = UploadHandlerMock
 

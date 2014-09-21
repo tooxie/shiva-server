@@ -4,7 +4,10 @@ import bcrypt
 import hashlib
 import os
 
+from flask import current_app as app
 from flask.ext.sqlalchemy import SQLAlchemy
+from itsdangerous import (BadSignature, SignatureExpired,
+                          TimedJSONWebSignatureSerializer as Serializer)
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import func
 
@@ -287,6 +290,35 @@ class User(db.Model):
         _pass = bcrypt.hashpw(password.encode('utf-8'), salt)
 
         return (_pass, salt)
+
+    def verify_password(self, password):
+        _password, salt = self.hash_password(password)
+
+        return _password == self.password
+
+    def generate_auth_token(self, expiration=None):
+        if not expiration:
+            expiration = app.config.get('AUTH_EXPIRATION_TIME', 3600)
+
+        if not isinstance(expiration, int):
+            raise ValueError
+
+        s = Serializer(app.config['SECRET_KEY'], expires_in=expiration)
+
+        return s.dumps({'pk': self.pk})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(app.config['SECRET_KEY'])
+
+        try:
+            data = s.loads(token)
+        except (SignatureExpired, BadSignature):
+            return None
+
+        user = User.query.get(data['pk'])
+
+        return user
 
     def __repr__(self):
         return "<User ('%s')>" % self.email

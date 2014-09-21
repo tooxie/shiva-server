@@ -45,3 +45,8 @@ UPLOAD_PATH = ''
 # module.
 UPLOAD_DEFAULT_ARTIST = 'unknown'
 UPLOAD_DEFAULT_ALBUM = 'unknown'
+
+# Auth
+# Time (in seconds) for which the session tokens will be valid. After this time
+# the client will have to re-authenticate.
+AUTH_EXPIRATION_TIME = 3600  # 1h
