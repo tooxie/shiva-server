@@ -9,6 +9,7 @@ from shiva import app
 class AppTestCase(unittest.TestCase):
 
     def setUp(self):
+        app.app.config['SECRET_KEY'] = 'heimlich'
         app.app.run = Mock()
 
     def test_main(self):
