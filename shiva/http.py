@@ -44,8 +44,10 @@ class Resource(restful.Resource):
 
         # TODO: Check permissions
         item = self._by_id(id)
+        item = self.update(item)
 
-        self.update(item)
+        g.db.session.add(item)
+        g.db.session.commit()
 
     def delete(self, id=None):
         if not id:

@@ -56,8 +56,7 @@ class ArtistResource(Resource):
         artist.name = request.form.get('name')
         artist.image = request.form.get('image')
 
-        db.session.add(artist)
-        db.session.commit()
+        return artist
 
     def get_full_tree(self, artist):
         _artist = marshal(artist, self.get_resource_fields())
@@ -147,8 +146,7 @@ class AlbumResource(Resource):
         album.year = request.form.get('year')
         album.cover = request.form.get('cover_url')
 
-        db.session.add(album)
-        db.session.commit()
+        return album
 
     def get_filters(self):
         return (
@@ -279,8 +277,7 @@ class TrackResource(Resource):
             except:
                 pass
 
-        db.session.add(track)
-        db.session.commit()
+        return track
 
     def get_filters(self):
         return (
