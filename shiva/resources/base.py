@@ -15,10 +15,7 @@ from shiva.utils import parse_bool, get_list, get_by_name
 class ArtistResource(Resource):
     """ The resource responsible for artists. """
 
-    def __init__(self, *args, **kwargs):
-        self.db_model = Artist
-
-        super(ArtistResource, self).__init__(*args, **kwargs)
+    db_model = Artist
 
     def get_resource_fields(self):
         return {
@@ -77,10 +74,7 @@ class ArtistResource(Resource):
 class AlbumResource(Resource):
     """ The resource responsible for albums. """
 
-    def __init__(self, *args, **kwargs):
-        self.db_model = Album
-
-        super(AlbumResource, self).__init__(*args, **kwargs)
+    db_model = Album
 
     def get_resource_fields(self):
         return {
@@ -176,10 +170,7 @@ class AlbumResource(Resource):
 class TrackResource(Resource):
     """ The resource responsible for tracks. """
 
-    def __init__(self, *args, **kwargs):
-        self.db_model = Track
-
-        super(TrackResource, self).__init__(*args, **kwargs)
+    db_model = Track
 
     def get_resource_fields(self):
         return {
