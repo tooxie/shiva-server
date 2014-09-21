@@ -9,6 +9,7 @@ import re
 import string
 import traceback
 
+from flask.ext.restful.utils import unpack as _unpack
 from slugify import slugify as do_slug
 import dateutil.parser
 import mutagen
@@ -237,3 +238,17 @@ class MetadataManager(object):
     def save(self):
         """Save changes to file metadata."""
         self.reader.save()
+
+
+def unpack(value):
+    """Return a three tuple of data, code, and headers"""
+    if isinstance(value, tuple):
+        if len(value) == 0:
+            return '', 200, {}
+
+    data, code, headers = _unpack(value[0])
+
+    if isinstance(data, tuple):
+        return data[0], code, headers
+
+    return data, code, headers
