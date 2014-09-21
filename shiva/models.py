@@ -251,9 +251,6 @@ class LyricsCache(db.Model):
 
 
 class User(db.Model):
-    """
-    """
-
     __tablename__ = 'users'
 
     pk = db.Column(db.Integer, primary_key=True)
@@ -261,12 +258,23 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=True)
     salt = db.Column(db.String(256), nullable=True)
 
+    # Metadata
+    # Should these attributes be in their own table?
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    creation_date = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, *args, **kwargs):
+        kwargs['creation_date'] = datetime.now()
+
+        super(User, self).__init__(*args, **kwargs)
+
     def __setattr__(self, *args, **kwargs):
         if args[0] == 'password':
             password = args[1]
             salt = None
 
-            if password is not None:
+            if password not in (None, ''):
                 password, salt = self.hash_password(password)
 
             self.salt = salt
