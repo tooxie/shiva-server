@@ -18,6 +18,23 @@ from shiva.exceptions import MetadataManagerReadError
 
 
 def parse_bool(value):
+    """
+    This utility takes a string or a boolean, and return a boolean value. The
+    possible False strings are 'false', '0' and '', any other string will
+    evaluate to True. Raises ValueError if the value is not either boolean nor
+    string.
+
+    """
+
+    if value is None:
+        return False
+
+    if isinstance(value, bool):
+        return value
+
+    if not isinstance(value, basestring):
+        raise ValueError
+
     false_values = ('false', '0', '')
 
     return value.lower() not in false_values
