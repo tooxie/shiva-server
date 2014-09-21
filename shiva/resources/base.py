@@ -31,8 +31,8 @@ class ArtistResource(Resource):
         }
 
     def post(self):
-        name = request.values.get('name')
-        image_url = request.values.get('image_url')
+        name = request.form.get('name')
+        image_url = request.form.get('image_url')
 
         try:
             artist = self.create(name, image_url)
@@ -56,8 +56,7 @@ class ArtistResource(Resource):
         artist.name = request.form.get('name')
         artist.image = request.form.get('image')
 
-        db.session.add(artist)
-        db.session.commit()
+        return artist
 
     def get_full_tree(self, artist):
         _artist = marshal(artist, self.get_resource_fields())
@@ -99,10 +98,10 @@ class AlbumResource(Resource):
 
     def post(self):
         params = {
-            'name': request.values.get('name'),
-            'year': request.values.get('year'),
-            'cover_url': request.values.get('cover_url'),
-            'artists': request.values.getlist('artist_id'),
+            'name': request.form.get('name'),
+            'year': request.form.get('year'),
+            'cover_url': request.form.get('cover_url'),
+            'artists': request.form.getlist('artist_id'),
         }
 
         try:
@@ -147,8 +146,7 @@ class AlbumResource(Resource):
         album.year = request.form.get('year')
         album.cover = request.form.get('cover_url')
 
-        db.session.add(album)
-        db.session.commit()
+        return album
 
     def get_filters(self):
         return (
@@ -205,10 +203,10 @@ class TrackResource(Resource):
 
     def post(self):
         params = {
-            'title': request.values.get('title'),
-            'artist_id': request.values.get('artist_id'),
-            'album_id': request.values.get('album_id'),
-            'ordinal': request.values.get('ordinal'),
+            'title': request.form.get('title'),
+            'artist_id': request.form.get('artist_id'),
+            'album_id': request.form.get('album_id'),
+            'ordinal': request.form.get('ordinal'),
         }
 
         try:
@@ -279,8 +277,7 @@ class TrackResource(Resource):
             except:
                 pass
 
-        db.session.add(track)
-        db.session.commit()
+        return track
 
     def get_filters(self):
         return (
