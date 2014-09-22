@@ -14,8 +14,6 @@ class TrackResourceTestCase(ResourceTestCase):
             'title': 'I want it that way',
             'path': '/some/path',
             'track': (StringIO('The content of the mp3'), 'track.mp3'),
-            'hash_file': False,
-            'no_metadata': True,
         }
 
     def test_track_base_resource(self):
@@ -44,6 +42,28 @@ class TrackResourceTestCase(ResourceTestCase):
 
         _rv = self.app.post(url, data=self.get_payload())
         nose.eq_(_rv.status_code, 409)  # Conflict
+
+    def test_track_creation_with_nonexistent_artist_id(self):
+        url = '/tracks?hash_file=false&no_metadata=true'
+        payload = self.get_payload()
+        payload['artist_id'] = 404
+        rv = self.app.post(url, data=payload,
+                           content_type='multipart/form-data')
+
+        resp = json.loads(rv.data)
+
+        nose.eq_(rv.status_code, 400)  # Bad Request
+
+    def test_track_creation_with_nonexistent_album_id(self):
+        url = '/tracks?hash_file=false&no_metadata=true'
+        payload = self.get_payload()
+        payload['album_id'] = 404
+        rv = self.app.post(url, data=payload,
+                           content_type='multipart/form-data')
+
+        resp = json.loads(rv.data)
+
+        nose.eq_(rv.status_code, 400)  # Bad Request
 
     def test_track_update(self):
         url = '/tracks/%s' % self.track.pk
