@@ -231,7 +231,6 @@ class TrackResource(Resource):
 
         handler.save()
 
-        # TODO: Document this.
         hash_file = parse_bool(request.args.get('hash_file', True))
         no_metadata = parse_bool(request.args.get('no_metadata', False))
 
