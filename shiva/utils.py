@@ -269,3 +269,22 @@ def unpack(value):
         return data[0], code, headers
 
     return data, code, headers
+
+
+def get_list(model, id_list):
+    for _id in id_list:
+        artist = model.query.get(_id)
+
+        if not artist:
+            raise ValueError
+
+        yield artist
+
+
+def get_by_name(model, name):
+    instance = model.query.filter_by(name=name).first()
+
+    if not instance:
+        instance = model(name=name)
+
+    return instance
