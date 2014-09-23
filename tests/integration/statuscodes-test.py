@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from nose import tools as nose
 import os
 import tempfile
 import unittest
+
+from nose import tools as nose
 
 from shiva import app as shiva
 
