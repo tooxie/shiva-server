@@ -286,8 +286,8 @@ class User(db.Model):
         super(User, self).__setattr__(*args, **kwargs)
 
     def hash_password(self, password, salt=None):
-        salt = salt if salt else bcrypt.gensalt()
-        _pass = bcrypt.hashpw(password.encode('utf-8'), salt)
+        salt = salt or self.salt or bcrypt.gensalt()
+        _pass = bcrypt.hashpw(password.encode('utf-8'), salt.encode('utf-8'))
 
         return (_pass, salt)
 
