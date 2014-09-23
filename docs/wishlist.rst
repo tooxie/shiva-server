@@ -10,6 +10,7 @@ on them (or not). We may add things that are not documented here as well.
 * Download your tracks in batch.
 * Users.
 
+  + Join by invitation
   + Favourite artists.
   + Playlists.
   + Play count.

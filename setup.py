@@ -32,6 +32,7 @@ setup(
     package_dir={'': '.'},
     packages=find_packages('.'),
     install_requires=[
+        'bcrypt==1.0.2',
         'docopt==0.6.1',
         'Flask-Restful==0.2.3',
         'Flask-SQLAlchemy==0.16',
@@ -45,9 +46,10 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'shiva-server = shiva.app:main',
-            'shiva-indexer = shiva.indexer:main',
+            'shiva-admin = shiva.admin:main',
             'shiva-fileserver = shiva.fileserver:main',
+            'shiva-indexer = shiva.indexer:main',
+            'shiva-server = shiva.app:main',
         ]
     }
 )

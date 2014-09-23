@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import bcrypt
 import hashlib
 import os
 
@@ -11,7 +12,7 @@ from shiva.utils import slugify, MetadataManager
 
 db = SQLAlchemy()
 
-__all__ = ('db', 'Artist', 'Album', 'Track', 'LyricsCache')
+__all__ = ('db', 'Artist', 'Album', 'Track', 'LyricsCache', 'User')
 
 
 def random_row(model):
@@ -247,3 +248,45 @@ class LyricsCache(db.Model):
 
     def __repr__(self):
         return "<LyricsCache ('%s')>" % self.track.title
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=True)
+    salt = db.Column(db.String(256), nullable=True)
+
+    # Metadata
+    # Should these attributes be in their own table?
+    is_active = db.Column(db.Boolean, nullable=False, default=False)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    creation_date = db.Column(db.DateTime, nullable=False)
+
+    def __init__(self, *args, **kwargs):
+        kwargs['creation_date'] = datetime.now()
+
+        super(User, self).__init__(*args, **kwargs)
+
+    def __setattr__(self, *args, **kwargs):
+        if args[0] == 'password':
+            password = args[1]
+            salt = None
+
+            if password not in (None, ''):
+                password, salt = self.hash_password(password)
+
+            self.salt = salt
+            args = ('password', password)
+
+        super(User, self).__setattr__(*args, **kwargs)
+
+    def hash_password(self, password, salt=None):
+        salt = salt if salt else bcrypt.gensalt()
+        _pass = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+        return (_pass, salt)
+
+    def __repr__(self):
+        return "<User ('%s')>" % self.email
