@@ -384,6 +384,28 @@ combining both (``/tracks?album=0&artist=0``) you can get the list of "orphan"
 tracks.
 
 
+Track creation
+--------------
+
+To create a track, ``POST`` a Multipart-Encoded file as a ``track`` argument to
+the ``/tracks`` resource. This is the only required parameter. If you include
+the arguments ``artist_id`` or ``album_id``, it will take precedence and the
+file's metadata for artist (or album) will be ignored. If you send multimple
+IDs, they will all be used, but if any of them doesn't exist in the DB, the
+system will return a ``400 Bad Request`` and the track won't be saved.
+
+.. code:: sh
+
+    curl -F "track=@file.mp3" -F "artist_id=1" -F "artist_id=17" http://127.0.0.1:9002/tracks
+
+Use the query arguments ``hash_file`` and ``no_metadata`` to define if the file
+gets hashed and its metadata read.
+
+.. code:: sh
+
+    curl -F "track=@file.mp3" http://127.0.0.1:9002/tracks?hash_file=true&no_metadata=true
+
+
 /tracks/<int:id>/lyrics
 -----------------------
 

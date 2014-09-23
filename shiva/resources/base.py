@@ -9,7 +9,7 @@ from shiva.http import Resource, JSONResponse
 from shiva.models import Album, Artist, db, Track
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
                                     ManyToManyField)
-from shiva.utils import parse_bool
+from shiva.utils import parse_bool, get_list, get_by_name
 
 
 class ArtistResource(Resource):
@@ -204,8 +204,8 @@ class TrackResource(Resource):
     def post(self):
         params = {
             'title': request.form.get('title'),
-            'artist_id': request.form.get('artist_id'),
-            'album_id': request.form.get('album_id'),
+            'artists': request.form.getlist('artist_id'),
+            'albums': request.form.getlist('album_id'),
             'ordinal': request.form.get('ordinal'),
         }
 
@@ -219,7 +219,7 @@ class TrackResource(Resource):
 
         return response, 201, headers
 
-    def create(self, title, artist_id, album_id, ordinal):
+    def create(self, title, artists, albums, ordinal):
         if not request.files:
             abort(400)
 
@@ -231,28 +231,41 @@ class TrackResource(Resource):
 
         handler.save()
 
-        # TODO: Document this.
-        hash_file = parse_bool(request.form.get('hash_file', True))
-        no_metadata = parse_bool(request.form.get('no_metadata', False))
+        hash_file = parse_bool(request.args.get('hash_file', True))
+        no_metadata = parse_bool(request.args.get('no_metadata', False))
 
         track = Track(path=handler.path, hash_file=hash_file,
                       no_metadata=no_metadata)
         db.session.add(track)
 
-        if handler.artist:
-            artist = Artist.query.filter_by(name=handler.artist).first()
-            if not artist:
-                artist = Artist(name=handler.artist)
-                db.session.add(artist)
+        # If an artist (or album) is given as argument, it will take precedence
+        # over whatever the file's metadata say.
+        artist_list = []
+        if artists:
+            try:
+                artist_list.extend(get_list(Artist, artists))
+            except ValueError:
+                abort(400)  # Bad Request
+        else:
+            if handler.artist:
+                artist_list.append(get_by_name(Artist, handler.artist))
 
+        album_list = []
+        if albums:
+            try:
+                album_list.extend(get_list(Album, albums))
+            except ValueError:
+                abort(400)  # Bad Request
+        else:
+            if handler.album:
+                artist_list.append(get_by_name(Album, handler.album))
+
+        for artist in artist_list:
+            db.session.add(artist)
             artist.tracks.append(track)
 
-        if handler.album:
-            album = Album.query.filter_by(name=handler.album).first()
-            if not album:
-                album = Album(name=handler.album)
-                db.session.add(album)
-
+        for album in album_list:
+            db.session.add(album)
             album.tracks.append(track)
 
         db.session.commit()
