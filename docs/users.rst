@@ -37,7 +37,7 @@ will have to re-authenticate.
 
     curl -d "email=herp@derp.com" -d "password=s3cr37" http://127.0.0.1:9002/users/login
 
-It will return something like::
+It will return something like:
 
 .. code:: javascript
 
@@ -45,7 +45,7 @@ It will return something like::
         "token": "eyJhbGciOiJIUzI1NiIsImV4cCI6MTQxMTUwNDczMywiaWF0IjoxNDExNTAzMjkzfQ.eyJwayI6MX0.7vNzVWGr-gJX7qygFJKM5x6dCVZapKTSsI2IzwYggLY"
     }
 
-You then need to include that token with your every request::
+You then need to include that token with your every request:
 
 .. code:: sh
 
