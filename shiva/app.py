@@ -5,6 +5,7 @@ from flask import Flask, g, request
 from flask.ext.restful import Api
 
 from shiva import resources
+from shiva.auth import verify_credentials
 from shiva.config import Configurator
 from shiva.models import db
 from shiva.utils import randstr
@@ -37,6 +38,7 @@ api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
 
 # Users
 api.add_resource(resources.UserResource, '/users', endpoint='users')
+api.add_resource(resources.AuthResource, '/users/login', endpoint='auth')
 
 # Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>',
@@ -49,6 +51,9 @@ api.add_resource(resources.AboutResource, '/about', endpoint='about')
 @app.before_request
 def before_request():
     g.db = db
+
+    # auth
+    verify_credentials(app)
 
 
 @app.after_request

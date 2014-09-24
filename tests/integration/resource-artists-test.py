@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from nose import tools as nose
-
 from flask import json
+from nose import tools as nose
 
 from tests.integration.resource import ResourceTestCase
 

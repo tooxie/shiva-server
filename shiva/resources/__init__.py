@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from shiva.auth import AuthResource
 from shiva.resources.base import (ArtistResource, AlbumResource, TrackResource,
                                   UserResource)
 from shiva.resources.static import AboutResource, ClientResource
