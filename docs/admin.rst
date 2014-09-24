@@ -2,7 +2,7 @@ Admin utility
 =============
 
 The utility ``shiva-admin`` will let you do some basic management tasks. The
-following commands are available::
+following commands are available:
 
 * ``user create [<email>]``
 * ``user activate <email_or_id>``
