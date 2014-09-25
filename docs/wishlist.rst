@@ -32,10 +32,4 @@ For the sake of simplicity many assumptions were made that will eventually be
 worked on and improved/removed.
 
 * Only music files. No videos. No images.
-* No users.
-
-  + Therefore, no customization.
-  + And no privacy.
-
-* No uploading of files.
 * No update of files' metadata when DB info changes.
