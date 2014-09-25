@@ -32,6 +32,7 @@ class AdminTestCase(unittest.TestCase):
             'password': 'p4ssw0rd',
             'is_active': True,
             'is_admin': False,
+            'interactive': False,
         }
 
     def test_user_creation(self):
@@ -64,6 +65,6 @@ class AdminTestCase(unittest.TestCase):
         user = admin.create_user(**self.get_payload())
         nose.ok_(user.pk is not None)
 
-        admin.delete(user.pk)
+        admin.delete_user(user.pk)
 
         nose.ok_(admin.get_user(user.pk) is None)
