@@ -205,6 +205,9 @@ class TrackResource(Resource):
             'ordinal': request.form.get('ordinal'),
         }
 
+        if 'track' not in request.files:
+            abort(400)  # Bad Request
+
         try:
             track = self.create(**params)
         except (IntegrityError, ObjectExistsError):
@@ -216,9 +219,6 @@ class TrackResource(Resource):
         return response, 201, headers
 
     def create(self, title, artists, albums, ordinal):
-        if not request.files:
-            abort(400)
-
         UploadHandler = app.config.get('UPLOAD_HANDLER')
         try:
             handler = UploadHandler(track=request.files.get('track'))
