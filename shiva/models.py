@@ -251,6 +251,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     pk = db.Column(db.Integer, primary_key=True)
+    display_name = db.Column(db.String(256))
     email = db.Column(db.String(256), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=True)
     salt = db.Column(db.String(256), nullable=True)

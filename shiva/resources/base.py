@@ -384,6 +384,7 @@ class UserResource(Resource):
         if not email:
             abort(400)  # Bad Request
 
+        display_name = request.form.get('display_name')
         is_active = False
         password = request.form.get('password')
         if password:
@@ -392,8 +393,9 @@ class UserResource(Resource):
         is_admin = parse_bool(request.form.get('admin', False))
 
         try:
-            user = self.create(email=email, password=password,
-                               is_active=is_active, is_admin=is_admin)
+            user = self.create(display_name=display_name, email=email,
+                               password=password, is_active=is_active,
+                               is_admin=is_admin)
         except (IntegrityError, ObjectExistsError):
             abort(409)
 
@@ -402,9 +404,9 @@ class UserResource(Resource):
 
         return response, 201, headers
 
-    def create(self, email, password, is_active, is_admin):
-        user = User(email=email, password=password, is_active=is_active,
-                    is_admin=is_admin)
+    def create(self, display_name, email, password, is_active, is_admin):
+        user = User(display_name=display_name, email=email, password=password,
+                    is_active=is_active, is_admin=is_admin)
 
         db.session.add(user)
         db.session.commit()
@@ -418,6 +420,9 @@ class UserResource(Resource):
                 abort(400)  # Bad Request
 
             user.email = email
+
+        if 'display_name' in request.form:
+            user.display_name = request.form.get('display_name')
 
         if 'password' in request.form:
             user.password = request.form.get('password')

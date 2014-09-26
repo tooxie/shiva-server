@@ -47,6 +47,7 @@ class UsersResourceTestCase(ResourceTestCase):
     def get_payload(self):
         return {
             'email': 'derpina@herp.com',
+            'display_name': 'derpina',
             'password': 'blink182',
             'is_active': True,
             'is_admin': False,
