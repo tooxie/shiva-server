@@ -6,6 +6,44 @@ from tests.integration.resource import ResourceTestCase
 
 
 class UsersResourceTestCase(ResourceTestCase):
+    """
+    GET /users
+        401 Unauthorized
+        405 Method Not Allowed
+    POST /users email=<str> [display_name=<str>] [password=<str>]
+                [is_active=<bool>] [is_admin=<bool>]
+        201 Created
+        400 Bad Request
+        401 Unauthorized
+        409 Conflict
+    GET /users/me
+        200 OK
+        401 Unauthorized
+    POST /users/me
+        401 Unauthorized
+        405 Method Not Allowed
+    PUT /users/me
+        401 Unauthorized
+        405 Method Not Allowed
+    DELETE /users/me
+        401 Unauthorized
+        405 Method Not Allowed
+    GET /users/<id>
+        200 OK
+        401 Unauthorized
+        404 Not Found
+    PUT /users/<id> [email=<str>] [display_name=<str>] [password=<str>]
+                    [is_active=<bool>] [is_admin=<bool>]
+        204 No Content
+        400 Bad Request (If email is unset)
+        401 Unauthorized
+        404 Not Found
+        409 Conflict
+    DELETE /users/<id>
+        204 No Content
+        401 Unauthorized
+        404 Not Found
+    """
 
     def get_payload(self):
         return {

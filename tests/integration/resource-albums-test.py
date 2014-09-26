@@ -6,6 +6,29 @@ from tests.integration.resource import ResourceTestCase
 
 
 class AlbumResourceTestCase(ResourceTestCase):
+    """
+    GET /albums [artist=<int>]
+        200 OK
+        401 Unauthorized
+    POST /albums name=<str> [year=<int>] [cover_url=<str>]
+        201 Created
+        400 Bad Request
+        401 Unauthorized
+        409 Conflict
+    GET /albums/<id> [fulltree=<bool>]
+        200 OK
+        401 Unauthorized
+        404 Not Found
+    PUT /albums/<id> [name=<str>] [year=<int>] [cover_url=<str>]
+        204 No Content
+        400 Bad Request
+        401 Unauthorized
+        404 Not Found
+    DELETE /albums/<id>
+        204 No Content
+        401 Unauthorized
+        404 Not Found
+    """
 
     def get_payload(self):
         return {

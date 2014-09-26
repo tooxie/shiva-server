@@ -8,6 +8,30 @@ from tests.integration.resource import ResourceTestCase
 
 
 class TrackResourceTestCase(ResourceTestCase):
+    """
+    GET /tracks [album=<id>] [artist=<id>]
+        200 OK
+        401 Unauthorized
+    POST /tracks track=<file> [title=<str>] [ordinal=<int>] [artist=<int>]
+                 [album=<int>]
+        201 Created
+        400 Bad Request
+        401 Unauthorized
+        409 Conflict
+    GET /tracks/<id> [artist=<int>] [album=<int>]
+        200 OK
+        401 Unauthorized
+        404 Not Found
+    PUT /tracks/<id> [title=<str>] [ordinal=<int>] [artist=<int>] [album=<int>]
+        204 No Content
+        400 Bad Request
+        401 Unauthorized
+        404 Not Found
+    DELETE /tracks/<id>
+        204 No Content
+        401 Unauthorized
+        404 Not Found
+    """
 
     def get_payload(self):
         return {
