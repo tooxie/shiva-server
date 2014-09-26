@@ -4,6 +4,7 @@ from flask.ext.restful import fields, marshal
 
 from shiva.converter import get_converter
 from shiva.media import get_mimetypes
+from shiva.models import TrackPlaylistRelationship
 
 
 class InstanceURI(fields.String):
@@ -48,21 +49,55 @@ class ManyToManyField(fields.Raw):
         return items
 
 
+class PlaylistField(fields.Raw):
+    """
+    This Field understands the linked list in which the playlist are
+    structured. Besides from fetching all the tracks it iterates over the items
+    finding the right index for each.
+    """
+
+    def __init__(self, nested):
+        self.nested = nested
+
+        super(PlaylistField, self).__init__()
+
+    def output(self, key, obj):
+        items = list(TrackPlaylistRelationship.query.filter_by(playlist=obj))
+        output = []
+        prev = None
+        index = 0
+        while len(items):
+            x = 0
+            for r_track in items:
+                if r_track.previous_track == prev:
+                    output.append(self.marshal(r_track, index))
+                    del(items[x])
+                    prev = r_track
+                    index += 1
+
+                    break
+
+                x += 1
+
+        return output
+
+    def marshal(self, r_track, index):
+        item = marshal(r_track, self.nested)
+        item['index'] = index
+
+        return item
+
+
 class ForeignKeyField(fields.Raw):
     def __init__(self, foreign_obj, nested):
-        self.foreign_obj = foreign_obj
         self.nested = nested
 
         super(ForeignKeyField, self).__init__()
 
     def output(self, key, obj):
-        _id = getattr(obj, '%s_pk' % key)
-        if not _id:
-            return None
+        _obj = getattr(obj, '%s' % key)
 
-        obj = self.foreign_obj.query.get(_id)
-
-        return marshal(obj, self.nested)
+        return marshal(_obj, self.nested)
 
 
 class Boolean(fields.Raw):

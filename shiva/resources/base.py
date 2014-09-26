@@ -6,9 +6,9 @@ from werkzeug.exceptions import NotFound
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
 from shiva.http import Resource
-from shiva.models import Album, Artist, db, Track, User
+from shiva.models import Album, Artist, db, Track, User, Playlist
 from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
-                                    ManyToManyField)
+                                    ManyToManyField, PlaylistField)
 from shiva.utils import parse_bool, get_list, get_by_name
 
 
@@ -353,6 +353,126 @@ class TrackResource(Resource):
         # _track['tabs'] = tabs.get()
 
         return _track
+
+
+class PlaylistResource(Resource):
+    """
+    Playlist are just a logical collection of tracks. Tracks must not be
+    necessarily related between them in any way.
+
+    To access a user's playlists filter by user id:
+
+        /playlists?user_id=6
+
+    """
+
+    db_model = Playlist
+
+    def get_resource_fields(self):
+        return {
+            'id': fields.Integer(attribute='pk'),
+            'name': fields.String,
+            'user': ForeignKeyField(User, {
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('users'),
+            }),
+            'read_only': fields.Boolean,
+            'creation_date': fields.DateTime,
+            'length': fields.Integer,
+            'tracks': PlaylistField({
+                'id': fields.Integer(attribute='pk'),
+                'uri': InstanceURI('tracks'),
+            }),
+        }
+
+    def post(self):
+        if g.user is None:
+            abort(400)
+
+        name = request.form.get('name', '').strip()
+        if not name:
+            abort(400)  # Bad Request
+
+        read_only = request.form.get('read_only', True)
+
+        playlist = self.create(name=name, read_only=read_only, user=g.user)
+
+        response = marshal(playlist, self.get_resource_fields())
+        headers = {'Location': url_for('playlists', id=playlist.pk)}
+
+        return response, 201, headers
+
+    def create(self, name, read_only, user):
+        playlist = Playlist(name=name, read_only=read_only, user=user)
+
+        db.session.add(playlist)
+        db.session.commit()
+
+        return playlist
+
+    def update(self, playlist):
+        if 'name' in request.form:
+            playlist.name = request.form.get('name')
+
+        if 'read_only' in request.form:
+            playlists.read_only = parse_bool(request.form.get('read_only'))
+
+        return playlist
+
+
+class PlaylistTrackResource(Resource):
+    def post(self, id, verb):
+        handler = getattr(self, '%s_track' % verb)
+        if not handler:
+            abort(400)
+
+        playlist = self.get_playlist(id)
+        if not playlist:
+            abort(404)
+
+        return handler(playlist)
+
+    def add_track(self, playlist):
+        if 'track' not in request.form:
+            abort(400)  # Bad Request
+
+        track = self.get_track(request.form.get('track'))
+        if not track:
+            abort(400)
+
+        try:
+            playlist.insert(request.form.get('index'), track)
+        except ValueError:
+            abort(400)
+
+        return self.Response('')
+
+    def remove_track(self, playlist):
+        if 'index' not in request.form:
+            abort(400)  # Bad Request
+
+        try:
+            playlist.remove_at(request.form.get('index'))
+        except (ValueError, IndexError):
+            abort(400)
+
+        return self.Response('')
+
+    def get_playlist(self, playlist_id):
+        try:
+            playlist = Playlist.query.get(playlist_id)
+        except:
+            playlist = None
+
+        return playlist
+
+    def get_track(self, track_id):
+        try:
+            track = Track.query.get(track_id)
+        except:
+            track = None
+
+        return track
 
 
 class UserResource(Resource):

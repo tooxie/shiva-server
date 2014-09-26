@@ -104,7 +104,7 @@ class Resource(restful.Resource):
         return self.Response('')
 
     def delete(self, id=None):
-        if not id:
+        if not id or not self.db_model:
             return restful.abort(405)  # Method Not Allowed
 
         item = self._by_id(id)
