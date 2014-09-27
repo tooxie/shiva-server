@@ -53,8 +53,15 @@ class ArtistResource(Resource):
         return artist
 
     def update(self, artist):
-        artist.name = request.form.get('name', '').strip()
-        artist.image = request.form.get('image')
+        if 'name' in request.form:
+            name = request.form.get('name', '').strip()
+            if not name:
+                abort(400)  # Bad Request
+
+            artist.name = name
+
+        if 'image' in request.form:
+            artist.image = request.form.get('image_url')
 
         return artist
 
