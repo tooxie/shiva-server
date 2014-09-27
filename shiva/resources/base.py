@@ -28,7 +28,10 @@ class ArtistResource(Resource):
         }
 
     def post(self):
-        name = request.form.get('name')
+        name = request.form.get('name', '').strip()
+        if not name:
+            abort(400)  # Bad Request
+
         image_url = request.form.get('image_url')
 
         try:
@@ -50,7 +53,7 @@ class ArtistResource(Resource):
         return artist
 
     def update(self, artist):
-        artist.name = request.form.get('name')
+        artist.name = request.form.get('name', '').strip()
         artist.image = request.form.get('image')
 
         return artist
@@ -92,7 +95,7 @@ class AlbumResource(Resource):
 
     def post(self):
         params = {
-            'name': request.form.get('name'),
+            'name': request.form.get('name', '').strip(),
             'year': request.form.get('year'),
             'cover_url': request.form.get('cover_url'),
             'artists': request.form.getlist('artist_id'),
@@ -194,7 +197,7 @@ class TrackResource(Resource):
 
     def post(self):
         params = {
-            'title': request.form.get('title'),
+            'title': request.form.get('title', '').strip(),
             'artists': request.form.getlist('artist_id'),
             'albums': request.form.getlist('album_id'),
             'ordinal': request.form.get('ordinal'),
