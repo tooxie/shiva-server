@@ -3,6 +3,8 @@ import os
 import tempfile
 import unittest
 
+from flask import json
+
 from shiva import app as shiva
 from shiva.converter import Converter
 from shiva.models import Artist, Album, Track, User
@@ -35,7 +37,7 @@ class ResourceTestCase(unittest.TestCase):
         shiva.app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         shiva.app.config['TESTING'] = True
         shiva.app.config['ALLOW_DELETE'] = True
-        shiva.app.config['ALLOW_ANONYMOUS_ACCESS'] = True
+        shiva.app.config['ALLOW_ANONYMOUS_ACCESS'] = False
         shiva.app.config['CONVERTER_CLASS'] = ConverterMock
         shiva.app.config['UPLOAD_HANDLER'] = UploadHandlerMock
 
@@ -66,3 +68,59 @@ class ResourceTestCase(unittest.TestCase):
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(self.db_path)
+
+    def authenticate(self):
+        """Logs a user in and returns the corresponding authentication token.
+        """
+
+        if hasattr(self, 'auth_token'):
+            return self.auth_token
+
+        url = '/users/login'
+        payload = dict(email='derp@mail.com', password='blink182')
+        rv = json.loads(self.app.post(url, data=payload).data)
+        self.auth_token = rv['token']
+
+        return self.auth_token
+
+    def do_request(self, method, *args, **kwargs):
+        """
+        Wrapper around flask's test client. It understands shiva's token-based
+        authentication and performs a login before the request, unless
+        otherwise specified.
+        """
+
+        _args = list(args)
+
+        authenticate = kwargs.get('authenticate', True)
+        if authenticate:
+            token = self.authenticate()
+            _args[0] = '%s%stoken=%s' % (args[0],
+                                         '&' if '?' in args[0] else '?',
+                                         token)
+
+        if 'authenticate' in kwargs:
+            del(kwargs['authenticate'])
+
+        func = getattr(self.app, method)
+        rv = func(*_args, **kwargs)
+        try:
+            rv.json = json.loads(rv.data)
+            rv.is_json = True
+        except:
+            rv.json = None
+            rv.is_json = False
+
+        return rv
+
+    def get(self, *args, **kwargs):
+        return self.do_request('get', *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.do_request('post', *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.do_request('put', *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.do_request('delete', *args, **kwargs)

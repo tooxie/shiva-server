@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from flask import json
 from nose import tools as nose
 
 from tests.integration.resource import ResourceTestCase
@@ -53,25 +52,105 @@ class UsersResourceTestCase(ResourceTestCase):
             'is_admin': False,
         }
 
+    # Unauthorized
+    def test_unauthorized_user_base_resource(self):
+        resp = self.get('/users', authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    def test_unauthorized_myself(self):
+        resp = self.get('/users/me', authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    def test_unauthorized_user(self):
+        resp = self.get('/users/1', authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    def test_unauthorized_user_creation(self):
+        payload = self.get_payload()
+        resp = self.post('/users', data=payload, authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    def test_unauthorized_user_update(self):
+        payload = self.get_payload()
+        resp = self.put('/users', data=payload, authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    def test_unauthorized_user_delete(self):
+        resp = self.delete('/users', authenticate=False)
+        nose.eq_(resp.status_code, 401)
+
+    # Authorized
     def test_user_base_resource(self):
-        rv = self.app.get('/users')
-        nose.eq_(rv.status_code, 405)
+        resp = self.get('/users')
+        nose.eq_(resp.status_code, 405)
+
+    # TODO: Test POST, PUT and DELETE against /users/me
+    def test_myself(self):
+        resp = self.get('/users/me')
+        nose.eq_(resp.status_code, 200)
+
+    def test_nonexistent_url(self):
+        resp = self.get('/users/you')
+        nose.eq_(resp.status_code, 404)
+
+    def test_user(self):
+        resp = self.get('/users/%s' % self.user.pk)
+        nose.eq_(resp.status_code, 200)
 
     def test_nonexistent_user(self):
-        rv = self.app.get('/users/123')
-        nose.eq_(rv.status_code, 404)
+        resp = self.get('/users/123')
+        nose.eq_(resp.status_code, 404)
 
     def test_user_creation(self):
-        rv = self.app.post('/users', data=self.get_payload())
-        resp = json.loads(rv.data)
+        resp = self.post('/users', data=self.get_payload())
+        nose.eq_(resp.status_code, 201)
 
-        nose.eq_(rv.status_code, 201)
+        _resp = self.post('/users', data=self.get_payload())
+        nose.eq_(_resp.status_code, 409)  # Conflict
 
-        _rv = self.app.post('/users', data=self.get_payload())
-        nose.eq_(_rv.status_code, 409)  # Conflict
+    def test_user_creation_error(self):
+        payload = self.get_payload().update({'email': ''})
+        resp = self.post('/users', data=payload)
+        nose.eq_(resp.status_code, 400)  # Bad Request
 
-    def test_user_deletion(self):
-        # The correct status code in this case would be 405, but to prevent
-        # brute-force attacks we return always 404.
-        rv = self.app.delete('/users/%i' % self.user.pk)
-        nose.eq_(rv.status_code, 404)
+    def test_user_update(self):
+        resp = self.post('/users', data=self.get_payload())
+        nose.eq_(resp.status_code, 201)
+
+        user_url = '/users/%s' % resp.json['id']
+        old_name = resp.json['display_name']
+
+        resp = self.put(user_url, data={'display_name': '%s2' % old_name})
+        nose.eq_(resp.status_code, 204)
+
+        resp = self.get(user_url)
+        nose.eq_(resp.status_code, 200)
+        nose.ok_(resp.json['display_name'] != old_name)
+
+    def test_user_update_error(self):
+        resp = self.post('/users', data=self.get_payload())
+        user_url = '/users/%s' % resp.json['id']
+
+        resp = self.put(user_url, data={'email': ''})
+        nose.eq_(resp.status_code, 400)  # Bad Request
+
+    def test_user_update_conflict(self):
+        resp = self.post('/users', data={'email': 'one'})
+        resp_url = '/users/%s' % resp.json['id']
+
+        self.post('/users', data={'email': 'two'})
+
+        resp = self.put(resp_url, data={'email': 'two'})
+        nose.eq_(resp.status_code, 409)  # Conflict
+
+    def test_user_delete(self):
+        resp = self.post('/users', data=self.get_payload())
+        nose.eq_(resp.status_code, 201)
+
+        user_url = '/users/%s' % resp.json['id']
+
+        resp = self.delete(user_url)
+        nose.eq_(resp.status_code, 204)
+
+        resp = self.delete(user_url)
+        nose.eq_(resp.status_code, 404)
