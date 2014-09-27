@@ -277,6 +277,11 @@ class TrackResource(Resource):
         track.title = request.form.get('title')
         track.ordinal = request.form.get('ordinal')
 
+        # The track attribute cannot be updated. A new track has to be created
+        # with the new value instead.
+        if 'track' in request.form:
+            abort(400)  # Bad Request
+
         for artist_pk in request.form.getlist('artist_id'):
             try:
                 artist = Artist.query.get(artist_pk)
