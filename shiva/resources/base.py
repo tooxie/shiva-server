@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import current_app as app, request, url_for
+from flask import current_app as app, g, request, url_for
 from flask.ext.restful import abort, fields, marshal
 from werkzeug.exceptions import NotFound
 
@@ -353,22 +353,26 @@ class UserResource(Resource):
     def get_resource_fields(self):
         return {
             'id': fields.Integer(attribute='pk'),
-            'email': fields.String,
-            'is_active': fields.Boolean,
-            'is_admin': fields.Boolean,
+            'display_name': fields.String,
             'creation_date': fields.DateTime,
         }
 
-    def get(self, id=None):
-        if id is None:
-            abort(405)
+    def get(self, id=None, key=None):
+        if key:
+            if key != 'me':
+                abort(404)
+
+            return marshal(g.user, self.get_resource_fields())
+
+        if not id:
+            abort(405)  # Method Not Allowed
 
         return super(UserResource, self).get(id)
 
     def post(self):
         email = request.form.get('email')
         if not email:
-            abort(400)
+            abort(400)  # Bad Request
 
         is_active = False
         password = request.form.get('password')
@@ -398,8 +402,11 @@ class UserResource(Resource):
         return user
 
     def update(self, user):
-        email = request.form.get('email')
-        if email:
+        if 'email' in request.form:
+            email = request.form.get('email', '').strip()
+            if not email:
+                abort(400)  # Bad Request
+
             user.email = email
 
         if 'password' in request.form:
