@@ -54,9 +54,6 @@ class Artist(db.Model):
     events = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
 
-    tracks = db.relationship('Track', secondary=track_artist,
-                             backref="artists", lazy='dynamic')
-
     def __init__(self, *args, **kwargs):
         if 'date_added' not in kwargs:
             kwargs['date_added'] = datetime.today()
@@ -98,9 +95,6 @@ class Album(db.Model):
     year = db.Column(db.Integer)
     cover = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
-
-    tracks = db.relationship('Track', secondary=track_album, backref="albums",
-                             lazy='dynamic')
 
     def __init__(self, *args, **kwargs):
         if 'date_added' not in kwargs:
@@ -155,11 +149,11 @@ class Track(db.Model):
     date_added = db.Column(db.Date(), nullable=False)
     hash = db.Column(db.String(32))
 
-    lyrics = db.relationship('LyricsCache', backref='track', uselist=False)
-
-    album_pk = db.Column(db.Integer, db.ForeignKey('albums.pk'), nullable=True)
-    artist_pk = db.Column(db.Integer, db.ForeignKey('artists.pk'),
-                          nullable=True)
+    lyrics = db.relationship('LyricsCache', backref='tracks', uselist=False)
+    albums = db.relationship('Album', secondary=track_album, lazy='dynamic',
+                             backref=db.backref('tracks', lazy='dynamic'))
+    artists = db.relationship('Artist', secondary=track_artist, lazy='dynamic',
+                              backref=db.backref('tracks', lazy='dynamic'))
 
     def __init__(self, path, *args, **kwargs):
         if not isinstance(path, (basestring, file)):

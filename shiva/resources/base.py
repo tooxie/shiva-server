@@ -64,7 +64,7 @@ class ArtistResource(Resource):
         for album in artist.albums:
             _artist['albums'].append(albums.get_full_tree(album))
 
-        no_album = artist.tracks.filter(Track.albums == None).all()
+        no_album = artist.tracks.filter_by(albums=None).all()
         track_fields = TrackResource().get_resource_fields()
         _artist['no_album_tracks'] = marshal(no_album, track_fields)
 
