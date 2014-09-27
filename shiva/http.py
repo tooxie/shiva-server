@@ -95,13 +95,17 @@ class Resource(restful.Resource):
         item = self.update(item)
 
         g.db.session.add(item)
-        g.db.session.commit()
+        try:
+            g.db.session.commit()
+        except:
+            # Assuming a unique constraint was violated.
+            restful.abort(409)  # Conflict
 
         return self.Response('')
 
     def delete(self, id=None):
         if not id:
-            return restful.abort(405)
+            return restful.abort(405)  # Method Not Allowed
 
         item = self._by_id(id)
 
