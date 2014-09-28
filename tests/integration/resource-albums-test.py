@@ -1,63 +1,117 @@
 # -*- coding: utf-8 -*-
-from flask import json
 from nose import tools as nose
 
 from tests.integration.resource import ResourceTestCase
 
 
 class AlbumResourceTestCase(ResourceTestCase):
+    """
+    GET /albums [artist=<int>]
+        200 OK
+        401 Unauthorized
+    POST /albums name=<str> [year=<int>] [cover_url=<str>]
+        201 Created
+        400 Bad Request
+        401 Unauthorized
+    GET /albums/<id> [fulltree=<bool>]
+        200 OK
+        401 Unauthorized
+        404 Not Found
+    PUT /albums/<id> [name=<str>] [year=<int>] [cover_url=<str>]
+        204 No Content
+        400 Bad Request
+        401 Unauthorized
+        404 Not Found
+    DELETE /albums/<id>
+        204 No Content
+        401 Unauthorized
+        404 Not Found
+    """
 
     def get_payload(self):
         return {
             'name': "Keep rockin'",
         }
 
-    def test_album_base_resource(self):
-        rv = self.app.get('/albums')
-        resp = json.loads(rv.data)
+    # Unauthorized
+    def test_unauthorized_album_base_resource(self):
+        resp = self.get('/albums', authenticate=False)
+        nose.ok_(resp.status_code, 401)
 
-        nose.eq_(rv.status_code, 200)
-        nose.ok_(resp.has_key('item_count'))
-        nose.ok_(resp.has_key('items'))
-        nose.ok_(resp.has_key('page'))
-        nose.ok_(resp.has_key('page_size'))
-        nose.ok_(resp.has_key('pages'))
+    def test_unauthorized_album(self):
+        resp = self.get('/albums/1', authenticate=False)
+        nose.ok_(resp.status_code, 401)
+
+    def test_unauthorized_album_creation(self):
+        payload = self.get_payload()
+        resp = self.post('/albums', data=payload, authenticate=False)
+        nose.ok_(resp.status_code, 401)
+
+    def test_unauthorized_album_update(self):
+        payload = self.get_payload()
+        resp = self.put('/albums/1', data=payload, authenticate=False)
+        nose.ok_(resp.status_code, 401)
+
+    def test_unauthorized_album_delete(self):
+        resp = self.delete('/albums/1', authenticate=False)
+        nose.ok_(resp.status_code, 401)
+
+    # Authorized
+    def test_album_base_resource(self):
+        resp = self.get('/albums')
+
+        nose.eq_(resp.status_code, 200)
+        nose.ok_(resp.json.has_key('item_count'))
+        nose.ok_(resp.json.has_key('items'))
+        nose.ok_(resp.json.has_key('page'))
+        nose.ok_(resp.json.has_key('page_size'))
+        nose.ok_(resp.json.has_key('pages'))
 
     def test_nonexistent_album(self):
-        rv = self.app.get('/albums/123')
-        nose.eq_(rv.status_code, 404)
+        resp = self.get('/albums/123')
+        nose.eq_(resp.status_code, 404)
 
     def test_fulltree(self):
-        rv = self.app.get('/albums/%s?fulltree=1' % self.album_pk)
-        nose.eq_(rv.status_code, 200)
+        resp = self.get('/albums/%s?fulltree=1' % self.album_pk)
+        nose.eq_(resp.status_code, 200)
 
     def test_album_creation(self):
-        rv = self.app.post('/albums', data=self.get_payload())
-        resp = json.loads(rv.data)
+        resp = self.post('/albums', data=self.get_payload())
+        nose.eq_(resp.status_code, 201)
 
-        nose.eq_(rv.status_code, 201)
+        _resp = self.post('/albums', data=self.get_payload())
+        # Albums with the same name for the same artist are allowed.
+        nose.eq_(_resp.status_code, 201)
 
-        _rv = self.app.post('/albums', data=self.get_payload())
-        nose.eq_(_rv.status_code, 409)  # Conflict
+        _resp = self.post('/albums', data={'name': ''})
+        # But albums without name are not allowed.
+        nose.eq_(_resp.status_code, 400)
 
     def test_album_update(self):
         url = '/albums/%s' % self.album.pk
         old_name = self.album.name
 
-        rv = self.app.put(url, data={'name': 'Rock no more'})
-        rv = self.app.get(url)
-        resp = json.loads(rv.data)
+        resp = self.put(url, data={'name': 'Rock no more'})
+        nose.ok_(resp.status_code, 204)
 
-        nose.ok_(resp['name'] != old_name)
+        resp = self.get(url)
+        nose.ok_(resp.status_code, 200)
+        nose.ok_(resp.json['name'] != old_name)
 
-    def test_album_deletion(self):
-        rv = self.app.post('/albums', data={'name': 'derp'})
-        resp = json.loads(rv.data)
+        resp = self.put(url, data={'name': ''})
+        nose.ok_(resp.status_code, 400)
 
-        album_id = resp['id']
+    def test_album_delete(self):
+        resp = self.post('/albums', data={'name': 'derp'})
+        nose.eq_(resp.status_code, 201)
 
-        rv = self.app.delete('/albums/%i' % album_id)
-        nose.eq_(rv.status_code, 200)
+        album_url = '/albums/%i' % resp.json['id']
 
-        rv = self.app.get('/albums/%i' % album_id)
-        nose.eq_(rv.status_code, 404)
+        resp = self.delete(album_url)
+        nose.eq_(resp.status_code, 204)
+
+        resp = self.get(album_url)
+        nose.eq_(resp.status_code, 404)
+
+        resp = self.delete(album_url)
+        nose.eq_(resp.status_code, 404)

@@ -10,7 +10,38 @@ from shiva.decorators import allow_origins, allow_method
 from shiva.utils import parse_bool, unpack
 
 
+class JSONResponse(restful.Response):
+    """
+    A subclass of flask.Response that sets the Content-Type header by default
+    to "application/json".
+    """
+
+    def __init__(self, *args, **kwargs):
+        data, status, headers = unpack(args)
+
+        params = {
+            'mimetype': 'application/json',
+            'response': data,
+            'status': status,
+            'headers': headers,
+        }
+        params.update(kwargs.copy())
+
+        if status >= 400:
+            params['response'] = restful.utils.error_data(status)
+
+        if params['status'] == 200 and params['response'] == '':
+            params['status'] = 204
+
+        if isinstance(params['response'], dict):
+            params['response'] = json.dumps(params['response'])
+
+        super(JSONResponse, self).__init__(**params)
+
+
 class Resource(restful.Resource):
+    Response = JSONResponse
+
     def __new__(cls, *args, **kwargs):
         cls.method_decorators.append(allow_method)
 
@@ -23,7 +54,7 @@ class Resource(restful.Resource):
     # Without this the shiva.decorator.allow_origins method won't get called
     # when issuing an OPTIONS request.
     def options(self, *args, **kwargs):
-        return JSONResponse()
+        return self.Response()
 
     def get(self, id=None, slug=None):
         """
@@ -64,18 +95,24 @@ class Resource(restful.Resource):
         item = self.update(item)
 
         g.db.session.add(item)
-        g.db.session.commit()
+        try:
+            g.db.session.commit()
+        except:
+            # Assuming a unique constraint was violated.
+            restful.abort(409)  # Conflict
+
+        return self.Response('')
 
     def delete(self, id=None):
         if not id:
-            return restful.abort(405)
+            return restful.abort(405)  # Method Not Allowed
 
         item = self._by_id(id)
 
         g.db.session.delete(item)
         g.db.session.commit()
 
-        return ''
+        return self.Response('')
 
     def _by_id(self, id):
         try:
@@ -183,32 +220,3 @@ class Resource(restful.Resource):
             'page_size': limit,
             'pages': total_pages,
         }
-
-
-class JSONResponse(restful.Response):
-    """
-    A subclass of flask.Response that sets the Content-Type header by default
-    to "application/json".
-    """
-
-    def __init__(self, *args, **kwargs):
-        data, status, headers = unpack(args)
-
-        params = {
-            'mimetype': 'application/json',
-            'response': data,
-            'status': status,
-            'headers': headers,
-        }
-        params.update(kwargs.copy())
-
-        if status >= 400:
-            params['response'] = restful.utils.error_data(status)
-
-        if params['status'] == 200 and params['response'] == '':
-            params['status'] = 204
-
-        if isinstance(params['response'], dict):
-            params['response'] = json.dumps(params['response'])
-
-        super(JSONResponse, self).__init__(**params)

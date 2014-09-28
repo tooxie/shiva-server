@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import current_app as app, request, url_for
+from flask import current_app as app, g, request, url_for
 from flask.ext.restful import abort, fields, marshal
 from werkzeug.exceptions import NotFound
 
@@ -28,7 +28,10 @@ class ArtistResource(Resource):
         }
 
     def post(self):
-        name = request.form.get('name')
+        name = request.form.get('name', '').strip()
+        if not name:
+            abort(400)  # Bad Request
+
         image_url = request.form.get('image_url')
 
         try:
@@ -50,8 +53,15 @@ class ArtistResource(Resource):
         return artist
 
     def update(self, artist):
-        artist.name = request.form.get('name')
-        artist.image = request.form.get('image')
+        if 'name' in request.form:
+            name = request.form.get('name', '').strip()
+            if not name:
+                abort(400)  # Bad Request
+
+            artist.name = name
+
+        if 'image' in request.form:
+            artist.image = request.form.get('image_url')
 
         return artist
 
@@ -64,7 +74,7 @@ class ArtistResource(Resource):
         for album in artist.albums:
             _artist['albums'].append(albums.get_full_tree(album))
 
-        no_album = artist.tracks.filter(Track.albums == None).all()
+        no_album = artist.tracks.filter_by(albums=None).all()
         track_fields = TrackResource().get_resource_fields()
         _artist['no_album_tracks'] = marshal(no_album, track_fields)
 
@@ -92,37 +102,23 @@ class AlbumResource(Resource):
 
     def post(self):
         params = {
-            'name': request.form.get('name'),
+            'name': request.form.get('name', '').strip(),
             'year': request.form.get('year'),
             'cover_url': request.form.get('cover_url'),
-            'artists': request.form.getlist('artist_id'),
         }
 
-        try:
-            album = self.create(**params)
-        except (IntegrityError, ObjectExistsError):
-            abort(409)
+        if not params['name']:
+            abort(400)  # Bad Request
+
+        album = self.create(**params)
 
         response = marshal(album, self.get_resource_fields())
         headers = {'Location': url_for('albums', id=album.pk)}
 
         return response, 201, headers
 
-    # TODO: Document creation of objects and multivalued arguments
-    # (i.e. /albums?name=Derp&artist_id=1&artist_id2)
-    def create(self, name, year, cover_url, artists=[]):
-        albums = Album.query.filter_by(name=name).all()
-        for album in albums:
-            if album.artists == artists:
-                raise ObjectExistsError
-
-            if map(lambda a: a.pk in artists, album.artists):
-                raise ObjectExistsError
-
+    def create(self, name, year, cover_url):
         album = Album(name=name, year=year, cover=cover_url)
-
-        for artist in artists:
-            album.artists.append(Artist.query.get(artist))
 
         db.session.add(album)
         db.session.commit()
@@ -136,9 +132,18 @@ class AlbumResource(Resource):
         set through a PUT request. It has to be done through the Track model.
         """
 
-        album.name = request.form.get('name')
-        album.year = request.form.get('year')
-        album.cover = request.form.get('cover_url')
+        if 'name' in request.form:
+            name = request.form.get('name', '').strip()
+            if not name:
+                abort(400)
+
+            album.name = request.form.get('name')
+
+        if 'year' in request.form:
+            album.year = request.form.get('year')
+
+        if 'cover_url' in request.form:
+            album.cover = request.form.get('cover_url')
 
         return album
 
@@ -194,7 +199,7 @@ class TrackResource(Resource):
 
     def post(self):
         params = {
-            'title': request.form.get('title'),
+            'title': request.form.get('title', '').strip(),
             'artists': request.form.getlist('artist_id'),
             'albums': request.form.getlist('album_id'),
             'ordinal': request.form.get('ordinal'),
@@ -266,6 +271,11 @@ class TrackResource(Resource):
     def update(self, track):
         track.title = request.form.get('title')
         track.ordinal = request.form.get('ordinal')
+
+        # The track attribute cannot be updated. A new track has to be created
+        # with the new value instead.
+        if 'track' in request.form:
+            abort(400)  # Bad Request
 
         for artist_pk in request.form.getlist('artist_id'):
             try:
@@ -353,23 +363,28 @@ class UserResource(Resource):
     def get_resource_fields(self):
         return {
             'id': fields.Integer(attribute='pk'),
-            'email': fields.String,
-            'is_active': fields.Boolean,
-            'is_admin': fields.Boolean,
+            'display_name': fields.String,
             'creation_date': fields.DateTime,
         }
 
-    def get(self, id=None):
-        if id is None:
-            abort(405)
+    def get(self, id=None, key=None):
+        if key:
+            if key != 'me':
+                abort(404)
+
+            return marshal(g.user, self.get_resource_fields())
+
+        if not id:
+            abort(405)  # Method Not Allowed
 
         return super(UserResource, self).get(id)
 
     def post(self):
         email = request.form.get('email')
         if not email:
-            abort(400)
+            abort(400)  # Bad Request
 
+        display_name = request.form.get('display_name')
         is_active = False
         password = request.form.get('password')
         if password:
@@ -378,8 +393,9 @@ class UserResource(Resource):
         is_admin = parse_bool(request.form.get('admin', False))
 
         try:
-            user = self.create(email=email, password=password,
-                               is_active=is_active, is_admin=is_admin)
+            user = self.create(display_name=display_name, email=email,
+                               password=password, is_active=is_active,
+                               is_admin=is_admin)
         except (IntegrityError, ObjectExistsError):
             abort(409)
 
@@ -388,9 +404,9 @@ class UserResource(Resource):
 
         return response, 201, headers
 
-    def create(self, email, password, is_active, is_admin):
-        user = User(email=email, password=password, is_active=is_active,
-                    is_admin=is_admin)
+    def create(self, display_name, email, password, is_active, is_admin):
+        user = User(display_name=display_name, email=email, password=password,
+                    is_active=is_active, is_admin=is_admin)
 
         db.session.add(user)
         db.session.commit()
@@ -398,9 +414,15 @@ class UserResource(Resource):
         return user
 
     def update(self, user):
-        email = request.form.get('email')
-        if email:
+        if 'email' in request.form:
+            email = request.form.get('email', '').strip()
+            if not email:
+                abort(400)  # Bad Request
+
             user.email = email
+
+        if 'display_name' in request.form:
+            user.display_name = request.form.get('display_name')
 
         if 'password' in request.form:
             user.password = request.form.get('password')
