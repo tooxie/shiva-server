@@ -105,34 +105,20 @@ class AlbumResource(Resource):
             'name': request.form.get('name', '').strip(),
             'year': request.form.get('year'),
             'cover_url': request.form.get('cover_url'),
-            'artists': request.form.getlist('artist_id'),
         }
 
-        try:
-            album = self.create(**params)
-        except (IntegrityError, ObjectExistsError):
-            abort(409)
+        if not params['name']:
+            abort(400)  # Bad Request
+
+        album = self.create(**params)
 
         response = marshal(album, self.get_resource_fields())
         headers = {'Location': url_for('albums', id=album.pk)}
 
         return response, 201, headers
 
-    # TODO: Document creation of objects and multivalued arguments
-    # (i.e. /albums?name=Derp&artist_id=1&artist_id2)
-    def create(self, name, year, cover_url, artists=[]):
-        albums = Album.query.filter_by(name=name).all()
-        for album in albums:
-            if album.artists == artists:
-                raise ObjectExistsError
-
-            if map(lambda a: a.pk in artists, album.artists):
-                raise ObjectExistsError
-
+    def create(self, name, year, cover_url):
         album = Album(name=name, year=year, cover=cover_url)
-
-        for artist in artists:
-            album.artists.append(Artist.query.get(artist))
 
         db.session.add(album)
         db.session.commit()
@@ -146,9 +132,18 @@ class AlbumResource(Resource):
         set through a PUT request. It has to be done through the Track model.
         """
 
-        album.name = request.form.get('name')
-        album.year = request.form.get('year')
-        album.cover = request.form.get('cover_url')
+        if 'name' in request.form:
+            name = request.form.get('name', '').strip()
+            if not name:
+                abort(400)
+
+            album.name = request.form.get('name')
+
+        if 'year' in request.form:
+            album.year = request.form.get('year')
+
+        if 'cover_url' in request.form:
+            album.cover = request.form.get('cover_url')
 
         return album
 
