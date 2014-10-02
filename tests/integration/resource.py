@@ -2,6 +2,7 @@
 import os
 import tempfile
 import unittest
+import random
 
 from flask import json
 
@@ -41,31 +42,46 @@ class ResourceTestCase(unittest.TestCase):
         shiva.app.config['CONVERTER_CLASS'] = ConverterMock
         shiva.app.config['UPLOAD_HANDLER'] = UploadHandlerMock
 
-        with shiva.app.test_request_context():
-            shiva.db.create_all()
+        self.ctx = shiva.app.test_request_context()
+        self.ctx.push()
 
-            self.artist = Artist(name='4no1')
-            self.album = Album(name='Falling down')
-            self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
-                               hash_file=False, no_metadata=True)
-            self.album.artists.append(self.artist)
-            self.user = User(email='derp@mail.com', password='blink182',
-                             is_active=True, is_admin=False)
+        shiva.db.create_all()
 
-            shiva.db.session.add(self.artist)
-            shiva.db.session.add(self.album)
-            shiva.db.session.add(self.track)
-            shiva.db.session.add(self.user)
-            shiva.db.session.commit()
+        self.artist = Artist(name='4no1')
+        self.album = Album(name='Falling down')
+        self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
+                           hash_file=False, no_metadata=True)
+        self.album.artists.append(self.artist)
+        self.user = User(email='derp@mail.com', password='blink182',
+                         is_active=True, is_admin=False)
 
-            self.app = shiva.app.test_client()
+        shiva.db.session.add(self.artist)
+        shiva.db.session.add(self.album)
+        shiva.db.session.add(self.track)
+        shiva.db.session.add(self.user)
+        shiva.db.session.commit()
 
-            self.artist_pk = self.artist.pk
-            self.album_pk = self.album.pk
-            self.track_pk = self.track.pk
-            self.user_pk = self.user.pk
+        self._app = shiva.app
+        self._db = shiva.db
+        self.app = shiva.app.test_client()
+
+        self.artist_pk = self.artist.pk
+        self.album_pk = self.album.pk
+        self.track_pk = self.track.pk
+        self.user_pk = self.user.pk
+
+    def mk_track(self):
+        name = str(random.random())
+        track = Track(title=name, path='/music/band/%s.mp3' % name,
+                      hash_file=False, no_metadata=True)
+
+        self._db.session.add(track)
+        self._db.session.commit()
+
+        return track
 
     def tearDown(self):
+        self.ctx.pop()
         os.close(self.db_fd)
         os.unlink(self.db_path)
 

@@ -21,6 +21,7 @@ Contents:
    conversion
    cors
    users
+   playlists
    admin
    contributing
    wishlist

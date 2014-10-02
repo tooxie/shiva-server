@@ -36,6 +36,12 @@ api.add_resource(resources.LyricsResource, '/tracks/<int:id>/lyrics',
 api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
                  '/tracks/<slug>/convert', endpoint='convert')
 
+# Playlists
+api.add_resource(resources.PlaylistResource, '/playlists',
+                 '/playlists/<int:id>', endpoint='playlists')
+api.add_resource(resources.PlaylistTrackResource, '/playlists/<int:id>/<verb>',
+                 endpoint='playlist_tracks')
+
 # Users
 api.add_resource(resources.UserResource, '/users', '/users/<int:id>',
                  '/users/<key>', endpoint='users')

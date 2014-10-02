@@ -233,6 +233,173 @@ class Track(db.Model):
         return "<Track ('%s')>" % self.title
 
 
+class TrackPlaylistRelationship(db.Model):
+    __tablename__ = 'trackplaylist'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    track_pk = db.Column(db.Integer, db.ForeignKey('tracks.pk'),
+                         nullable=False)
+    playlist_pk = db.Column(db.Integer, db.ForeignKey('playlists.pk'),
+                            nullable=False)
+    previous_track_pk = db.Column(db.Integer,
+                                  db.ForeignKey('trackplaylist.pk'))
+
+    track = db.relationship('Track')
+    playlist = db.relationship('Playlist')
+    previous_track = db.relationship('TrackPlaylistRelationship',
+                                     uselist=False)
+
+    def __repr__(self):
+        return "<TrackPlaylistRelationship (#%s)>" % (self.pk)
+
+
+class Playlist(db.Model):
+    __tablename__ = 'playlists'
+
+    pk = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    read_only = db.Column(db.Boolean, nullable=False, default=True)
+    user_pk = db.Column(db.Integer, db.ForeignKey('users.pk'), nullable=False)
+    creation_date = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship('User')
+    tracks = db.relationship('Track', backref='playlists', lazy='dynamic',
+        secondary='trackplaylist',
+        primaryjoin=(pk == TrackPlaylistRelationship.playlist_pk))
+
+    def __init__(self, *args, **kwargs):
+        kwargs['creation_date'] = datetime.now()
+
+        super(Playlist, self).__init__(*args, **kwargs)
+
+    def remove_at(self, index=None):
+        """
+        Removes an item from the playlist. The playlist is a linked list, so
+        this method takes care of removing the element and updating any links
+        to it.
+        """
+
+        try:
+            index = int(index)
+        except:
+            raise ValueError
+
+        if index < 0:
+            raise ValueError
+
+        query = TrackPlaylistRelationship.query.filter_by(playlist=self)
+        count = query.count()
+        if index >= count:
+            raise IndexError
+
+        # Playlist-track relationship
+        r_track = self.get_track_at(index)
+        next_track = TrackPlaylistRelationship.query.filter(
+            TrackPlaylistRelationship.playlist == self,
+            TrackPlaylistRelationship.previous_track == r_track).first()
+
+        if next_track:
+            # Update linked list
+            next_track.previous_track = r_track.previous_track
+            db.session.add(next_track)
+
+        # import ipdb; ipdb.set_trace()
+        db.session.delete(r_track)
+        db.session.commit()
+
+    def insert(self, index, track):
+        """
+        Inserts a track in the playlist. The playlist tracks are structured in
+        a linked list, to insert an item in the list this method find the item
+        in the right position and updates the links in both.
+
+        If the value None is given as index, the track will be appended at the
+        end of the list.
+        """
+
+        if index is not None:
+            try:
+                index = int(index)
+            except:
+                raise ValueError
+
+            if index < 0:
+                raise ValueError
+
+        if track is None:
+            raise ValueError
+
+        rel = TrackPlaylistRelationship(playlist=self, track=track)
+
+        query = TrackPlaylistRelationship.query.filter_by(playlist=self)
+        count = query.count()
+
+        if index is None:
+            index = count
+
+        if count == 0 and index > 0:
+            raise ValueError
+
+        if count > 0:
+            if index > count:
+                raise ValueError
+
+            # r_track is not an actual track, but a relationship between the
+            # playlist and a track.
+            if index == count:  # Append at the end
+                r_track = self.get_track_at(index - 1)
+                rel.previous_track = r_track
+            else:
+                r_track = self.get_track_at(index)
+                if not r_track:
+                    raise ValueError
+                rel.previous_track = r_track.previous_track
+                r_track.previous_track = rel
+
+            db.session.add(r_track)
+
+        db.session.add(rel)
+        db.session.commit()
+
+    def get_track_at(self, index):
+        """
+        This method finds the track at position `index` in the current
+        playlist. Will return None if the track is not present.
+
+        It fetches the playlist's parent (the track with `previous_track_pk`
+        None) and queries for each susequent item until the requested item is
+        found.  This implementation is the slowest, but for now is ok because
+        is also the simplest.
+
+        This is a very good candidate for optimization.
+        """
+
+        counter = 0
+        # Get the parent
+        track = TrackPlaylistRelationship.query.filter_by(
+            playlist=self, previous_track=None).first()
+
+        while True:
+            if counter == index:
+                return track
+            elif counter > index:
+                return None
+
+            track = TrackPlaylistRelationship.query.filter(
+                TrackPlaylistRelationship.playlist == self,
+                TrackPlaylistRelationship.previous_track == track).first()
+            counter += 1
+
+    @property
+    def length(self):
+        query = TrackPlaylistRelationship.query.filter_by(playlist=self)
+
+        return query.count()
+
+    def __repr__(self):
+        return "<Playlist ('%s')" % self.name
+
+
 class LyricsCache(db.Model):
     __tablename__ = 'lyricscache'
 

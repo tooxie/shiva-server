@@ -173,7 +173,7 @@ Filtering
 The album list accepts an ``artist`` parameter in which case will filter the
 list of albums only to those corresponding to that artist.
 
-Example response for the request ``GET /albums/?artist=7``:
+Example response for the request ``GET /albums?artist=7``:
 
 .. code:: javascript
 

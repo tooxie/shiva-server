@@ -6,6 +6,8 @@ from shiva.models import User
 
 
 def verify_credentials(app):
+    g.user = None
+
     if request.path == '/users/login':
         return None
 
