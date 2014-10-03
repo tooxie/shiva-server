@@ -537,6 +537,13 @@ class UserResource(Resource):
 
         return user
 
+    def put(self, id=None, key=None):
+        if key is not None:
+            # Assume /users/me
+            abort(405)
+
+        return super(UserResource, self).put(id)
+
     def update(self, user):
         if 'email' in request.form:
             email = request.form.get('email', '').strip()
@@ -561,3 +568,10 @@ class UserResource(Resource):
             user.is_admin = parse_bool(request.form.get('is_admin'))
 
         return user
+
+    def delete(self, id=None, key=None):
+        if key is not None:
+            # Assume /users/me
+            abort(405)
+
+        return super(UserResource, self).delete(id)

@@ -58,25 +58,20 @@ class UsersResourceTestCase(ResourceTestCase):
         resp = self.get('/users', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_myself(self):
         resp = self.get('/users/me', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_user(self):
         resp = self.get('/users/1', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_user_creation(self):
         payload = self.get_payload()
         resp = self.post('/users', data=payload, authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_user_update(self):
         payload = self.get_payload()
         resp = self.put('/users', data=payload, authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_user_delete(self):
         resp = self.delete('/users', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
@@ -98,10 +93,18 @@ class UsersResourceTestCase(ResourceTestCase):
         resp = self.get('/users')
         nose.eq_(resp.json['item_count'], count)
 
-    # TODO: Test POST, PUT and DELETE against /users/me
     def test_myself(self):
         resp = self.get('/users/me')
         nose.eq_(resp.status_code, 200)
+
+        resp = self.post('/users/me')
+        nose.eq_(resp.status_code, 405)
+
+        resp = self.put('/users/me')
+        nose.eq_(resp.status_code, 405)
+
+        resp = self.delete('/users/me')
+        nose.eq_(resp.status_code, 405)
 
     def test_nonexistent_url(self):
         resp = self.get('/users/you')
