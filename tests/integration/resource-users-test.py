@@ -83,7 +83,20 @@ class UsersResourceTestCase(ResourceTestCase):
     # Authorized
     def test_user_base_resource(self):
         resp = self.get('/users')
-        nose.eq_(resp.status_code, 405)
+        nose.eq_(resp.status_code, 200)
+
+        count = resp.json['item_count']
+
+        user = self.mk_user()
+        resp = self.get('/users')
+        nose.eq_(resp.json['item_count'], count + 1)
+
+        user.is_public = False
+        self._db.session.add(user)
+        self._db.session.commit()
+
+        resp = self.get('/users')
+        nose.eq_(resp.json['item_count'], count)
 
     # TODO: Test POST, PUT and DELETE against /users/me
     def test_myself(self):
