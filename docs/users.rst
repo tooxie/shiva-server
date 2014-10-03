@@ -8,6 +8,7 @@ A user consists of:
 
     * E-mail.
     * Password.
+    * An 'is_public' flag.
     * An 'is_active' flag.
     * An 'is_admin' flag.
     * A creation date.
@@ -17,7 +18,8 @@ User creation
 -------------
 
 Issue a ``POST`` request to the ``/users`` resource. Note the the ``GET``
-method is disallowed.
+method will only list those users whose ``is_public`` attribute is set to
+``True``.
 
 .. code:: sh
 
