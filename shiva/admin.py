@@ -46,15 +46,16 @@ def main():
     ctx.pop()
 
 
-def create_user(email=None, password='', is_active=True, is_admin=None,
-                interactive=False):
+def create_user(email=None, password='', is_public=False, is_active=True,
+                is_admin=None, interactive=False):
     """
     User creation function. If the `interactive` flag is set, it will delegate
     the task to the create_user_interactive() function.
     """
 
     if interactive:
-        return create_user_interactive(email, password, is_active, is_admin)
+        return create_user_interactive(email, password, is_public, is_active,
+                                       is_admin)
 
     if not email:
         raise ValueError
@@ -68,13 +69,13 @@ def create_user(email=None, password='', is_active=True, is_admin=None,
     if password == '':
         is_active = False
 
-    user = mk_user(email, password, is_active, is_admin)
+    user = mk_user(email, password, is_public, is_active, is_admin)
 
     return user
 
 
-def create_user_interactive(email=None, password='', is_active=True,
-                            is_admin=True):
+def create_user_interactive(email=None, password='', is_public=False,
+                            is_active=True, is_admin=True):
     """
     This function will interactively prompt for the required information. In
     case of error, instead of throwing exceptions will print human readable
@@ -109,6 +110,8 @@ def create_user_interactive(email=None, password='', is_active=True,
     else:
         is_active = confirm('Is active?')
 
+    is_public = confirm('Is public?')
+
     if is_admin is None:
         is_admin = confirm('Is admin?')
 
@@ -120,16 +123,16 @@ def create_user_interactive(email=None, password='', is_active=True,
         log.error('Aborting.')
         sys.exit(1)
 
-    user = mk_user(email, password, is_active, is_admin)
+    user = mk_user(email, password, is_public, is_active, is_admin)
 
     log.info('User #%s created successfuly.' % user.pk)
 
     return user
 
 
-def mk_user(email, password, is_active, is_admin):
-    user = User(email=email, password=password, is_active=is_active,
-                is_admin=is_admin)
+def mk_user(email, password, is_public, is_active, is_admin):
+    user = User(email=email, password=password, is_public=is_public,
+                is_active=is_active, is_admin=is_admin)
 
     db.session.add(user)
     db.session.commit()
