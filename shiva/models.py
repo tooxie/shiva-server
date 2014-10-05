@@ -11,8 +11,9 @@ from itsdangerous import (BadSignature, SignatureExpired,
                           TimedJSONWebSignatureSerializer as Serializer)
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import func
+from slugify import slugify
 
-from shiva.utils import slugify, MetadataManager
+from shiva.utils import MetadataManager
 from shiva import dbtypes
 
 db = SQLAlchemy()
@@ -51,7 +52,7 @@ class Artist(db.Model):
     pk = db.Column(dbtypes.GUID, default=uuid.uuid4, primary_key=True)
     # TODO: Update the files' Metadata when changing this info.
     name = db.Column(db.String(128), unique=True, nullable=False)
-    slug = db.Column(db.String(128), nullable=False)
+    slug = db.Column(db.String(128))
     image = db.Column(db.String(256))
     events = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
@@ -93,7 +94,7 @@ class Album(db.Model):
 
     pk = db.Column(dbtypes.GUID, default=uuid.uuid4, primary_key=True)
     name = db.Column(db.String(128), nullable=False)
-    slug = db.Column(db.String(128), nullable=False)
+    slug = db.Column(db.String(128))
     year = db.Column(db.Integer)
     cover = db.Column(db.String(256))
     date_added = db.Column(db.Date(), nullable=False)
@@ -190,7 +191,8 @@ class Track(db.Model):
 
     def __setattr__(self, attr, value):
         if attr == 'title':
-            super(Track, self).__setattr__('slug', slugify(value))
+            slug = slugify(value) if value else None
+            super(Track, self).__setattr__('slug', slug)
 
         super(Track, self).__setattr__(attr, value)
 
