@@ -56,7 +56,7 @@ class Resource(restful.Resource):
     def options(self, *args, **kwargs):
         return self.Response()
 
-    def get(self, id=None, slug=None):
+    def get(self, id=None):
         """
         Handler for the GET method. Given, for example:
 
@@ -65,16 +65,14 @@ class Resource(restful.Resource):
 
         if a db_model attribute exists in the resource pointing to the
         respective model of the resource, the class will try to fetch the
-        requested instance by id or slug. If such attribute doesn't exist it
-        will return a 405 (Method Not Allowed) status code.
+        requested instance by id. If such attribute doesn't exist it will
+        return a 405 (Method Not Allowed) status code.
         """
 
         result = None
 
         if id:
             result = self.marshal(self.full_tree(self._by_id(id)))
-        elif slug:
-            result = self.marshal(self.full_tree(self._by_slug(slug)))
         else:
             if not hasattr(self, 'db_model'):
                 return restful.abort(405)
@@ -127,20 +125,6 @@ class Resource(restful.Resource):
 
     def get_by_id(self, id):
         return self.db_model.query.get(id)
-
-    def _by_slug(self, slug):
-        try:
-            result = self.get_by_slug(slug)
-        except:
-            restful.abort(404)
-
-        if not result:
-            restful.abort(404)
-
-        return result
-
-    def get_by_slug(self, slug):
-        return self.db_model.query.filter_by(slug=slug).first()
 
     def _all(self):
         result = self.get_all()
