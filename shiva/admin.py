@@ -152,14 +152,11 @@ def confirm(question):
 def get_user(email_or_id):
     query = User.query
 
-    try:
-        pk = int(email_or_id)
-        user = query.get(pk)
-    except ValueError:
-        email = email_or_id
-        user = query.filter_by(email=email).first()
-    except:
-        user = None
+    is_id = len(str(email_or_id).split('-')) == 5
+    if is_id:
+        user = query.get(email_or_id)
+    else:
+        user = query.filter_by(email=email_or_id).first()
 
     return user
 
