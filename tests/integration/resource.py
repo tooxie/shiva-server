@@ -53,7 +53,7 @@ class ResourceTestCase(unittest.TestCase):
                            hash_file=False, no_metadata=True)
         self.album.artists.append(self.artist)
         self.user = User(email='derp@mail.com', password='blink182',
-                         is_active=True, is_admin=False)
+                         is_public=True, is_active=True, is_admin=False)
 
         shiva.db.session.add(self.artist)
         shiva.db.session.add(self.album)
@@ -79,6 +79,18 @@ class ResourceTestCase(unittest.TestCase):
         self._db.session.commit()
 
         return track
+
+    def mk_user(self, is_public=True, is_active=True, is_admin=False):
+        email = str(random.random())
+        password = str(random.random())
+
+        user = User(email=email, password=password, is_public=is_public,
+                    is_active=is_active, is_admin=is_admin)
+
+        self._db.session.add(user)
+        self._db.session.commit()
+
+        return user
 
     def tearDown(self):
         self.ctx.pop()

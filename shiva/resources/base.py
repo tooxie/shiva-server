@@ -494,12 +494,16 @@ class UserResource(Resource):
 
             return marshal(g.user, self.get_resource_fields())
 
-        if not id:
-            abort(405)  # Method Not Allowed
-
         return super(UserResource, self).get(id)
 
-    def post(self):
+    def get_all(self):
+        return self.db_model.query.filter_by(is_public=True)
+
+    def post(self, key=None):
+        if key is not None:
+            # Assume /users/me
+            abort(405)
+
         email = request.form.get('email')
         if not email:
             abort(400)  # Bad Request
@@ -533,6 +537,13 @@ class UserResource(Resource):
 
         return user
 
+    def put(self, id=None, key=None):
+        if key is not None:
+            # Assume /users/me
+            abort(405)
+
+        return super(UserResource, self).put(id)
+
     def update(self, user):
         if 'email' in request.form:
             email = request.form.get('email', '').strip()
@@ -557,3 +568,10 @@ class UserResource(Resource):
             user.is_admin = parse_bool(request.form.get('is_admin'))
 
         return user
+
+    def delete(self, id=None, key=None):
+        if key is not None:
+            # Assume /users/me
+            abort(405)
+
+        return super(UserResource, self).delete(id)

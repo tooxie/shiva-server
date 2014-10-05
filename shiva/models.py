@@ -425,6 +425,7 @@ class User(db.Model):
 
     # Metadata
     # Should these attributes be in their own table?
+    is_public = db.Column(db.Boolean, nullable=False, default=False)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
     creation_date = db.Column(db.DateTime, nullable=False)
