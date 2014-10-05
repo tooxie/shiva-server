@@ -19,40 +19,40 @@ db.init_app(app)
 api = Api(app)
 
 # Artists
-api.add_resource(resources.ArtistResource, '/artists', '/artists/<id>',
+api.add_resource(resources.ArtistResource, '/artists/', '/artists/<id>/',
                  endpoint='artists')
-api.add_resource(resources.ShowsResource, '/artists/<id>/shows',
+api.add_resource(resources.ShowsResource, '/artists/<id>/shows/',
                  endpoint='shows')
 
 # Albums
-api.add_resource(resources.AlbumResource, '/albums', '/albums/<id>',
+api.add_resource(resources.AlbumResource, '/albums/', '/albums/<id>/',
                  endpoint='albums')
 
 # Tracks
-api.add_resource(resources.TrackResource, '/tracks', '/tracks/<id>',
+api.add_resource(resources.TrackResource, '/tracks/', '/tracks/<id>/',
                  endpoint='tracks')
-api.add_resource(resources.LyricsResource, '/tracks/<id>/lyrics',
+api.add_resource(resources.LyricsResource, '/tracks/<id>/lyrics/',
                  endpoint='lyrics')
-api.add_resource(resources.ConvertResource, '/tracks/<id>/convert',
+api.add_resource(resources.ConvertResource, '/tracks/<id>/convert/',
                  endpoint='convert')
 
 # Playlists
-api.add_resource(resources.PlaylistResource, '/playlists', '/playlists/<id>',
-                 endpoint='playlists')
-api.add_resource(resources.PlaylistTrackResource, '/playlists/<id>/<verb>',
+api.add_resource(resources.PlaylistTrackResource, '/playlists/<id>/<verb>/',
                  endpoint='playlist_tracks')
+api.add_resource(resources.PlaylistResource, '/playlists/', '/playlists/<id>/',
+                 endpoint='playlists')
 
 # Users
-api.add_resource(resources.UserResource, '/users', '/users/<id>',
+api.add_resource(resources.AuthResource, '/users/login/', endpoint='auth')
+api.add_resource(resources.UserResource, '/users/', '/users/<id>/',
                  endpoint='users')
-api.add_resource(resources.AuthResource, '/users/login', endpoint='auth')
 
 # Other
-api.add_resource(resources.RandomResource, '/random/<resource_name>',
+api.add_resource(resources.RandomResource, '/random/<resource_name>/',
                  endpoint='random')
-api.add_resource(resources.WhatsNewResource, '/whatsnew', endpoint='whatsnew')
-api.add_resource(resources.ClientResource, '/clients', endpoint='client')
-api.add_resource(resources.AboutResource, '/about', endpoint='about')
+api.add_resource(resources.WhatsNewResource, '/whatsnew/', endpoint='whatsnew')
+api.add_resource(resources.ClientResource, '/clients/', endpoint='client')
+api.add_resource(resources.AboutResource, '/about/', endpoint='about')
 
 
 @app.before_request

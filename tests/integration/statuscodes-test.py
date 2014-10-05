@@ -12,16 +12,13 @@ class StatusCodesTestCase(ResourceTestCase):
         resp = self.get('/', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_whatsnew(self):
-        resp = self.get('/whatsnew', authenticate=False)
+        resp = self.get('/whatsnew/', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_clients(self):
-        resp = self.get('/clients', authenticate=False)
+        resp = self.get('/clients/', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
-    def test_unauthorized_about(self):
-        resp = self.get('/about', authenticate=False)
+        resp = self.get('/about/', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
     # Authorized
@@ -30,13 +27,13 @@ class StatusCodesTestCase(ResourceTestCase):
         nose.eq_(resp.status_code, 404)
 
     def test_whatsnew(self):
-        resp = self.get('/whatsnew?since=20101010')
+        resp = self.get('/whatsnew/?since=20101010')
         nose.eq_(resp.status_code, 200)
 
     def test_clients(self):
-        resp = self.get('/clients')
+        resp = self.get('/clients/')
         nose.eq_(resp.status_code, 200)
 
     def test_about(self):
-        resp = self.get('/about')
+        resp = self.get('/about/')
         nose.eq_(resp.status_code, 200)

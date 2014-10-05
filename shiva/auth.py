@@ -8,7 +8,7 @@ from shiva.models import User
 def verify_credentials(app):
     g.user = None
 
-    if request.path == '/users/login':
+    if request.path == '/users/login/':
         return None
 
     if app.config.get('ALLOW_ANONYMOUS_ACCESS', False):

@@ -104,7 +104,7 @@ class ResourceTestCase(unittest.TestCase):
         if hasattr(self, 'auth_token'):
             return self.auth_token
 
-        url = '/users/login'
+        url = '/users/login/'
         payload = dict(email='derp@mail.com', password='blink182')
         rv = json.loads(self.app.post(url, data=payload).data)
         self.auth_token = rv['token']
