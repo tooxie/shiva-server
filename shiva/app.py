@@ -19,32 +19,32 @@ db.init_app(app)
 api = Api(app)
 
 # Artists
-api.add_resource(resources.ArtistResource, '/artists', '/artists/<int:id>',
-                 '/artists/<slug>', endpoint='artists')
-api.add_resource(resources.ShowsResource, '/artists/<int:id>/shows',
-                 '/artists/<slug>/shows', endpoint='shows')
+api.add_resource(resources.ArtistResource, '/artists', '/artists/<id>',
+                 endpoint='artists')
+api.add_resource(resources.ShowsResource, '/artists/<id>/shows',
+                 endpoint='shows')
 
 # Albums
-api.add_resource(resources.AlbumResource, '/albums', '/albums/<int:id>',
-                 '/albums/<slug>', endpoint='albums')
+api.add_resource(resources.AlbumResource, '/albums', '/albums/<id>',
+                 endpoint='albums')
 
 # Tracks
-api.add_resource(resources.TrackResource, '/tracks', '/tracks/<int:id>',
-                 '/tracks/<slug>', endpoint='tracks')
-api.add_resource(resources.LyricsResource, '/tracks/<int:id>/lyrics',
-                 '/tracks/<slug>/lyrics', endpoint='lyrics')
-api.add_resource(resources.ConvertResource, '/tracks/<int:id>/convert',
-                 '/tracks/<slug>/convert', endpoint='convert')
+api.add_resource(resources.TrackResource, '/tracks', '/tracks/<id>',
+                 endpoint='tracks')
+api.add_resource(resources.LyricsResource, '/tracks/<id>/lyrics',
+                 endpoint='lyrics')
+api.add_resource(resources.ConvertResource, '/tracks/<id>/convert',
+                 endpoint='convert')
 
 # Playlists
-api.add_resource(resources.PlaylistResource, '/playlists',
-                 '/playlists/<int:id>', endpoint='playlists')
-api.add_resource(resources.PlaylistTrackResource, '/playlists/<int:id>/<verb>',
+api.add_resource(resources.PlaylistResource, '/playlists', '/playlists/<id>',
+                 endpoint='playlists')
+api.add_resource(resources.PlaylistTrackResource, '/playlists/<id>/<verb>',
                  endpoint='playlist_tracks')
 
 # Users
-api.add_resource(resources.UserResource, '/users', '/users/<int:id>',
-                 '/users/<key>', endpoint='users')
+api.add_resource(resources.UserResource, '/users', '/users/<id>',
+                 endpoint='users')
 api.add_resource(resources.AuthResource, '/users/login', endpoint='auth')
 
 # Other
