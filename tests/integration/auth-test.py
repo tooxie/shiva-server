@@ -18,21 +18,23 @@ class AuthTestCase(unittest.TestCase):
         shiva.app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
         shiva.app.config['TESTING'] = True
         shiva.app.config['ALLOW_ANONYMOUS_ACCESS'] = False
-        with shiva.app.test_request_context():
-            shiva.db.create_all()
 
-            self.user = User(email='derp@mail.com', password='blink182',
-                             is_active=True, is_admin=False)
-            shiva.db.session.add(self.user)
+        self.ctx = shiva.app.test_request_context()
+        self.ctx.push()
 
-            shiva.db.session.commit()
+        shiva.db.create_all()
 
-            self.app = shiva.app.test_client()
-            self.auth_token = self.get_token()
+        self.user = User(email='derp@mail.com', password='blink182',
+                         is_public=False, is_active=True, is_admin=False)
+        shiva.db.session.add(self.user)
+        shiva.db.session.commit()
+
+        self.app = shiva.app.test_client()
 
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(self.db_path)
+        self.ctx.pop()
 
     def get_payload(self):
         return {
