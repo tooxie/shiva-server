@@ -105,7 +105,7 @@ class AlbumResourceTestCase(ResourceTestCase):
         resp = self.post('/albums', data={'name': 'derp'})
         nose.eq_(resp.status_code, 201)
 
-        album_url = '/albums/%i' % resp.json['id']
+        album_url = '/albums/%s' % resp.json['id']
 
         resp = self.delete(album_url)
         nose.eq_(resp.status_code, 204)

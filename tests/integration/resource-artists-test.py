@@ -115,7 +115,7 @@ class ArtistResourceTestCase(ResourceTestCase):
         resp = self.post('/artists', data=self.get_payload())
         nose.eq_(resp.status_code, 201)
 
-        artist_url = '/artists/%i' % resp.json['id']
+        artist_url = '/artists/%s' % resp.json['id']
 
         resp = self.delete(artist_url)
         nose.eq_(resp.status_code, 204)

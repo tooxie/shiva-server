@@ -64,14 +64,17 @@ class UsersResourceTestCase(ResourceTestCase):
         resp = self.get('/users/1', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
+        # POST
         payload = self.get_payload()
         resp = self.post('/users', data=payload, authenticate=False)
         nose.eq_(resp.status_code, 401)
 
+        # PUT
         payload = self.get_payload()
         resp = self.put('/users', data=payload, authenticate=False)
         nose.eq_(resp.status_code, 401)
 
+        # DELETE
         resp = self.delete('/users', authenticate=False)
         nose.eq_(resp.status_code, 401)
 
