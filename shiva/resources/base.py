@@ -19,7 +19,7 @@ class ArtistResource(Resource):
 
     def get_resource_fields(self):
         return {
-            'id': fields.Integer(attribute='pk'),
+            'id': fields.String(attribute='pk'),
             'name': fields.String,
             'slug': fields.String,
             'uri': InstanceURI('artists'),
@@ -88,13 +88,13 @@ class AlbumResource(Resource):
 
     def get_resource_fields(self):
         return {
-            'id': fields.Integer(attribute='pk'),
+            'id': fields.String(attribute='pk'),
             'name': fields.String,
             'slug': fields.String,
             'year': fields.Integer,
             'uri': InstanceURI('albums'),
             'artists': ManyToManyField(Artist, {
-                'id': fields.Integer(attribute='pk'),
+                'id': fields.String(attribute='pk'),
                 'uri': InstanceURI('artists'),
             }),
             'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
@@ -179,7 +179,7 @@ class TrackResource(Resource):
 
     def get_resource_fields(self):
         return {
-            'id': fields.Integer(attribute='pk'),
+            'id': fields.String(attribute='pk'),
             'uri': InstanceURI('tracks'),
             'files': TrackFiles,
             'bitrate': fields.Integer,
@@ -187,11 +187,11 @@ class TrackResource(Resource):
             'title': fields.String,
             'slug': fields.String,
             'artists': ManyToManyField(Artist, {
-                'id': fields.Integer(attribute='pk'),
+                'id': fields.String(attribute='pk'),
                 'uri': InstanceURI('artists'),
             }),
             'albums': ManyToManyField(Album, {
-                'id': fields.Integer(attribute='pk'),
+                'id': fields.String(attribute='pk'),
                 'uri': InstanceURI('albums'),
             }),
             'ordinal': fields.Integer,
@@ -370,17 +370,17 @@ class PlaylistResource(Resource):
 
     def get_resource_fields(self):
         return {
-            'id': fields.Integer(attribute='pk'),
+            'id': fields.String(attribute='pk'),
             'name': fields.String,
             'user': ForeignKeyField(User, {
-                'id': fields.Integer(attribute='pk'),
+                'id': fields.String(attribute='pk'),
                 'uri': InstanceURI('users'),
             }),
             'read_only': fields.Boolean,
             'creation_date': fields.DateTime,
             'length': fields.Integer,
             'tracks': PlaylistField({
-                'id': fields.Integer(attribute='pk'),
+                'id': fields.String(attribute='pk'),
                 'uri': InstanceURI('tracks'),
             }),
         }
@@ -482,16 +482,13 @@ class UserResource(Resource):
 
     def get_resource_fields(self):
         return {
-            'id': fields.Integer(attribute='pk'),
+            'id': fields.String(attribute='pk'),
             'display_name': fields.String,
             'creation_date': fields.DateTime,
         }
 
-    def get(self, id=None, key=None):
-        if key:
-            if key != 'me':
-                abort(404)
-
+    def get(self, id=None):
+        if id == 'me':
             return marshal(g.user, self.get_resource_fields())
 
         return super(UserResource, self).get(id)
@@ -499,9 +496,8 @@ class UserResource(Resource):
     def get_all(self):
         return self.db_model.query.filter_by(is_public=True)
 
-    def post(self, key=None):
-        if key is not None:
-            # Assume /users/me
+    def post(self, id=None):
+        if id == 'me':
             abort(405)
 
         email = request.form.get('email')
@@ -537,9 +533,8 @@ class UserResource(Resource):
 
         return user
 
-    def put(self, id=None, key=None):
-        if key is not None:
-            # Assume /users/me
+    def put(self, id=None):
+        if id == 'me':
             abort(405)
 
         return super(UserResource, self).put(id)
@@ -569,9 +564,8 @@ class UserResource(Resource):
 
         return user
 
-    def delete(self, id=None, key=None):
-        if key is not None:
-            # Assume /users/me
+    def delete(self, id=None):
+        if id == 'me':
             abort(405)
 
         return super(UserResource, self).delete(id)

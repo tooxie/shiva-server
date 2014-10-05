@@ -12,6 +12,10 @@ from shiva.models import Artist, Album, Track, User
 from shiva.resources.upload import UploadHandler
 
 
+class DoubleSlashError(Exception):
+    pass
+
+
 class ConverterMock(Converter):
     def get_uri(self):
         return 'http://127.0.0.1:8000%s' % self.track
@@ -104,7 +108,7 @@ class ResourceTestCase(unittest.TestCase):
         if hasattr(self, 'auth_token'):
             return self.auth_token
 
-        url = '/users/login'
+        url = '/users/login/'
         payload = dict(email='derp@mail.com', password='blink182')
         rv = json.loads(self.app.post(url, data=payload).data)
         self.auth_token = rv['token']
@@ -120,12 +124,14 @@ class ResourceTestCase(unittest.TestCase):
 
         _args = list(args)
 
+        if '//' in args[0]:
+            raise DoubleSlashError
+
         authenticate = kwargs.get('authenticate', True)
         if authenticate:
             token = self.authenticate()
-            _args[0] = '%s%stoken=%s' % (args[0],
-                                         '&' if '?' in args[0] else '?',
-                                         token)
+            _args[0] = '%s%stoken=%s' % (
+                args[0], '&' if '?' in args[0] else '?', token)
 
         if 'authenticate' in kwargs:
             del(kwargs['authenticate'])

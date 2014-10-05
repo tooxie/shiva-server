@@ -11,10 +11,11 @@ import shutil
 import tempfile
 
 from flask import current_app as app
+from slugify import slugify
 
 from shiva.exceptions import (InvalidFileTypeError, MetadataManagerReadError,
                               NoUploadPathConfigError)
-from shiva.utils import MetadataManager, slugify
+from shiva.utils import MetadataManager
 
 
 class UploadHandler(object):

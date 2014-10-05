@@ -39,7 +39,7 @@ def main():
         elif arguments['activate']:
             activate_user(arguments['<email_or_id>'])
         elif arguments['deactivate']:
-            activate_user(arguments['<email_or_id>'])
+            deactivate_user(arguments['<email_or_id>'])
         elif arguments['delete']:
             delete_user(arguments['<email_or_id>'])
 
@@ -115,9 +115,11 @@ def create_user_interactive(email=None, password='', is_public=False,
     if is_admin is None:
         is_admin = confirm('Is admin?')
 
-    log.info('\nE-mail: %s\nPassword: %s\nActive: %s\nAdmin: %s\n' % (
+    log.info('\nE-mail: %s\nPassword: %s\nActive: %s\nPublic: %s'
+             '\nAdmin: %s\n' % (
         email, '(Empty)' if password == '' else '(Not shown)',
-        'Yes' if is_active else 'No', 'Yes' if is_admin else 'No'))
+        'Yes' if is_active else 'No', 'Yes' if is_public else 'No',
+        'Yes' if is_admin else 'No'))
 
     if not confirm('Are values correct?'):
         log.error('Aborting.')
@@ -125,7 +127,7 @@ def create_user_interactive(email=None, password='', is_public=False,
 
     user = mk_user(email, password, is_public, is_active, is_admin)
 
-    log.info('User #%s created successfuly.' % user.pk)
+    log.info("User '%s' created successfuly." % user.pk)
 
     return user
 
@@ -152,38 +154,52 @@ def confirm(question):
 def get_user(email_or_id):
     query = User.query
 
-    try:
-        pk = int(email_or_id)
-        user = query.get(pk)
-    except ValueError:
-        email = email_or_id
-        user = query.filter_by(email=email).first()
-    except:
-        user = None
+    is_id = len(str(email_or_id).split('-')) == 5
+    if is_id:
+        user = query.get(email_or_id)
+    else:
+        user = query.filter_by(email=email_or_id).first()
 
     return user
 
 
 def activate_user(email_or_id):
     user = get_user(email_or_id)
+    if not user:
+        log.error('Error: User does not exists.')
+        sys.exit(1)
+
     user.is_active = True
 
-    log.info('User #%s activated.' % user.pk)
+    db.session.add(user)
+    db.session.commit()
+
+    log.info("User '%s' activated." % user.pk)
 
 
 def deactivate_user(email_or_id):
     user = get_user(email_or_id)
+    if not user:
+        log.error('Error: User does not exists.')
+        sys.exit(1)
+
     user.is_active = False
 
-    log.info('User #%s deactivated.' % user.pk)
+    db.session.add(user)
+    db.session.commit()
+
+    log.info("User '%s' deactivated." % user.pk)
 
 
 def delete_user(email_or_id):
     user = get_user(email_or_id)
+    if not user:
+        log.error('Error: User does not exists.')
+        sys.exit(1)
 
     _pk = user.pk
 
     db.session.delete(user)
     db.session.commit()
 
-    log.info('User #%s deleted.' % _pk)
+    log.info("User '%s' deleted." % _pk)

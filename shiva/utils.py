@@ -10,7 +10,6 @@ import string
 import traceback
 
 from flask.ext.restful.utils import unpack as _unpack
-from slugify import slugify as do_slug
 import dateutil.parser
 import mutagen
 
@@ -70,31 +69,6 @@ def randstr(length=32):
     chars = ''.join(invalid_chars_re.split(chars))
 
     return ''.join(random.choice(chars) for _ in range(length))
-
-
-def slugify(text):
-    """
-    Generates an alphanumeric slug. If the resulting slug is numeric-only a
-    hyphen and a random string is appended to it.
-
-    """
-
-    if not text:
-        return ''
-
-    slug = do_slug(text)
-    if not slug:
-        slug = randstr(length=6)
-
-    try:
-        is_int = isinstance(int(slug), int)
-    except ValueError:
-        is_int = False
-
-    if is_int:
-        slug += u'-%s' % randstr(6)
-
-    return slug
 
 
 def _import(class_path):

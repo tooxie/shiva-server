@@ -651,33 +651,18 @@ An example request is ``GET /artists?page_size=10&page=3``.
 Using slugs instead of IDs
 --------------------------
 
-It is possible to use slugs instead of IDs when requesting an specific
-resource. It will work the exact same way because slugs, as IDs, are unique. An
-example on the ``/artist`` resource:
-
-Example response for the request ``GET /artists/eterna-inocencia``:
-
-.. code:: javascript
-
-    {
-        "name": "Eterna Inocencia",
-        "image": "http://userserve-ak.last.fm/serve/_/8339787/Eterna+Inocencia+Eterna.jpg",
-        "uri": "/artists/3",
-        "slug": "eterna-inocencia",
-        "id": 3
-    }
+In previous versions of Shiva it was possible to use slugs instead of ID to
+request a specific resource. This is *not possible* anymore, since we use
+`UUID <http://en.wikipedia.org/wiki/Universally_unique_identifier>`_ values as
+IDs, and it's not possible to differentiate slugs from UUIDs without hitting
+the database every time. For performance reasons, slugs as record identifiers
+were discarded completely. However, slugs are still generated, stored, and
+present in the resulting JSON. Feel free to use them, but Shiva doesn't commit
+to keeping them unique.
 
 
 Uniqueness of slugs
 ~~~~~~~~~~~~~~~~~~~
 
-Slugs are generated from the following fields:
-
-* ``Artist.name``
-* ``Album.name``
-* ``Track.title``
-
-If the slug clashes with an existing one, then a hyphen and a unique ID will be
-appended to it. Due to the possibility of `using slugs instead of IDs`_, if an
-slug results in a numeric string a hyphen and a unique ID will be appended to
-remove the ambiguity.
+Slugs are *not* unique. Shiva does not commit to keeping slugs unique. For this
+reason, don't use them as identifiers.
