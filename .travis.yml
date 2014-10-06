@@ -18,7 +18,7 @@ install:
     - echo "MEDIA_DIRS = (MediaDir(os.environ['HOME']),)" >> shiva/config/local.py
 
 script:
-    - find shiva -name '*.py' -exec pep8 '{}' \+
+    - find shiva -name '*.py' -exec pep8 --ignore=E128 '{}' \+
     - shiva-indexer
     - nosetests --with-cov --cov shiva
 

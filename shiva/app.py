@@ -76,7 +76,7 @@ def after_request(response):
 def main():
     if not app.config.get('SECRET_KEY'):
         error = ('Error: Please define a `SECRET_KEY` in your config file.\n'
-                'You can use the following one:\n\n    %s\n' % randstr(64))
+                 'You can use the following one:\n\n    %s\n' % randstr(64))
         sys.stderr.write(error)
         sys.exit(1)
 

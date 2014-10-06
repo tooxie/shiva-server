@@ -410,9 +410,9 @@ def main():
         if kwargs['write_every'] is not None:
             kwargs['write_every'] = int(kwargs['write_every'])
     except TypeError:
+        error_values = (kwargs['write_every'], type(kwargs['write_every']))
         sys.stderr.write('ERROR: Invalid value for --write-every, expected '
-                         '<int>, got "%s" <%s>. instead' % (
-            kwargs['write_every'], type(kwargs['write_every'])))
+                         '<int>, got "%s" <%s>. instead' % error_values)
         sys.exit(3)
 
     # Generate database
