@@ -6,9 +6,8 @@ python:
 
 before_install:
     - sudo apt-get -qq update
-    - sudo apt-get -qq install libxml2-dev libxslt-dev ffmpeg python-dev sqlite
-                               pep8
-    - pip install nose-cov mock python-coveralls
+    - sudo apt-get -qq install `cat dependencies.apt`
+    - pip install -r dependencies-dev.pip
     - pip install --timeout 120 "python-dateutil==2.1"
     - if [ $(python -V 2>&1 | grep -c "2\.6\.") -eq 1 ]; then pip install unittest2; fi
 
@@ -19,7 +18,7 @@ install:
     - echo "MEDIA_DIRS = (MediaDir(os.environ['HOME']),)" >> shiva/config/local.py
 
 script:
-    - find shiva -name '*.py' -exec pep8 '{}' \+
+    - find shiva -name '*.py' -exec pep8 --ignore=E128 '{}' \+
     - shiva-indexer
     - nosetests --with-cov --cov shiva
 

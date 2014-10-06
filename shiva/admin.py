@@ -115,11 +115,15 @@ def create_user_interactive(email=None, password='', is_public=False,
     if is_admin is None:
         is_admin = confirm('Is admin?')
 
-    log.info('\nE-mail: %s\nPassword: %s\nActive: %s\nPublic: %s'
-             '\nAdmin: %s\n' % (
-        email, '(Empty)' if password == '' else '(Not shown)',
-        'Yes' if is_active else 'No', 'Yes' if is_public else 'No',
-        'Yes' if is_admin else 'No'))
+    preview = {
+        'email': email,
+        'password': '(Empty)' if password == '' else '(Not shown)',
+        'active': 'Yes' if is_active else 'No',
+        'public': 'Yes' if is_public else 'No',
+        'admin': 'Yes' if is_admin else 'No',
+    }
+    log.info('\nE-mail: %(email)s\nPassword: %(password)s\nActive: %(active)s'
+             '\nPublic: %(public)s\nAdmin: %(admin)s\n' % preview)
 
     if not confirm('Are values correct?'):
         log.error('Aborting.')
