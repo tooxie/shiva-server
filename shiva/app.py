@@ -52,6 +52,9 @@ api.add_resource(resources.AuthResource, '/users/login/', endpoint='auth')
 api.add_resource(resources.UserResource, '/users/', '/users/<id>/',
                  endpoint='users')
 
+# Shiva-Shiva
+api.add_resource(resources.SyncResource, '/sync/', endpoint='sync')
+
 # Other
 api.add_resource(resources.RandomResource, '/random/<resource_name>/',
                  endpoint='random')

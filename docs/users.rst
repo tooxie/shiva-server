@@ -64,10 +64,10 @@ The concept of Roles is very limited in Shiva. There are 3 possible roles:
 * Shiva
 
 The first 2 are assigned to users, the last one is only used by other Shiva
-instances to communicate with each other. Please note that this functionality 
-is not yet implemented.
+instances to communicate with each other.
 
 To create a normal user (i.e. either *User* or *Admin* roles) use the command
-`shiva-admin user add`.
+`shiva-admin user add`, while to create a *Shiva* role user, use the command
+`shiva-shiva add`.
 
 A role-authentication failure will result in a 401 Forbidden status code.

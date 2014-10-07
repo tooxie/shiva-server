@@ -51,6 +51,7 @@ setup(
             'shiva-fileserver = shiva.bin:fileserver',
             'shiva-indexer = shiva.bin:indexer',
             'shiva-server = shiva.bin:server',
+            'shiva-shiva = shiva.bin:sync',
         ]
     }
 )
