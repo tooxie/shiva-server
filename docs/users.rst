@@ -52,3 +52,22 @@ You then need to include that token with your every request:
 .. code:: sh
 
     curl http://127.0.0.1:9002/tracks?token=$AUTH_TOKEN
+
+
+Role-based Access Control
+=========================
+
+The concept of Roles is very limited in Shiva. There are 3 possible roles:
+
+* User
+* Admin
+* Shiva
+
+The first 2 are assigned to users, the last one is only used by other Shiva
+instances to communicate with each other. Please note that this functionality 
+is not yet implemented.
+
+To create a normal user (i.e. either *User* or *Admin* roles) use the command
+`shiva-admin user add`.
+
+A role-authentication failure will result in a 401 Forbidden status code.

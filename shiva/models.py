@@ -13,8 +13,9 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql.expression import func
 from slugify import slugify
 
-from shiva.utils import MetadataManager
 from shiva import dbtypes
+from shiva.auth import Roles
+from shiva.utils import MetadataManager
 
 db = SQLAlchemy()
 
@@ -432,7 +433,8 @@ class User(db.Model):
     # Should these attributes be in their own table?
     is_public = db.Column(db.Boolean, nullable=False, default=False)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
-    is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    role = db.Column(db.Enum(*Roles.as_tuple()), nullable=False,
+                     default=Roles.USER)
     creation_date = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, *args, **kwargs):
