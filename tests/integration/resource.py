@@ -7,6 +7,7 @@ import random
 from flask import json
 
 from shiva import app as shiva
+from shiva.auth import Roles
 from shiva.converter import Converter
 from shiva.models import Artist, Album, Track, User
 from shiva.resources.upload import UploadHandler
@@ -56,7 +57,7 @@ class ResourceTestCase(unittest.TestCase):
         self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
                            hash_file=False, no_metadata=True)
         self.user = User(email='derp@mail.com', password='blink182',
-                         is_public=True, is_active=True, is_admin=False)
+                         is_public=True, is_active=True)
 
         self.track.albums.append(self.album)
         self.track.artists.append(self.artist)
@@ -90,8 +91,9 @@ class ResourceTestCase(unittest.TestCase):
         email = str(random.random())
         password = str(random.random())
 
+        role = Roles.get('ADMIN' if is_admin else 'USER')
         user = User(email=email, password=password, is_public=is_public,
-                    is_active=is_active, is_admin=is_admin)
+                    is_active=is_active, role=role)
 
         self._db.session.add(user)
         self._db.session.commit()

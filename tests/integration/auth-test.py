@@ -25,7 +25,7 @@ class AuthTestCase(unittest.TestCase):
         shiva.db.create_all()
 
         self.user = User(email='derp@mail.com', password='blink182',
-                         is_public=False, is_active=True, is_admin=False)
+                         is_public=False, is_active=True)
         shiva.db.session.add(self.user)
         shiva.db.session.commit()
 

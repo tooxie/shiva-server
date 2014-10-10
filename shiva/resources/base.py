@@ -3,6 +3,7 @@ from flask import current_app as app, g, request, url_for
 from flask.ext.restful import abort, fields, marshal
 from werkzeug.exceptions import NotFound
 
+from shiva.auth import Roles
 from shiva.constants import HTTP
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
@@ -529,8 +530,9 @@ class UserResource(Resource):
         return response, 201, headers
 
     def create(self, display_name, email, password, is_active, is_admin):
+        role = Roles.get('ADMIN' if is_admin else 'USER')
         user = User(display_name=display_name, email=email, password=password,
-                    is_active=is_active, is_admin=is_admin)
+                    is_active=is_active, role=role)
 
         db.session.add(user)
         db.session.commit()
@@ -564,7 +566,8 @@ class UserResource(Resource):
                 user.is_active = parse_bool(request.form.get('is_active'))
 
         if 'is_admin' in request.form:
-            user.is_admin = parse_bool(request.form.get('is_admin'))
+            is_admin = parse_bool(request.form.get('is_admin'))
+            user.role = Roles.get('ADMIN' if is_admin else 'USER')
 
         return user
 
