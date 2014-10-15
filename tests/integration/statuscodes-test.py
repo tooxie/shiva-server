@@ -3,7 +3,7 @@ from datetime import datetime
 
 from nose import tools as nose
 
-from tests.integration.resource import ResourceTestCase
+from .resource import ResourceTestCase
 
 
 class StatusCodesTestCase(ResourceTestCase):

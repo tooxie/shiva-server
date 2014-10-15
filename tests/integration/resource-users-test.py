@@ -2,7 +2,7 @@
 from nose import tools as nose
 
 from shiva.auth import Roles
-from tests.integration.resource import ResourceTestCase
+from .resource import ResourceTestCase
 
 
 class UsersResourceTestCase(ResourceTestCase):

@@ -3,7 +3,7 @@ from cStringIO import StringIO
 
 from nose import tools as nose
 
-from tests.integration.resource import ResourceTestCase
+from .resource import ResourceTestCase
 
 
 class TrackResourceTestCase(ResourceTestCase):
