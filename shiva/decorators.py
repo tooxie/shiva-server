@@ -4,6 +4,8 @@ from functools import wraps
 from flask import current_app as app, g, request
 from flask.ext.restful import abort
 
+from shiva.constants import HTTP
+
 
 def allow_method(func=None):
     """Checks if the method is globally allowed, raising a 405 if not.
@@ -14,7 +16,7 @@ def allow_method(func=None):
         def decorated(*args, **kwargs):
             allow_delete = app.config.get('ALLOW_DELETE', False)
             if func.func_name == 'delete' and not allow_delete:
-                abort(405)
+                abort(HTTP.METHOD_NOT_ALLOWED)
 
             return func(*args, **kwargs)
 

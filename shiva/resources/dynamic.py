@@ -7,6 +7,7 @@ from flask import request, current_app as app, g
 from flask.ext.restful import abort, fields, marshal
 import requests
 
+from shiva.constants import HTTP
 from shiva.converter import get_converter
 from shiva.exceptions import InvalidMimeTypeError
 from shiva.http import Resource, JSONResponse
@@ -69,7 +70,7 @@ class LyricsResource(Resource):
 
     def get(self, id=None, slug=None):
         if not id and not slug:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         if not id and slug:
             track = Track.query.filter_by(slug=slug).first()
@@ -89,7 +90,7 @@ class LyricsResource(Resource):
             lyrics = None
 
         if not lyrics:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         return marshal(lyrics, self.get_resource_fields())
 
@@ -121,14 +122,14 @@ class ConvertResource(Resource):
         track = Track.query.get(id)
         mimetype = request.args.get('mimetype')
         if not track or not mimetype:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         ConverterClass = get_converter()
         try:
             converter = ConverterClass(track, mimetype=mimetype)
         except InvalidMimeTypeError, e:
             log.error(e)
-            abort(400)
+            abort(HTTP.NOT_FOUND)
 
         converter.convert()
         uri = converter.get_uri()
@@ -160,7 +161,7 @@ class ShowsResource(Resource):
 
     def get(self, id=None, slug=None):
         if not id and not slug:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         if not id and slug:
             artist = Artist.query.filter_by(slug=slug).first()
@@ -168,7 +169,7 @@ class ShowsResource(Resource):
             artist = Artist.query.get(id)
 
         if not artist:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         latitude = request.args.get('latitude')
         longitude = request.args.get('longitude')
@@ -226,7 +227,7 @@ class RandomResource(Resource):
 
             return marshal(get_resource(), resource_fields)
 
-        abort(404)
+        abort(HTTP.NOT_FOUND)
 
     def get_track(self):
         return Track.random()
