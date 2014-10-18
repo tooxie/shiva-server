@@ -7,6 +7,7 @@ import sys
 from flask import abort, Flask, Response, request, send_file
 
 from shiva.config import Configurator
+from shiva.constants import HTTP
 from shiva.utils import get_logger
 
 app = Flask(__name__)
@@ -73,7 +74,7 @@ def get_range_bytes(range_header):
 def serve(relative_path):
     absolute_path = get_absolute_path(relative_path)
     if not absolute_path:
-        abort(404)
+        abort(HTTP.NOT_FOUND)
 
     range_header = request.headers.get('Range', None)
     if not range_header:

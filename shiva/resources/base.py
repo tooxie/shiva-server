@@ -3,6 +3,7 @@ from flask import current_app as app, g, request, url_for
 from flask.ext.restful import abort, fields, marshal
 from werkzeug.exceptions import NotFound
 
+from shiva.constants import HTTP
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
 from shiva.http import Resource
@@ -30,14 +31,14 @@ class ArtistResource(Resource):
     def post(self):
         name = request.form.get('name', '').strip()
         if not name:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         image_url = request.form.get('image_url')
 
         try:
             artist = self.create(name, image_url)
         except (IntegrityError, ObjectExistsError):
-            abort(409)
+            abort(HTTP.CONFLICT)
 
         response = marshal(artist, self.get_resource_fields())
         headers = {'Location': url_for('artists', id=artist.pk)}
@@ -56,7 +57,7 @@ class ArtistResource(Resource):
         if 'name' in request.form:
             name = request.form.get('name', '').strip()
             if not name:
-                abort(400)  # Bad Request
+                abort(HTTP.BAD_REQUEST)
 
             artist.name = name
 
@@ -108,7 +109,7 @@ class AlbumResource(Resource):
         }
 
         if not params['name']:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         album = self.create(**params)
 
@@ -135,7 +136,7 @@ class AlbumResource(Resource):
         if 'name' in request.form:
             name = request.form.get('name', '').strip()
             if not name:
-                abort(400)
+                abort(HTTP.BAD_REQUEST)
 
             album.name = request.form.get('name')
 
@@ -156,7 +157,7 @@ class AlbumResource(Resource):
         try:
             pk = artist_pk if int(artist_pk) > 0 else None
         except ValueError:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         return queryset.join(Album.artists).filter(Artist.pk == pk)
 
@@ -206,12 +207,12 @@ class TrackResource(Resource):
         }
 
         if 'track' not in request.files:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         try:
             track = self.create(**params)
         except (IntegrityError, ObjectExistsError):
-            abort(409)
+            abort(HTTP.CONFLICT)
 
         response = marshal(track, self.get_resource_fields())
         headers = {'Location': url_for('tracks', id=track.pk)}
@@ -223,7 +224,7 @@ class TrackResource(Resource):
         try:
             handler = UploadHandler(track=request.files.get('track'))
         except InvalidFileTypeError, e:
-            abort(415)  # Unsupported Media Type
+            abort(HTTP.UNSUPPORTED_MEDIA_TYPE)
 
         handler.save()
 
@@ -241,7 +242,7 @@ class TrackResource(Resource):
             try:
                 artist_list.extend(get_list(Artist, artists))
             except ValueError:
-                abort(400)  # Bad Request
+                abort(HTTP.BAD_REQUEST)
         else:
             if handler.artist:
                 artist_list.append(get_by_name(Artist, handler.artist))
@@ -251,7 +252,7 @@ class TrackResource(Resource):
             try:
                 album_list.extend(get_list(Album, albums))
             except ValueError:
-                abort(400)  # Bad Request
+                abort(HTTP.BAD_REQUEST)
         else:
             if handler.album:
                 artist_list.append(get_by_name(Album, handler.album))
@@ -275,7 +276,7 @@ class TrackResource(Resource):
         # The track attribute cannot be updated. A new track has to be created
         # with the new value instead.
         if 'track' in request.form:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         for artist_pk in request.form.getlist('artist_id'):
             try:
@@ -303,7 +304,7 @@ class TrackResource(Resource):
         try:
             pk = artist_pk if int(artist_pk) > 0 else None
         except ValueError:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         return queryset.filter(Track.artist_pk == pk)
 
@@ -311,7 +312,7 @@ class TrackResource(Resource):
         try:
             pk = album_pk if int(album_pk) > 0 else None
         except ValueError:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         return queryset.filter_by(album_pk=pk)
 
@@ -387,11 +388,11 @@ class PlaylistResource(Resource):
 
     def post(self):
         if g.user is None:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         name = request.form.get('name', '').strip()
         if not name:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         read_only = request.form.get('read_only', True)
 
@@ -424,37 +425,37 @@ class PlaylistTrackResource(Resource):
     def post(self, id, verb):
         handler = getattr(self, '%s_track' % verb)
         if not handler:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         playlist = self.get_playlist(id)
         if not playlist:
-            abort(404)
+            abort(HTTP.NOT_FOUND)
 
         return handler(playlist)
 
     def add_track(self, playlist):
         if 'track' not in request.form:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         track = self.get_track(request.form.get('track'))
         if not track:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         try:
             playlist.insert(request.form.get('index'), track)
         except ValueError:
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         return self.Response('')
 
     def remove_track(self, playlist):
         if 'index' not in request.form:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         try:
             playlist.remove_at(request.form.get('index'))
         except (ValueError, IndexError):
-            abort(400)
+            abort(HTTP.BAD_REQUEST)
 
         return self.Response('')
 
@@ -498,11 +499,14 @@ class UserResource(Resource):
 
     def post(self, id=None):
         if id == 'me':
-            abort(405)
+            abort(HTTP.METHOD_NOT_ALLOWED)
+
+        if g.user is None:
+            abort(HTTP.METHOD_NOT_ALLOWED)
 
         email = request.form.get('email')
         if not email:
-            abort(400)  # Bad Request
+            abort(HTTP.BAD_REQUEST)
 
         display_name = request.form.get('display_name')
         is_active = False
@@ -517,7 +521,7 @@ class UserResource(Resource):
                                password=password, is_active=is_active,
                                is_admin=is_admin)
         except (IntegrityError, ObjectExistsError):
-            abort(409)
+            abort(HTTP.CONFLICT)
 
         response = marshal(user, self.get_resource_fields())
         headers = {'Location': url_for('users', id=user.pk)}
@@ -535,7 +539,7 @@ class UserResource(Resource):
 
     def put(self, id=None):
         if id == 'me':
-            abort(405)
+            abort(HTTP.METHOD_NOT_ALLOWED)
 
         return super(UserResource, self).put(id)
 
@@ -543,7 +547,7 @@ class UserResource(Resource):
         if 'email' in request.form:
             email = request.form.get('email', '').strip()
             if not email:
-                abort(400)  # Bad Request
+                abort(HTTP.BAD_REQUEST)
 
             user.email = email
 
@@ -566,6 +570,6 @@ class UserResource(Resource):
 
     def delete(self, id=None):
         if id == 'me':
-            abort(405)
+            abort(HTTP.METHOD_NOT_ALLOWED)
 
         return super(UserResource, self).delete(id)

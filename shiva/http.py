@@ -5,7 +5,7 @@ import json
 from flask import current_app as app, Response, request, g
 from flask.ext import restful
 
-
+from shiva.constants import HTTP
 from shiva.decorators import allow_origins, allow_method
 from shiva.utils import parse_bool, unpack
 
@@ -75,7 +75,7 @@ class Resource(restful.Resource):
             result = self.marshal(self.full_tree(self._by_id(id)))
         else:
             if not hasattr(self, 'db_model'):
-                return restful.abort(405)
+                restful.abort(HTTP.METHOD_NOT_ALLOWED)
 
             result = self._all()
 
@@ -83,10 +83,10 @@ class Resource(restful.Resource):
 
     def put(self, id=None):
         if not id:
-            return restful.abort(405)
+            restful.abort(HTTP.METHOD_NOT_ALLOWED)
 
         if not hasattr(self, 'update'):
-            return restful.abort(405)
+            restful.abort(HTTP.METHOD_NOT_ALLOWED)
 
         # TODO: Check permissions
         item = self._by_id(id)
@@ -97,13 +97,13 @@ class Resource(restful.Resource):
             g.db.session.commit()
         except:
             # Assuming a unique constraint was violated.
-            restful.abort(409)  # Conflict
+            restful.abort(HTTP.CONFLICT)
 
         return self.Response('')
 
     def delete(self, id=None):
         if not id or not self.db_model:
-            return restful.abort(405)  # Method Not Allowed
+            restful.abort(HTTP.METHOD_NOT_ALLOWED)
 
         item = self._by_id(id)
 
@@ -116,10 +116,10 @@ class Resource(restful.Resource):
         try:
             result = self.get_by_id(id)
         except:
-            restful.abort(404)
+            restful.abort(HTTP.NOT_FOUND)
 
         if not result:
-            restful.abort(404)
+            restful.abort(HTTP.NOT_FOUND)
 
         return result
 
