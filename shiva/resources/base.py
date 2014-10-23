@@ -332,11 +332,11 @@ class TrackResource(Resource):
         resource_fields = self.get_resource_fields()
         if include_related:
             artist = ArtistResource()
-            resource_fields['artist'] = ForeignKeyField(
+            resource_fields['artists'] = ManyToManyField(
                 Artist,
                 artist.get_resource_fields())
             album = AlbumResource()
-            resource_fields['album'] = ForeignKeyField(
+            resource_fields['albums'] = ManyToManyField(
                 Album,
                 album.get_resource_fields())
 
