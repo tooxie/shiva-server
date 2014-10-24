@@ -55,9 +55,11 @@ class ResourceTestCase(unittest.TestCase):
         self.album = Album(name='Falling down')
         self.track = Track(title='Falling down', path='/music/4no1/01.mp3',
                            hash_file=False, no_metadata=True)
-        self.album.artists.append(self.artist)
         self.user = User(email='derp@mail.com', password='blink182',
                          is_public=True, is_active=True, is_admin=False)
+
+        self.track.albums.append(self.album)
+        self.track.artists.append(self.artist)
 
         shiva.db.session.add(self.artist)
         shiva.db.session.add(self.album)
