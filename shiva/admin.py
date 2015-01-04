@@ -17,9 +17,10 @@ import sys
 
 from docopt import docopt
 
+from shiva.app import app
+from shiva.auth import Roles
 from shiva.models import db, User
 from shiva.utils import get_logger
-from shiva.app import app
 
 log = get_logger()
 
@@ -137,8 +138,9 @@ def create_user_interactive(email=None, password='', is_public=False,
 
 
 def mk_user(email, password, is_public, is_active, is_admin):
+    role = Roles.get('ADMIN' if is_admin else 'USER')
     user = User(email=email, password=password, is_public=is_public,
-                is_active=is_active, is_admin=is_admin)
+                is_active=is_active, role=role)
 
     db.session.add(user)
     db.session.commit()

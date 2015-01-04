@@ -4,8 +4,8 @@ import os
 import tempfile
 import unittest
 
-from shiva import admin
-from shiva import app as shiva
+from shiva import admin, app as shiva
+from shiva.auth import Roles
 
 
 class AdminTestCase(unittest.TestCase):
@@ -40,7 +40,7 @@ class AdminTestCase(unittest.TestCase):
 
         nose.ok_(user.pk is not None)
         nose.eq_(user.is_active, True)
-        nose.eq_(user.is_admin, False)
+        nose.eq_(user.role, Roles.USER)
 
     def test_user_activation(self):
         params = self.get_payload()
