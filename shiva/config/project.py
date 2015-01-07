@@ -56,7 +56,7 @@ AUTH_EXPIRATION_TIME = 3600  # 1h
 ALLOW_ANONYMOUS_ACCESS = False
 
 # Shiva2Shiva
-NEIGHBOURS = (
+NODES = (
     {
         'host': '127.0.0.1',
         'key': '',
@@ -66,6 +66,7 @@ NEIGHBOURS = (
 )
 
 # Alternative NEIGHBOURS config:
+"""
 NEIGHBOURS = (
     Neighbour('127.0.0.1',
         key='1234567890',
@@ -82,5 +83,6 @@ NEIGHBOURS = {
         'key': '',
         'token': '',
         'enabled': False,
-    }
+    },
 }
+"""
