@@ -13,16 +13,22 @@ MEDIA_DIRS = (
     # MediaDir('/home/fatmike/music/shiva'),
     # If in doubt, read the source.
 )
+
 # The path where uploaded files will be stored.
 UPLOAD_PATH = ''
-# Add your own mimetypes here.
+
+# These are the default mimetypes. Add your own here.
 # MIMETYPES = (
 #     MimeType(type='audio', subtype='mp3', extension='mp3',
 #              acodec='libmp3lame'),
 #     MimeType(type='audio', subtype='ogg', extension='ogg',
 #              acodec='libvorbis'),
 # )
+
 LASTFM_API_KEY = ''
+METROLYRICS_API_KEY = ''
+BANDSINTOWN_APP_ID = 'SHIVA_APP_ID'
+
 SCRAPERS = {
     'lyrics': (
         'azlyrics.AZLyrics',
@@ -30,7 +36,6 @@ SCRAPERS = {
         'letrascanciones.MP3Lyrics',
     ),
 }
-METROLYRICS_API_KEY = '1234567890123456789012345678901234567890'
-BANDSINTOWN_APP_ID = 'SHIVA_APP_ID'
+
 # Here you can redefine anything you set in your settings.project file, like
 # the database URI.
