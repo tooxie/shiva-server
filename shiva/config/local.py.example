@@ -3,6 +3,10 @@ from shiva.media import MediaDir, MimeType
 
 SERVER_URI = ''
 SECRET_KEY = ''  # Set this to something secret.
+
+# Require validation to access Shiva.
+ALLOW_ANONYMOUS_ACCESS = False
+
 MEDIA_DIRS = (
     # Examples.
     # MediaDir(root='/srv/http', dirs=('/music',), url='http://127.0.0.1/'),
