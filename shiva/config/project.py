@@ -50,3 +50,4 @@ UPLOAD_DEFAULT_ALBUM = 'unknown'
 # Time (in seconds) for which the session tokens will be valid. After this time
 # the client will have to re-authenticate.
 AUTH_EXPIRATION_TIME = 3600  # 1h
+ALLOW_ANONYMOUS_ACCESS = False
