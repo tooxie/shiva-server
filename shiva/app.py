@@ -3,6 +3,7 @@ import sys
 
 from flask import Flask, g, request
 from flask.ext.restful import Api
+from flask.ext.compress import Compress
 
 from shiva import resources
 from shiva.auth import verify_credentials
@@ -14,6 +15,10 @@ app = Flask(__name__)
 app.config.from_object(Configurator())
 db.app = app
 db.init_app(app)
+
+# Serve all requests gzipped
+if app.config.get('USE_GZIP', True):
+    Compress(app)
 
 # RESTful API
 api = Api(app)
@@ -85,7 +90,7 @@ def main():
     except:
         port = 9002
 
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port)
 
 
 if __name__ == '__main__':

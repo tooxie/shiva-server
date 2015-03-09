@@ -20,6 +20,9 @@ DEFAULT_ALBUM_COVER = ('http://wortraub.com/wp-content/uploads/2012/07/'
                        'Vinyl_Close_Up.jpg')
 DEFAULT_ARTIST_IMAGE = 'http://www.super8duncan.com/images/band_silhouette.jpg'
 
+# Compress all responses with gzip. Will be ignored in DEBUG mode.
+USE_GZIP = True
+
 # https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
 CORS_ENABLED = False
 # CORS_ALLOWED_ORIGINS accepts the following values:
