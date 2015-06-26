@@ -31,6 +31,11 @@ setup(
     platforms=['OS-independent', 'Any'],
     package_dir={'': '.'},
     packages=find_packages('.'),
+    package_data={
+        "shiva": [
+            "logging.conf",
+        ]
+    },
     install_requires=[
         'bcrypt==1.0.2',
         'docopt==0.6.1',
