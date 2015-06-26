@@ -1,13 +1,13 @@
-.. |buildstatus| image:: https://secure.travis-ci.org/tooxie/shiva-server.png?branch=master
+.. |buildstatus| image:: https://img.shields.io/travis/tooxie/shiva-server.png
     :alt: Build status
     :target: http://travis-ci.org/tooxie/shiva-server
-.. |testcoverage| image:: https://coveralls.io/repos/tooxie/shiva-server/badge.png
+.. |testcoverage| image:: https://img.shields.io/coveralls/tooxie/shiva-server.png
     :alt: Test coverage
     :target: https://coveralls.io/r/tooxie/shiva-server
 .. |documentation| image:: https://readthedocs.org/projects/shiva/badge/?version=latest
     :alt: Documentation
     :target: http://shiva.readthedocs.org/en/latest/
-.. |downloads| image:: https://pypip.in/d/shiva/badge.png
+.. |downloads| image:: https://img.shields.io/pypi/dm/shiva.png
     :alt: PyPi downloads
     :target: https://pypi.python.org/pypi/shiva
 
