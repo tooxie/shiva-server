@@ -3,7 +3,12 @@ from flask import g, request
 from flask.ext.restful import abort, Resource
 
 from shiva.constants import HTTP
-from shiva.models import User
+
+
+def get_user():
+    from shiva.models import User
+
+    return User
 
 
 def verify_credentials(app):
@@ -16,7 +21,7 @@ def verify_credentials(app):
         return None
 
     token = request.args.get('token', '')
-    user = User.verify_auth_token(token)
+    user = get_user().verify_auth_token(token)
 
     if not user:
         abort(HTTP.UNAUTHORIZED)
@@ -29,7 +34,7 @@ class AuthResource(Resource):
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = User.query.filter_by(email=email).first()
+        user = get_user().query.filter_by(email=email).first()
         if not user or not user.verify_password(password):
             abort(HTTP.UNAUTHORIZED)
 
