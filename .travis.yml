@@ -16,10 +16,12 @@ install:
     - cp shiva/config/local.py.example shiva/config/local.py
     - echo "import os" >> shiva/config/local.py
     - echo "MEDIA_DIRS = (MediaDir(os.environ['HOME']),)" >> shiva/config/local.py
+    - echo "SQLALCHEMY_DATABASE_URI = 'sqlite://'" >> shiva/config/local.py
 
 script:
     - find shiva -name '*.py' -exec pep8 --ignore=E128 '{}' \+
     - shiva-indexer
+    - python -c "from shiva.app import db; db.create_all()"
     - nosetests --with-cov --cov shiva
 
 after_success:
