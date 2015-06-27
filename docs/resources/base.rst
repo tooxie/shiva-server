@@ -237,10 +237,15 @@ Example response for the request ``GET /tracks/510``:
         "id": 510,
         "length": 180,
         "files": {
-            "audio/mp3": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3",
-            "audio/ogg": "/tracks/510/convert?mimetype=audio%2Fogg"
+            "audio/mp3": {
+              "needs_conversion": false,
+              "uri": "http://localhost:8080/nofx-pump_up_the_valuum/04. Dinosaurs Will Die.mp3"
+            }
+            "audio/ogg": {
+              "needs_conversion": true,
+              "uri": "/tracks/510/convert?mimetype=audio%2Fogg"
+            }
         }
-
     }
 
 
@@ -258,8 +263,11 @@ Fields
   of the track's title.
 * ``title``: The title of the track.
 * ``uri``: The URI of this resource's instance.
-* ``files``: A list of URIs to access the files in the different formats,
-  according to the MEDIA_DIRS setting.
+* ``files``: An object containing:
+    * ``needs_conversion``: A boolean indicating if the file has to be
+      converted. Use this to inform users that the track will take a little
+      longer to load.
+    * ``uri``: The URI to the track.
 
 
 Filtering by artist
@@ -287,8 +295,14 @@ Example response for the request ``GET /tracks?artist=16``:
             "id": 523,
             "length": 189,
             "files": {
-                "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3",
-                "audio/ogg": "/tracks/523/convert?mimetype=audio%2Fogg"
+                "audio/mp3": {
+                    "needs_conversion": false,
+                    "uri": "http://localhost:8080/ftd-2003-sofa_so_good/01 For The Day - Pay Cheque (Heritage II).mp3"
+                }
+                "audio/ogg": {
+                    "needs_conversion": true,
+                    "uri": "/tracks/523/convert?mimetype=audio%2Fogg"
+                }
             }
         },
         {
@@ -308,8 +322,14 @@ Example response for the request ``GET /tracks?artist=16``:
             "id": 531,
             "length": 171,
             "files": {
-                "audio/mp3": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3",
-                "audio/ogg": "/tracks/523/convert?mimetype=audio%2Fogg"
+                "audio/mp3": {
+                    "needs_conversion": false,
+                    "uri": "http://localhost:8080/ftd-2003-sofa_so_good/02 For The Day - In Your Dreams.mp3"
+                }
+                "audio/ogg": {
+                    "needs_conversion": true,
+                    "uri": "/tracks/523/convert?mimetype=audio%2Fogg"
+                }
             }
         }
     ]
@@ -334,8 +354,14 @@ Example response for the request ``GET /tracks?album=18``:
             },
             "length": 132,
             "files": {
-                "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3",
-                "audio/ogg": "/tracks/277/convert?mimetype=audio%2Fogg"
+                "audio/mp3": {
+                    "needs_conversion": false,
+                    "uri": "http://localhost:8080/flip-keep_rockin/flip-01-shapes.mp3"
+                }
+                "audio/ogg": {
+                    "needs_conversion": true,
+                    "uri": "/tracks/277/convert?mimetype=audio%2Fogg"
+                }
             }
             "ordinal": 1,
             "title": "Shapes",
@@ -355,8 +381,14 @@ Example response for the request ``GET /tracks?album=18``:
             },
             "length": 118,
             "files": {
-                "audio/mp3": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3",
-                "audio/ogg": "/tracks/281/convert?mimetype=audio%2Fogg"
+                "audio/mp3": {
+                    "needs_conversion": false,
+                    "uri": "http://localhost:8080/flip-keep_rockin/flip-02-stucked_to_the_ground.mp3"
+                }
+                "audio/ogg": {
+                    "needs_conversion": true,
+                    "uri": "/tracks/281/convert?mimetype=audio%2Fogg"
+                }
             }
             "ordinal": 2,
             "title": "Stucked to The Ground",
@@ -548,8 +580,14 @@ Here's an example response for the request ``GET /artists/2?fulltree=true``:
                         },
                         "length": 161,
                         "files": {
-                            "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/tomalo-con-calma.mp3",
-                            "audio/ogg": "/tracks/27/convert?mimetype=audio%2Fogg"
+                            "audio/mp3": {
+                                "needs_conversion": false,
+                                "uri": "http://127.0.0.1:8001/eterna_inocencia/tomalo-con-calma.mp3"
+                            }
+                            "audio/ogg": {
+                                "needs_conversion": true,
+                                "uri": "/tracks/27/convert?mimetype=audio%2Fogg"
+                            }
                         }
                         "ordinal": 0,
                         "title": "02 - Rio Lujan",
@@ -569,8 +607,14 @@ Here's an example response for the request ``GET /artists/2?fulltree=true``:
                         },
                         "length": 262,
                         "files": {
-                            "audio/mp3": "http://127.0.0.1:8001/eterna_inocencia/estoy-herido-en-mi-interior.mp3",
-                            "audio/ogg": "/tracks/28/convert?mimetype=audio%2Fogg"
+                            "audio/mp3": {
+                                "needs_conversion": false,
+                                "uri": "http://127.0.0.1:8001/eterna_inocencia/estoy-herido-en-mi-interior.mp3"
+                            }
+                            "audio/ogg": {
+                                "needs_conversion": true,
+                                "uri": "/tracks/28/convert?mimetype=audio%2Fogg"
+                            }
                         }
                         "ordinal": 0,
                         "title": "03 - Estoy herido en mi interior",
@@ -620,8 +664,14 @@ simply a list of tracks that are not related to any album:
             },
             bitrate: 192,
             files: {
-                audio/mp3: "http://127.0.0.1:8001/music/dead_fish-1998-sirva-se/14-dead_fish-the_party-buc.mp3",
-                audio/ogg: "/tracks/82/convert?mimetype=audio%2Fogg"
+                audio/mp3: {
+                    "needs_conversion": false,
+                    "uri": "http://127.0.0.1:8001/music/dead_fish-1998-sirva-se/14-dead_fish-the_party-buc.mp3"
+                }
+                audio/ogg: {
+                    "needs_conversion": true,
+                    "uri": "/tracks/82/convert?mimetype=audio%2Fogg"
+                }
             },
             id: 82,
             length: 1,
