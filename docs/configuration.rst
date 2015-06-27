@@ -45,3 +45,14 @@ Then Shiva will also try to load this configuration files:
 
 In this case ``$XDG_CONFIG_HOME/shiva/debug.py`` will also have precedence over
 ``config/debug.py``.
+
+
+Database
+--------
+
+By default shiva uses sqlite because of its ease of setup and use, but if you
+have a different requirement you can override the ``SQLALCHEMY_DATABASE_URI``
+setting in your ``local.py`` file and use any of the `supported databases
+<http://docs.sqlalchemy.org/en/rel_0_5/dbengine.html#supported-databases>`_.
+
+Make sure that you have the proper database adapter installed.
