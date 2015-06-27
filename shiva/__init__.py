@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Shiva - A RESTful API to your music collection
 #
-# Copyright © 2014 Alvaro Mouriño
+# Copyright © 2015 Alvaro Mouriño
 # Author: Alvaro Mouriño <alvaro@mourino.net>
 # URL: <https://github.com/tooxie/shiva-server>
 """
@@ -37,13 +37,13 @@ to-your-music-collection/
 You can find the technical documentation at `Read The Docs
 <http://shiva.readthedocs.org/en/latest/>`_.
 
-Copyright © 2014 Alvaro Mouriño
+Copyright © 2015 Alvaro Mouriño
 """
 
 __version__ = '0.9.0'
 __author__ = u'Alvaro Mouriño'
 __author_email__ = 'alvaro@mourino.net'
-__copyright__ = '2014 Alvaro Mouriño'
+__copyright__ = '2015 Alvaro Mouriño'
 __url__ = 'https://github.com/tooxie/shiva-server'
 __contributors__ = [
     u'Bojan Mihelac <bmihelac@mihelac.org>',
