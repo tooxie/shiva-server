@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+Shiva's configuration file. Here you can override Shiva's default values to fit
+your needs. For more information please read the `documentation
+<http://shiva.readthedocs.org/en/latest/configuration.html>_`.
+"""
 from shiva.media import MediaDir, MimeType
 
 SERVER_URI = ''
 SECRET_KEY = ''  # Set this to something secret.
+
+SQLALCHEMY_DATABASE_URI = 'sqlite:///shiva.db'
 
 # Require validation to access Shiva.
 ALLOW_ANONYMOUS_ACCESS = False

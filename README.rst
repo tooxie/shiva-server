@@ -60,6 +60,6 @@ Why Shiva?
 ----------
 
 Shiva is the name of the `crater <https://en.wikipedia.org/wiki/Shiva_crater>`_
-that would have been created by the
-`K-Pg event <https://en.wikipedia.org/wiki/Cretaceous%E2%80%93Paleogene_extinction_event>`_
+that would have been created by the `K-Pg event
+<https://en.wikipedia.org/wiki/Cretaceous%E2%80%93Paleogene_extinction_event>`_
 that extincted the `dinosaurs <https://www.youtube.com/watch?v=dlAeN3Qxlvc>`_.
