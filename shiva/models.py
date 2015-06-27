@@ -433,8 +433,8 @@ class User(db.Model):
     # Should these attributes be in their own table?
     is_public = db.Column(db.Boolean, nullable=False, default=False)
     is_active = db.Column(db.Boolean, nullable=False, default=False)
-    role = db.Column(db.Enum(*Roles.as_tuple()), nullable=False,
-                     default=Roles.USER)
+    role = db.Column(db.Enum(*Roles.as_tuple(), name="role"),
+                     nullable=False, default=Roles.USER)
     creation_date = db.Column(db.DateTime, nullable=False)
 
     def __init__(self, *args, **kwargs):
