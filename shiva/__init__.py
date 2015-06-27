@@ -40,7 +40,7 @@ You can find the technical documentation at `Read The Docs
 Copyright © 2015 Alvaro Mouriño
 """
 
-__version__ = '0.9.0'
+__version__ = '0.10.0'
 __author__ = u'Alvaro Mouriño'
 __author_email__ = 'alvaro@mourino.net'
 __copyright__ = '2015 Alvaro Mouriño'
