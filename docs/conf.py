@@ -245,7 +245,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'Shiva', u'Shiva Documentation',
-   u'Alvaro Mouriño', 'Shiva', 'One line description of project.',
+   u'Alvaro Mouriño', 'Shiva', 'A RESTful API to your music collection',
    'Miscellaneous'),
 ]
 
