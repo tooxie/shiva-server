@@ -83,10 +83,11 @@ class Converter(object):
 
         path = os.path.join(file_path, self.mimetype.extension)
 
+        return path
+
+    def mkdir(self, path):
         if not os.path.exists(path):
             os.mkdir(path)
-
-        return path
 
     def get_dest_filename(self):
         filename = os.path.basename(self.track.path)
@@ -124,6 +125,7 @@ class Converter(object):
 
     def convert(self):
         path = self.get_dest_fullpath()
+        self.mkdir(os.path.dirname(path))
         if self.converted_file_exists():
             return path
 

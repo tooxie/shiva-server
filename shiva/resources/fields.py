@@ -29,7 +29,10 @@ class TrackFiles(fields.Raw):
 
         for mimetype in get_mimetypes():
             converter = ConverterClass(track, mimetype)
-            paths[str(mimetype)] = converter.get_uri()
+            paths[str(mimetype)] = {
+                'needs_conversion': not converter.converted_file_exists(),
+                'uri': converter.get_uri(),
+            }
 
         return paths
 
