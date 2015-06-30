@@ -106,3 +106,13 @@ class ForeignKeyField(fields.Raw):
 class Boolean(fields.Raw):
     def output(self, key, obj):
         return bool(super(Boolean, self).output(key, obj))
+
+
+class SerializerField(fields.Raw):
+    def __init__(self, serializer):
+        self.serializer = serializer
+
+        super(SerializerField, self).__init__()
+
+    def output(self, key, obj):
+        return self.serializer(getattr(obj, key)).to_json()
