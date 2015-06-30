@@ -351,6 +351,13 @@ class PlaylistResource(Resource):
 
 
 class PlaylistTrackResource(Resource):
+    """
+    While PlaylistResource is used to create and update playlists and their
+    attributes, PlaylistTrackResource is used to manipulate the tracks
+    contained in the playlist.
+
+    """
+
     def post(self, id, verb):
         handler = getattr(self, '%s_track' % verb)
         if not handler:
