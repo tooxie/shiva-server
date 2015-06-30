@@ -2,6 +2,7 @@
 """Basic admin manager for Shiva.
 
 Usage:
+    shiva-admin db create
     shiva-admin user create [<email>]
     shiva-admin user activate <email_or_id>
     shiva-admin user deactivate <email_or_id>
@@ -17,7 +18,7 @@ import sys
 
 from docopt import docopt
 
-from shiva.app import app
+from shiva.app import app, db
 from shiva.auth import Roles
 from shiva.models import db, User
 from shiva.utils import get_logger
@@ -43,6 +44,9 @@ def main():
             deactivate_user(arguments['<email_or_id>'])
         elif arguments['delete']:
             delete_user(arguments['<email_or_id>'])
+    elif arguments['db']:
+        if arguments['create']:
+            create_db()
 
     ctx.pop()
 
@@ -209,3 +213,8 @@ def delete_user(email_or_id):
     db.session.commit()
 
     log.info("User '%s' deleted." % _pk)
+
+
+def create_db():
+    db.create_all()
+    log.info('DB created.')
