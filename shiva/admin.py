@@ -3,6 +3,7 @@
 
 Usage:
     shiva-admin db create
+    shiva-admin db destroy
     shiva-admin user create [<email>]
     shiva-admin user activate <email_or_id>
     shiva-admin user deactivate <email_or_id>
@@ -47,6 +48,8 @@ def main():
     elif arguments['db']:
         if arguments['create']:
             create_db()
+        if arguments['destroy']:
+            destroy_db()
 
     ctx.pop()
 
@@ -218,3 +221,12 @@ def delete_user(email_or_id):
 def create_db():
     db.create_all()
     log.info('DB created.')
+
+
+def destroy_db():
+    confirm = 'All data will be lost. Do you want to continue? [y/N]'
+    if raw_input(confirm) in ['y', 'Y']:
+        db.drop_all()
+        log.info('DB destroyed.')
+    else:
+        log.info('Aborting.')

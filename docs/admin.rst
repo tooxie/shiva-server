@@ -9,5 +9,6 @@ following commands are available:
 * ``user deactivate <email_or_id>``
 * ``user delete <email_or_id>``
 * ``db create``
+* ``db destroy``
 
 For more information run ``shiva-admin --help``.
