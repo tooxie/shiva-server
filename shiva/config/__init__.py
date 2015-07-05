@@ -61,12 +61,20 @@ class Configurator(object):
         return self._config.from_object(project)
 
     def get_xdg_path(self):
-        default_config_home = os.path.join(os.getenv('HOME'), '.config')
+        path_home = os.getenv('HOME')
+        if not path_home:
+            return None
+
+        default_config_home = os.path.join(path_home, '.config')
 
         return os.getenv('XDG_CONFIG_HOME') or default_config_home
 
     def from_xdg_config(self):
-        local_py = os.path.join(self.get_xdg_path(), 'shiva/config.py')
+        xdg_path = self.get_xdg_path()
+        if not xdg_path:
+            return False
+
+        local_py = os.path.join(xdg_path, 'shiva/config.py')
 
         if not os.path.exists(local_py):
             return False
@@ -97,7 +105,11 @@ class Configurator(object):
 
             loaded = self._config.from_object(debug)
 
-        debug_py = os.path.join(self.get_xdg_path(), 'shiva/debug.py')
+        xdg_path = self.get_xdg_path()
+        if not xdg_path:
+            return False
+
+        debug_py = os.path.join(xdg_path, 'shiva/debug.py')
         if not os.path.exists(debug_py):
             return False
 
