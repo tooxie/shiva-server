@@ -56,3 +56,10 @@ setting in your ``local.py`` file and use any of the `supported databases
 <http://docs.sqlalchemy.org/en/rel_0_5/dbengine.html#supported-databases>`_.
 
 Make sure that you have the proper database adapter installed.
+
+The indexer will take care of creating and populating the DB for you, but if
+you have to do it manually, you can do it through the admin helper:
+``shiva-admin db create``
+
+On the other hand, if you need to drop the DB there is also a command for this:
+``shiva-admin db destroy``
