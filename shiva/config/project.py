@@ -8,6 +8,7 @@ DEBUG = True
 SQLALCHEMY_DATABASE_URI = 'sqlite:///shiva.db'
 ACCEPTED_FORMATS = (
     'mp3',
+    'ogg',
 )
 MIMETYPES = (
     MimeType(type='audio', subtype='mp3', extension='mp3',

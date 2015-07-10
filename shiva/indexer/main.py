@@ -18,6 +18,9 @@ Options:
                          indexed.
     --verbose-sql        Print every SQL statement. Be careful, it's a little
                          too verbose.
+    --post-to=<uri>      Send file to a Shiva instance instead of processing it
+                         locally. Use SHIVA_USER and SHIVA_PASSWORD environment
+                         variables if the instance requires authentication.
     -v --verbose         Show debugging messages about the progress.
     -q --quiet           Suppress warnings.
 """
