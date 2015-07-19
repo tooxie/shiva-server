@@ -248,6 +248,7 @@ class TrackPlaylistRelationship(db.Model):
                             nullable=False)
     previous_track_pk = db.Column(dbtypes.GUID,
                                   db.ForeignKey('trackplaylist.pk'))
+    # track_addition_date
 
     track = db.relationship('Track')
     playlist = db.relationship('Playlist')

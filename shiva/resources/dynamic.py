@@ -56,18 +56,6 @@ class LyricsResource(Resource):
 
     """
 
-    def get_resource_fields(self):
-        return {
-            'id': fields.Integer(attribute='pk'),
-            'uri': InstanceURI('lyrics'),
-            'text': fields.String,
-            'source_uri': fields.String(attribute='source'),
-            'track': ForeignKeyField(Track, {
-                'id': fields.Integer(attribute='pk'),
-                'uri': InstanceURI('track'),
-            }),
-        }
-
     def get(self, id=None, slug=None):
         if not id and not slug:
             abort(HTTP.NOT_FOUND)
@@ -81,7 +69,7 @@ class LyricsResource(Resource):
 
     def get_for(self, track):
         if track.lyrics:
-            return marshal(track.lyrics, self.get_resource_fields())
+            return LyricsSerializer(track.lyrics).to_json()
 
         try:
             lyrics = get_lyrics(track)
@@ -92,7 +80,7 @@ class LyricsResource(Resource):
         if not lyrics:
             abort(HTTP.NOT_FOUND)
 
-        return marshal(lyrics, self.get_resource_fields())
+        return LyricsSerializer(lyrics).to_json()
 
     def post(self, id):
         text = request.form.get('text', None)
@@ -140,24 +128,6 @@ class ConvertResource(Resource):
 class ShowsResource(Resource):
     """
     """
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String,
-            'artists': ManyToManyField(Artist, {
-                'id': fields.Integer(attribute='pk'),
-                'uri': InstanceURI('artist'),
-            }),
-            'other_artists': fields.List(fields.Raw),
-            'datetime': fields.DateTime,
-            'title': fields.String,
-            'tickets_left': Boolean,
-            'venue': fields.Nested({
-                'latitude': fields.String,
-                'longitude': fields.String,
-                'name': fields.String,
-            }),
-        }
 
     def get(self, id=None, slug=None):
         if not id and not slug:
@@ -209,8 +179,7 @@ class ShowsResource(Resource):
             return
 
         for event in response.json():
-            yield marshal(ShowModel(artist_name, event),
-                          self.get_resource_fields())
+            yield ShowsSerializer(ShowModel(artist_name, event)).to_json()
 
 
 class RandomResource(Resource):

@@ -54,3 +54,35 @@ UPLOAD_DEFAULT_ALBUM = 'unknown'
 # the client will have to re-authenticate.
 AUTH_EXPIRATION_TIME = 3600  # 1h
 ALLOW_ANONYMOUS_ACCESS = False
+
+# Shiva2Shiva
+NODES = (
+    {
+        'host': '127.0.0.1',
+        'key': '',
+        'token': '',
+        'enabled': False,
+    },
+)
+
+# Alternative NEIGHBOURS config:
+"""
+NEIGHBOURS = (
+    Neighbour('127.0.0.1',
+        key='1234567890',
+        token='a1b2c3d4e5f6g7h8i9j0kalbmcndoepf',
+        enabled=False),
+    Neighbour('127.0.0.1',
+        key='4j48m9bkjr',
+        token='usd9s8ducuhv9183km23loisd0s8giuf',
+        enabled=False),
+)
+
+NEIGHBOURS = {
+    '127.0.0.1': {
+        'key': '',
+        'token': '',
+        'enabled': False,
+    },
+}
+"""

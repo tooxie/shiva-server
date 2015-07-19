@@ -19,6 +19,7 @@ MEDIA_DIRS = (
     # MediaDir(root='/srv/http', dirs=('/music',), url='http://127.0.0.1/'),
     # MediaDir('/home/fatmike/music/shiva'),
     # If in doubt, read the source.
+    # ShivaDir('https://192.168.6.1:8000', key='i8sdu90c009823a9s9800e0e08'),
 )
 
 # The path where uploaded files will be stored.

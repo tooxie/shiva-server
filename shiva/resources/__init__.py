@@ -7,3 +7,4 @@ from shiva.resources.static import AboutResource, ClientResource
 from shiva.resources.dynamic import (
     ConvertResource, LyricsResource, RandomResource, ShowsResource,
     WhatsNewResource)
+from shiva.sync import SyncResource
