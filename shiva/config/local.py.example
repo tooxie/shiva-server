@@ -12,7 +12,7 @@ SECRET_KEY = ''  # Set this to something secret.
 SQLALCHEMY_DATABASE_URI = 'sqlite:///shiva.db'
 
 # Require validation to access Shiva.
-ALLOW_ANONYMOUS_ACCESS = False
+ALLOW_ANONYMOUS_ACCESS = True
 
 MEDIA_DIRS = (
     # Examples.
