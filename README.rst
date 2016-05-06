@@ -12,6 +12,17 @@
     :target: https://pypi.python.org/pypi/shiva
 
 
+No longer maintained
+====================
+
+**Note:** This project is no longer under maintainance.
+
+Please feel free to fork it and develop it further, I would gladly answer any
+questions you may have, but I will **not** develop any more features. Thanks
+everyone for their support, it was fun to work on this, but I have no interest
+in maintaining this any more.
+
+
 Shiva
 =====
 
