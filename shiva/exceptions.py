@@ -38,3 +38,10 @@ class InvalidFileTypeError(Exception):
 
 class ObjectExistsError(Exception):
     pass
+
+
+class NoModelToSerializeError(Exception):
+    def __init__(self, name):
+        msg = 'The serializer %s requires a model to serialize.' % name
+
+        super(NoConfigFoundError, self).__init__(msg)

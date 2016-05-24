@@ -177,7 +177,7 @@ class Resource(restful.Resource):
         if isinstance(result, dict):
             return result
 
-        return restful.marshal(result, self.get_resource_fields())
+        return self.serializer(result).to_json()
 
     def paginate(self, queryset):
         options = request.args.to_dict()

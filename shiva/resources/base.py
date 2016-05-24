@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from flask import current_app as app, g, request, url_for
-from flask.ext.restful import abort, fields, marshal
+from flask.ext.restful import abort
 from werkzeug.exceptions import NotFound
 
 from shiva.auth import Roles
@@ -8,9 +8,9 @@ from shiva.constants import HTTP
 from shiva.exceptions import (InvalidFileTypeError, IntegrityError,
                               ObjectExistsError)
 from shiva.http import Resource
+from shiva.lyrics import get_lyrics
 from shiva.models import Album, Artist, db, Track, User, Playlist
-from shiva.resources.fields import (ForeignKeyField, InstanceURI, TrackFiles,
-                                    ManyToManyField, PlaylistField)
+from shiva.resources import serializers
 from shiva.utils import parse_bool, get_list, get_by_name
 
 
@@ -18,16 +18,7 @@ class ArtistResource(Resource):
     """ The resource responsible for artists. """
 
     db_model = Artist
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String(attribute='pk'),
-            'name': fields.String,
-            'slug': fields.String,
-            'uri': InstanceURI('artists'),
-            'image': fields.String(default=app.config['DEFAULT_ARTIST_IMAGE']),
-            'events_uri': fields.String(attribute='events'),
-        }
+    serializer = serializers.ArtistSerializer
 
     def post(self):
         name = request.form.get('name', '').strip()
@@ -41,7 +32,7 @@ class ArtistResource(Resource):
         except (IntegrityError, ObjectExistsError):
             abort(HTTP.CONFLICT)
 
-        response = marshal(artist, self.get_resource_fields())
+        response = self.serializer(artist).to_json()
         headers = {'Location': url_for('artists', id=artist.pk)}
 
         return response, 201, headers
@@ -68,39 +59,25 @@ class ArtistResource(Resource):
         return artist
 
     def get_full_tree(self, artist):
-        _artist = marshal(artist, self.get_resource_fields())
-        _artist['albums'] = []
+        serializer = self.serializer(artist)
+        serializer.add_raw_field({
+            'albums': AlbumResource.serializer(artist.albums).to_json()
+        })
 
-        albums = AlbumResource()
+        no_album_tracks = artist.tracks.filter_by(albums=None).all()
+        track_serializer = serializers.TrackSerializer(no_album_tracks)
+        serializer.add_raw_field({
+            'no_album_tracks': track_serializer.to_json()
+        })
 
-        for album in artist.albums:
-            _artist['albums'].append(albums.get_full_tree(album))
-
-        no_album = artist.tracks.filter_by(albums=None).all()
-        track_fields = TrackResource().get_resource_fields()
-        _artist['no_album_tracks'] = marshal(no_album, track_fields)
-
-        return _artist
+        return serializer.to_json(recursive=True)
 
 
 class AlbumResource(Resource):
     """ The resource responsible for albums. """
 
     db_model = Album
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String(attribute='pk'),
-            'name': fields.String,
-            'slug': fields.String,
-            'year': fields.Integer,
-            'uri': InstanceURI('albums'),
-            'artists': ManyToManyField(Artist, {
-                'id': fields.String(attribute='pk'),
-                'uri': InstanceURI('artists'),
-            }),
-            'cover': fields.String(default=app.config['DEFAULT_ALBUM_COVER']),
-        }
+    serializer = serializers.AlbumSerializer
 
     def post(self):
         params = {
@@ -114,7 +91,7 @@ class AlbumResource(Resource):
 
         album = self.create(**params)
 
-        response = marshal(album, self.get_resource_fields())
+        response = self.serializer(album).to_json()
         headers = {'Location': url_for('albums', id=album.pk)}
 
         return response, 201, headers
@@ -163,41 +140,20 @@ class AlbumResource(Resource):
         return queryset.join(Album.artists).filter(Artist.pk == pk)
 
     def get_full_tree(self, album):
-        _album = marshal(album, self.get_resource_fields())
-        _album['tracks'] = []
+        serializer = self.serializer(album)
+        _tracks = album.tracks.order_by(Track.ordinal, Track.title).all()
+        serializer.add_raw_field({
+            'tracks': TrackResource.serializer(_tracks).to_json()
+        })
 
-        tracks = TrackResource()
-
-        for track in album.tracks.order_by(Track.ordinal, Track.title):
-            _album['tracks'].append(tracks.get_full_tree(track))
-
-        return _album
+        return serializer.to_json()
 
 
 class TrackResource(Resource):
     """ The resource responsible for tracks. """
 
     db_model = Track
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String(attribute='pk'),
-            'uri': InstanceURI('tracks'),
-            'files': TrackFiles,
-            'bitrate': fields.Integer,
-            'length': fields.Integer,
-            'title': fields.String,
-            'slug': fields.String,
-            'artists': ManyToManyField(Artist, {
-                'id': fields.String(attribute='pk'),
-                'uri': InstanceURI('artists'),
-            }),
-            'albums': ManyToManyField(Album, {
-                'id': fields.String(attribute='pk'),
-                'uri': InstanceURI('albums'),
-            }),
-            'ordinal': fields.Integer,
-        }
+    serializer = serializers.TrackSerializer
 
     def post(self):
         params = {
@@ -215,7 +171,7 @@ class TrackResource(Resource):
         except (IntegrityError, ObjectExistsError):
             abort(HTTP.CONFLICT)
 
-        response = marshal(track, self.get_resource_fields())
+        response = self.serializer(track).to_json()
         headers = {'Location': url_for('tracks', id=track.pk)}
 
         return response, 201, headers
@@ -331,30 +287,18 @@ class TrackResource(Resource):
 
         """
 
-        resource_fields = self.get_resource_fields()
+        serializer = self.serializer(track)
+
         if include_related:
-            artist = ArtistResource()
-            resource_fields['artists'] = ManyToManyField(
-                Artist,
-                artist.get_resource_fields())
-            album = AlbumResource()
-            resource_fields['albums'] = ManyToManyField(
-                Album,
-                album.get_resource_fields())
-
-        _track = marshal(track, resource_fields)
-
+            serializer.add_m2m_rel(key='artists', db_model=Artist,
+                                   serializer=serializers.ArtistSerializer)
+            serializer.add_m2m_rel(key='albums', db_model=Album,
+                                   serializer=serializers.AlbumSerializer)
         if include_scraped:
-            lyrics = LyricsResource()
-            try:
-                _track['lyrics'] = lyrics.get_for(track)
-            except NotFound:
-                _track['lyrics'] = None
+            serializer.update_schema({'lyrics': get_lyrics(track)})
+            # serializer.update_schema({'tabs': get_tabs(track)})
 
-        # tabs = TabsResource()
-        # _track['tabs'] = tabs.get()
-
-        return _track
+        return serializer.to_json()
 
 
 class PlaylistResource(Resource):
@@ -369,23 +313,7 @@ class PlaylistResource(Resource):
     """
 
     db_model = Playlist
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String(attribute='pk'),
-            'name': fields.String,
-            'user': ForeignKeyField(User, {
-                'id': fields.String(attribute='pk'),
-                'uri': InstanceURI('users'),
-            }),
-            'read_only': fields.Boolean,
-            'creation_date': fields.DateTime,
-            'length': fields.Integer,
-            'tracks': PlaylistField({
-                'id': fields.String(attribute='pk'),
-                'uri': InstanceURI('tracks'),
-            }),
-        }
+    serializer = serializers.PlaylistSerializer
 
     def post(self):
         if g.user is None:
@@ -399,7 +327,7 @@ class PlaylistResource(Resource):
 
         playlist = self.create(name=name, read_only=read_only, user=g.user)
 
-        response = marshal(playlist, self.get_resource_fields())
+        response = self.serializer(playlist).to_json()
         headers = {'Location': url_for('playlists', id=playlist.pk)}
 
         return response, 201, headers
@@ -423,6 +351,13 @@ class PlaylistResource(Resource):
 
 
 class PlaylistTrackResource(Resource):
+    """
+    While PlaylistResource is used to create and update playlists and their
+    attributes, PlaylistTrackResource is used to manipulate the tracks
+    contained in the playlist.
+
+    """
+
     def post(self, id, verb):
         handler = getattr(self, '%s_track' % verb)
         if not handler:
@@ -481,17 +416,11 @@ class UserResource(Resource):
     """ The resource responsible for users. """
 
     db_model = User
-
-    def get_resource_fields(self):
-        return {
-            'id': fields.String(attribute='pk'),
-            'display_name': fields.String,
-            'creation_date': fields.DateTime,
-        }
+    serializer = serializers.UserSerializer
 
     def get(self, id=None):
         if id == 'me':
-            return marshal(g.user, self.get_resource_fields())
+            return serializers.UserSerializer(g.user).to_json()
 
         return super(UserResource, self).get(id)
 
@@ -524,7 +453,7 @@ class UserResource(Resource):
         except (IntegrityError, ObjectExistsError):
             abort(HTTP.CONFLICT)
 
-        response = marshal(user, self.get_resource_fields())
+        response = serializers.UserSerializer(user).to_json()
         headers = {'Location': url_for('users', id=user.pk)}
 
         return response, 201, headers
