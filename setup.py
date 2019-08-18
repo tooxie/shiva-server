@@ -42,7 +42,7 @@ setup(
         'Flask-Compress==1.1.0',
         'Flask-Restful==0.2.3',
         'Flask-SQLAlchemy==0.16',
-        'Flask==0.10',
+        'Flask==1.0',
         'lxml==3.1beta1',
         'mutagen==1.21',
         'pyLast==0.5.11',
