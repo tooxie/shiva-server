@@ -5,6 +5,7 @@ import re
 import sys
 
 from flask import abort, Flask, Response, request, send_file
+import werkzeug.utils import safe_join
 
 from shiva.config import Configurator
 from shiva.constants import HTTP
@@ -26,7 +27,7 @@ def after_request(response):
 
 def get_absolute_path(relative_path):
     for mdir in app.config.get('MEDIA_DIRS', []):
-        full_path = os.path.join(mdir.root, relative_path)
+        full_path = safe_join(mdir.root, relative_path)
 
         for excluded in mdir.get_excluded_dirs():
             if full_path.startswith(excluded):
@@ -36,7 +37,7 @@ def get_absolute_path(relative_path):
             return full_path
 
     upath = app.config.get('UPLOAD_PATH')
-    full_path = os.path.join(upath, relative_path)
+    full_path = safe_join(upath, relative_path)
     if os.path.exists(full_path):
         return full_path
 
